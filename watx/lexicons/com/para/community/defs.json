@@ -1,0 +1,65 @@
+{
+  "lexicon": 1,
+  "id": "com.para.community.defs",
+  "defs": {
+    "summary": {
+      "type": "object",
+      "required": ["members", "visiblePosters", "policyPosts", "matterPosts", "badgeHolders"],
+      "properties": {
+        "members": { "type": "integer" },
+        "visiblePosters": { "type": "integer" },
+        "policyPosts": { "type": "integer" },
+        "matterPosts": { "type": "integer" },
+        "badgeHolders": { "type": "integer" }
+      }
+    },
+    "member": {
+      "type": "object",
+      "required": ["did", "influence", "votesReceivedAllTime", "votesCastAllTime", "policyPosts", "matterPosts"],
+      "properties": {
+        "did": { "type": "string", "format": "did" },
+        "handle": { "type": "string", "format": "handle" },
+        "displayName": { "type": "string", "maxGraphemes": 64, "maxLength": 640 },
+        "avatar": { "type": "string", "format": "uri" },
+        "party": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
+        "influence": { "type": "integer" },
+        "votesReceivedAllTime": { "type": "integer" },
+        "votesCastAllTime": { "type": "integer" },
+        "policyPosts": { "type": "integer" },
+        "matterPosts": { "type": "integer" }
+      }
+    },
+    "moderator": {
+      "type": "object",
+      "required": ["member", "role", "badge"],
+      "properties": {
+        "member": { "type": "ref", "ref": "#member" },
+        "role": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
+        "badge": { "type": "string", "maxGraphemes": 64, "maxLength": 64 }
+      }
+    },
+    "official": {
+      "type": "object",
+      "required": ["member", "office", "mandate"],
+      "properties": {
+        "member": { "type": "ref", "ref": "#member" },
+        "office": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
+        "mandate": { "type": "string", "maxGraphemes": 200, "maxLength": 1000 }
+      }
+    },
+    "deputyRole": {
+      "type": "object",
+      "required": ["tier", "role", "activeHolder", "votesBackingRole", "applicants"],
+      "properties": {
+        "tier": { "type": "string", "maxGraphemes": 32, "maxLength": 32 },
+        "role": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
+        "activeHolder": { "type": "ref", "ref": "#member" },
+        "votesBackingRole": { "type": "integer" },
+        "applicants": {
+          "type": "array",
+          "items": { "type": "string", "maxGraphemes": 64, "maxLength": 640 }
+        }
+      }
+    }
+  }
+}

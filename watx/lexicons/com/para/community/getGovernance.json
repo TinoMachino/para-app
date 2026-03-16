@@ -1,0 +1,56 @@
+{
+  "lexicon": 1,
+  "id": "com.para.community.getGovernance",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Get governance roster and role hierarchy for a Para community.",
+      "parameters": {
+        "type": "params",
+        "required": ["community"],
+        "properties": {
+          "community": {
+            "type": "string",
+            "maxLength": 64,
+            "maxGraphemes": 64,
+            "description": "Community identifier or label (for example: mx-federal or p/mx-federal)."
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50,
+            "description": "Maximum number of candidate members considered for role assignment."
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["community", "summary", "moderators", "officials", "deputies", "computedAt"],
+          "properties": {
+            "community": { "type": "string" },
+            "summary": { "type": "ref", "ref": "com.para.community.defs#summary" },
+            "moderators": {
+              "type": "array",
+              "items": { "type": "ref", "ref": "com.para.community.defs#moderator" }
+            },
+            "officials": {
+              "type": "array",
+              "items": { "type": "ref", "ref": "com.para.community.defs#official" }
+            },
+            "deputies": {
+              "type": "array",
+              "items": { "type": "ref", "ref": "com.para.community.defs#deputyRole" }
+            },
+            "computedAt": {
+              "type": "string",
+              "format": "datetime"
+            }
+          }
+        }
+      }
+    }
+  }
+}

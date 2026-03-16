@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-sticky-table/lib/components/sticky-table/ListItem.js b/node_modules/react-native-sticky-table/lib/components/sticky-table/ListItem.js
+index 1bad17b..d17c315 100644
+--- a/node_modules/react-native-sticky-table/lib/components/sticky-table/ListItem.js
++++ b/node_modules/react-native-sticky-table/lib/components/sticky-table/ListItem.js
+@@ -38,7 +38,7 @@ const ListItem = ({ item, index, defaultMaxWidth, listItemContainerStyle, listIt
+             !isNil(defaultMaxWidth) && getWidth(defaultMaxWidth),
+             listItemContainerStyle,
+         ], ...listItemContainerProps }, item ? ((_a = item === null || item === void 0 ? void 0 : item.data) === null || _a === void 0 ? void 0 : _a.map((innerItem, innerIndex) => {
+-        return (React.createElement(React.Fragment, null,
++        return (React.createElement(React.Fragment, { key: innerIndex },
+             React.createElement(View, { key: `${innerItem}-${innerIndex}`, ...columnItemContainerProps, style: [
+                     innerIndex === 0
+                         ? styles.tableRowTitleView
