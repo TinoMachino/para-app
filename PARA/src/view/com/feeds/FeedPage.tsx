@@ -6,39 +6,39 @@ import {
   useRef,
   useState,
 } from 'react'
-import { View } from 'react-native'
-import { type AppBskyActorDefs, AppBskyFeedDefs } from '@atproto/api'
+import {View} from 'react-native'
+import {type AppBskyActorDefs, AppBskyFeedDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
-import { type NavigationProp, useNavigation } from '@react-navigation/native'
-import { useQueryClient } from '@tanstack/react-query'
+import {useLingui} from '@lingui/react'
+import {type NavigationProp, useNavigation} from '@react-navigation/native'
+import {useQueryClient} from '@tanstack/react-query'
 
-import { DISCOVER_FEED_URI, VIDEO_FEED_URIS } from '#/lib/constants'
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { ComposeIcon2 } from '#/lib/icons'
-import { getRootNavigation, getTabState, TabState } from '#/lib/routes/helpers'
-import { type AllNavigatorParams } from '#/lib/routes/types'
-import { logEvent } from '#/lib/statsig/statsig'
-import { s } from '#/lib/styles'
-import { listenSoftReset } from '#/state/events'
-import { FeedFeedbackProvider, useFeedFeedback } from '#/state/feed-feedback'
-import { useSetHomeBadge } from '#/state/home-badge'
-import { type FeedSourceInfo } from '#/state/queries/feed'
+import {DISCOVER_FEED_URI, VIDEO_FEED_URIS} from '#/lib/constants'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {ComposeIcon2} from '#/lib/icons'
+import {getRootNavigation, getTabState, TabState} from '#/lib/routes/helpers'
+import {type AllNavigatorParams} from '#/lib/routes/types'
+import {logEvent} from '#/lib/statsig/statsig'
+import {s} from '#/lib/styles'
+import {listenSoftReset} from '#/state/events'
+import {FeedFeedbackProvider, useFeedFeedback} from '#/state/feed-feedback'
+import {useSetHomeBadge} from '#/state/home-badge'
+import {type FeedSourceInfo} from '#/state/queries/feed'
 import {
   type FeedDescriptor,
   type FeedParams,
   RQKEY as FEED_RQKEY,
 } from '#/state/queries/post-feed'
-import { truncateAndInvalidate } from '#/state/queries/util'
-import { useSession } from '#/state/session'
-import { useSetMinimalShellMode } from '#/state/shell'
-import { useHeaderOffset } from '#/components/hooks/useHeaderOffset'
-import { IS_NATIVE } from '#/env'
-import { PostFeed } from '../posts/PostFeed'
-import { FAB } from '../util/fab/FAB'
-import { type ListMethods } from '../util/List'
-import { LoadLatestBtn } from '../util/load-latest/LoadLatestBtn'
-import { MainScrollProvider } from '../util/MainScrollProvider'
+import {truncateAndInvalidate} from '#/state/queries/util'
+import {useSession} from '#/state/session'
+import {useSetMinimalShellMode} from '#/state/shell'
+import {useHeaderOffset} from '#/components/hooks/useHeaderOffset'
+import {IS_NATIVE} from '#/env'
+import {PostFeed} from '../posts/PostFeed'
+import {FAB} from '../util/fab/FAB'
+import {type ListMethods} from '../util/List'
+import {LoadLatestBtn} from '../util/load-latest/LoadLatestBtn'
+import {MainScrollProvider} from '../util/MainScrollProvider'
 
 const POLL_FREQ = 60e3 // 60sec
 
@@ -63,11 +63,11 @@ export function FeedPage({
   savedFeedConfig?: AppBskyActorDefs.SavedFeed
   feedInfo: FeedSourceInfo
 }) {
-  const { hasSession } = useSession()
-  const { _ } = useLingui()
+  const {hasSession} = useSession()
+  const {_} = useLingui()
   const navigation = useNavigation<NavigationProp<AllNavigatorParams>>()
   const queryClient = useQueryClient()
-  const { openComposer } = useOpenComposer()
+  const {openComposer} = useOpenComposer()
   const [isScrolledDown, setIsScrolledDown] = useState(false)
   const setMinimalShellMode = useSetMinimalShellMode()
   const headerOffset = useHeaderOffset()
@@ -122,7 +122,7 @@ export function FeedPage({
   }, [onSoftReset, isPageFocused])
 
   const onPressCompose = useCallback(() => {
-    openComposer({ logContext: 'Fab' })
+    openComposer({logContext: 'Fab'})
   }, [openComposer])
 
   const onPressLoadLatest = useCallback(() => {
@@ -142,7 +142,7 @@ export function FeedPage({
     <View
       testID={testID}
       // @ts-expect-error web only -sfn
-      dataSet={{ nosnippet: isDiscoverFeed ? '' : undefined }}>
+      dataSet={{nosnippet: isDiscoverFeed ? '' : undefined}}>
       <MainScrollProvider>
         <FeedFeedbackProvider value={feedFeedback}>
           <PostFeed
@@ -177,7 +177,7 @@ export function FeedPage({
           onPress={onPressCompose}
           icon={<ComposeIcon2 strokeWidth={1.5} size={29} style={s.white} />}
           accessibilityRole="button"
-          accessibilityLabel={_(msg({ message: `New post`, context: 'action' }))}
+          accessibilityLabel={_(msg({message: `New post`, context: 'action'}))}
           accessibilityHint=""
         />
       )}

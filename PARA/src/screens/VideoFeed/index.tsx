@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {
   LayoutAnimation,
   type ListRenderItem,
@@ -21,11 +21,11 @@ import {
   useSafeAreaFrame,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context'
-import { useEvent } from 'expo'
-import { useEventListener } from 'expo'
-import { Image, type ImageStyle } from 'expo-image'
-import { LinearGradient } from 'expo-linear-gradient'
-import { createVideoPlayer, type VideoPlayer, VideoView } from 'expo-video'
+import {useEvent} from 'expo'
+import {useEventListener} from 'expo'
+import {Image, type ImageStyle} from 'expo-image'
+import {LinearGradient} from 'expo-linear-gradient'
+import {createVideoPlayer, type VideoPlayer, VideoView} from 'expo-video'
 import {
   AppBskyEmbedVideo,
   type AppBskyFeedDefs,
@@ -35,8 +35,8 @@ import {
   RichText as RichTextAPI,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 import {
   type RouteProp,
   useFocusEffect,
@@ -44,66 +44,66 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native'
-import { type NativeStackScreenProps } from '@react-navigation/native-stack'
+import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
-import { HITSLOP_20 } from '#/lib/constants'
-import { useHaptics } from '#/lib/haptics'
-import { useNonReactiveCallback } from '#/lib/hooks/useNonReactiveCallback'
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
+import {HITSLOP_20} from '#/lib/constants'
+import {useHaptics} from '#/lib/haptics'
+import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
 import {
   type CommonNavigatorParams,
   type NavigationProp,
 } from '#/lib/routes/types'
-import { sanitizeDisplayName } from '#/lib/strings/display-names'
-import { cleanError } from '#/lib/strings/errors'
-import { sanitizeHandle } from '#/lib/strings/handles'
-import { logger } from '#/logger'
-import { useA11y } from '#/state/a11y'
+import {sanitizeDisplayName} from '#/lib/strings/display-names'
+import {cleanError} from '#/lib/strings/errors'
+import {sanitizeHandle} from '#/lib/strings/handles'
+import {logger} from '#/logger'
+import {useA11y} from '#/state/a11y'
 import {
   POST_TOMBSTONE,
   type Shadow,
   usePostShadow,
 } from '#/state/cache/post-shadow'
-import { useProfileShadow } from '#/state/cache/profile-shadow'
+import {useProfileShadow} from '#/state/cache/profile-shadow'
 import {
   FeedFeedbackProvider,
   useFeedFeedbackContext,
 } from '#/state/feed-feedback'
-import { useFeedFeedback } from '#/state/feed-feedback'
-import { useFeedInfo } from '#/state/queries/feed'
-import { usePostLikeMutationQueue } from '#/state/queries/post'
+import {useFeedFeedback} from '#/state/feed-feedback'
+import {useFeedInfo} from '#/state/queries/feed'
+import {usePostLikeMutationQueue} from '#/state/queries/post'
 import {
   type AuthorFilter,
   type FeedPostSliceItem,
   usePostFeedQuery,
 } from '#/state/queries/post-feed'
-import { useProfileFollowMutationQueue } from '#/state/queries/profile'
-import { useSession } from '#/state/session'
-import { useSetMinimalShellMode } from '#/state/shell'
-import { useSetLightStatusBar } from '#/state/shell/light-status-bar'
-import { List } from '#/view/com/util/List'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { ThreadComposePrompt } from '#/screens/PostThread/components/ThreadComposePrompt'
-import { Header } from '#/screens/VideoFeed/components/Header'
-import { atoms as a, ios, platform, ThemeProvider, useTheme } from '#/alf'
-import { setSystemUITheme } from '#/alf/util/systemUI'
-import { Button, ButtonIcon, ButtonText } from '#/components/Button'
-import { Divider } from '#/components/Divider'
-import { ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeftIcon } from '#/components/icons/Arrow'
-import { Check_Stroke2_Corner0_Rounded as CheckIcon } from '#/components/icons/Check'
-import { EyeSlash_Stroke2_Corner0_Rounded as Eye } from '#/components/icons/EyeSlash'
-import { Leaf_Stroke2_Corner0_Rounded as LeafIcon } from '#/components/icons/Leaf'
-import { KeepAwake } from '#/components/KeepAwake'
+import {useProfileFollowMutationQueue} from '#/state/queries/profile'
+import {useSession} from '#/state/session'
+import {useSetMinimalShellMode} from '#/state/shell'
+import {useSetLightStatusBar} from '#/state/shell/light-status-bar'
+import {List} from '#/view/com/util/List'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {ThreadComposePrompt} from '#/screens/PostThread/components/ThreadComposePrompt'
+import {Header} from '#/screens/VideoFeed/components/Header'
+import {atoms as a, ios, platform, ThemeProvider, useTheme} from '#/alf'
+import {setSystemUITheme} from '#/alf/util/systemUI'
+import {Button, ButtonIcon, ButtonText} from '#/components/Button'
+import {Divider} from '#/components/Divider'
+import {ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeftIcon} from '#/components/icons/Arrow'
+import {Check_Stroke2_Corner0_Rounded as CheckIcon} from '#/components/icons/Check'
+import {EyeSlash_Stroke2_Corner0_Rounded as Eye} from '#/components/icons/EyeSlash'
+import {Leaf_Stroke2_Corner0_Rounded as LeafIcon} from '#/components/icons/Leaf'
+import {KeepAwake} from '#/components/KeepAwake'
 import * as Layout from '#/components/Layout'
-import { Link } from '#/components/Link'
-import { ListFooter } from '#/components/Lists'
+import {Link} from '#/components/Link'
+import {ListFooter} from '#/components/Lists'
 import * as Hider from '#/components/moderation/Hider'
-import { PostControls } from '#/components/PostControls'
-import { RichText } from '#/components/RichText'
-import { Text } from '#/components/Typography'
-import { IS_ANDROID } from '#/env'
+import {PostControls} from '#/components/PostControls'
+import {RichText} from '#/components/RichText'
+import {Text} from '#/components/Typography'
+import {IS_ANDROID} from '#/env'
 import * as bsky from '#/types/bsky'
-import { Scrubber, VIDEO_PLAYER_BOTTOM_INSET } from './components/Scrubber'
+import {Scrubber, VIDEO_PLAYER_BOTTOM_INSET} from './components/Scrubber'
 
 function createThreeVideoPlayers(
   sources?: [string, string, string],
@@ -126,12 +126,12 @@ function createThreeVideoPlayers(
   return [p1, p2, p3]
 }
 
-export function VideoFeed({ }: NativeStackScreenProps<
+export function VideoFeed({}: NativeStackScreenProps<
   CommonNavigatorParams,
   'VideoFeed'
 >) {
-  const { top } = useSafeAreaInsets()
-  const { params } = useRoute<RouteProp<CommonNavigatorParams, 'VideoFeed'>>()
+  const {top} = useSafeAreaInsets()
+  const {params} = useRoute<RouteProp<CommonNavigatorParams, 'VideoFeed'>>()
 
   const t = useTheme()
   const setMinShellMode = useSetMinimalShellMode()
@@ -151,13 +151,13 @@ export function VideoFeed({ }: NativeStackScreenProps<
 
   return (
     <ThemeProvider theme="dark">
-      <Layout.Screen noInsetTop style={{ backgroundColor: 'black' }}>
+      <Layout.Screen noInsetTop style={{backgroundColor: 'black'}}>
         <KeepAwake />
         <View
           style={[
             a.absolute,
             a.z_50,
-            { top: 0, left: 0, right: 0, paddingTop: top },
+            {top: 0, left: 0, right: 0, paddingTop: top},
           ]}>
           <Header sourceContext={params} />
         </View>
@@ -185,30 +185,31 @@ type VideoItem = {
 }
 
 function Feed() {
-  const { params } = useRoute<RouteProp<CommonNavigatorParams, 'VideoFeed'>>()
+  const {params} = useRoute<RouteProp<CommonNavigatorParams, 'VideoFeed'>>()
   const isFocused = useIsFocused()
-  const { hasSession } = useSession()
-  const { height } = useSafeAreaFrame()
+  const {hasSession} = useSession()
+  const {height} = useSafeAreaFrame()
 
   const feedDesc = useMemo(() => {
     switch (params.type) {
       case 'feedgen':
         return `feedgen|${params.uri as string}` as const
       case 'author':
-        return `author|${params.did as string}|${params.filter as AuthorFilter
-          }` as const
+        return `author|${params.did as string}|${
+          params.filter as AuthorFilter
+        }` as const
       default:
         throw new Error(`Invalid video feed params ${JSON.stringify(params)}`)
     }
   }, [params])
   const feedUri = params.type === 'feedgen' ? params.uri : undefined
-  const { data: feedInfo } = useFeedInfo(feedUri)
+  const {data: feedInfo} = useFeedInfo(feedUri)
   const feedFeedback = useFeedFeedback(feedInfo ?? undefined, hasSession)
-  const { data, error, hasNextPage, isFetchingNextPage, fetchNextPage } =
+  const {data, error, hasNextPage, isFetchingNextPage, fetchNextPage} =
     usePostFeedQuery(
       feedDesc,
       params.type === 'feedgen' && params.sourceInterstitial !== 'none'
-        ? { feedCacheKey: params.sourceInterstitial }
+        ? {feedCacheKey: params.sourceInterstitial}
         : undefined,
     )
 
@@ -262,8 +263,8 @@ function Feed() {
   const scrollGesture = useMemo(() => Gesture.Native(), [])
 
   const renderItem: ListRenderItem<VideoItem> = useCallback(
-    ({ item, index }) => {
-      const { post, video } = item
+    ({item, index}) => {
+      const {post, video} = item
       const player = players?.[index % 3]
       const currentSource = currentSources[index % 3]
 
@@ -416,7 +417,7 @@ function Feed() {
   )
 
   const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
+    ({viewableItems}: {viewableItems: ViewToken[]; changed: ViewToken[]}) => {
       if (viewableItems[0] && viewableItems[0].index !== null) {
         const newIndex = viewableItems[0].index
         setCurrentIndex(newIndex)
@@ -491,8 +492,8 @@ let VideoItem = ({
   reqId: string | undefined
 }): React.ReactNode => {
   const postShadow = usePostShadow(post)
-  const { width, height } = useSafeAreaFrame()
-  const { sendInteraction, feedDescriptor } = useFeedFeedbackContext()
+  const {width, height} = useSafeAreaFrame()
+  const {sendInteraction, feedDescriptor} = useFeedFeedbackContext()
   const hasTrackedView = useRef(false)
 
   useEffect(() => {
@@ -515,7 +516,7 @@ let VideoItem = ({
             logContext: 'ImmersiveVideo',
             feedDescriptor,
           },
-          { statsig: false },
+          {statsig: false},
         )
       }
     }
@@ -535,7 +536,7 @@ let VideoItem = ({
   const shouldRenderVideo = active || ios(adjacent)
 
   return (
-    <View style={[a.relative, { height, width }]}>
+    <View style={[a.relative, {height, width}]}>
       {postShadow === POST_TOMBSTONE ? (
         <View
           style={[
@@ -544,7 +545,7 @@ let VideoItem = ({
             a.z_20,
             a.align_center,
             a.justify_center,
-            { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
+            {backgroundColor: 'rgba(0, 0, 0, 0.8)'},
           ]}>
           <Text
             style={[
@@ -589,7 +590,7 @@ function VideoItemInner({
   player: VideoPlayer
   embed: AppBskyEmbedVideo.View
 }) {
-  const { bottom } = useSafeAreaInsets()
+  const {bottom} = useSafeAreaInsets()
   const [isReady, setIsReady] = useState(!IS_ANDROID)
 
   useEventListener(player, 'timeUpdate', evt => {
@@ -609,7 +610,7 @@ function VideoItemInner({
           right: 0,
           bottom: bottom + VIDEO_PLAYER_BOTTOM_INSET,
         },
-        !isReady && { opacity: 0 },
+        !isReady && {opacity: 0},
       ]}
       player={player}
       nativeControls={false}
@@ -626,9 +627,9 @@ function ModerationOverlay({
   embed: AppBskyEmbedVideo.View
   onPressShow: () => void
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const hider = Hider.useHider()
-  const { bottom } = useSafeAreaInsets()
+  const {bottom} = useSafeAreaInsets()
 
   const onShow = useCallback(() => {
     hider.setIsContentVisible(true)
@@ -645,7 +646,7 @@ function ModerationOverlay({
           a.z_20,
           a.justify_center,
           a.align_center,
-          { backgroundColor: 'rgba(0, 0, 0, 0.8)' },
+          {backgroundColor: 'rgba(0, 0, 0, 0.8)'},
         ]}>
         <View style={[a.align_center, a.gap_sm]}>
           <Eye width={36} fill="white" />
@@ -678,7 +679,7 @@ function ModerationOverlay({
             colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)']}
             style={[a.absolute, a.inset_0]}
           />
-          <Divider style={{ borderColor: 'white' }} />
+          <Divider style={{borderColor: 'white'}} />
           <View>
             <Button
               label={_(msg`View details`)}
@@ -691,13 +692,13 @@ function ModerationOverlay({
                   height: 60,
                 },
               ]}>
-              {({ pressed }) => (
+              {({pressed}) => (
                 <Text
                   style={[
                     a.text_sm,
                     a.font_semi_bold,
                     a.text_center,
-                    { opacity: pressed ? 0.5 : 1 },
+                    {opacity: pressed ? 0.5 : 1},
                   ]}>
                   <Trans>View details</Trans>
                 </Text>
@@ -729,10 +730,10 @@ function Overlay({
   feedContext: string | undefined
   reqId: string | undefined
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
-  const { openComposer } = useOpenComposer()
-  const { currentAccount } = useSession()
+  const {openComposer} = useOpenComposer()
+  const {currentAccount} = useSession()
   const navigation = useNavigation<NavigationProp>()
   const seekingAnimationSV = useSharedValue(0)
 
@@ -823,7 +824,7 @@ function Overlay({
                   )}
                   to={{
                     screen: 'Profile',
-                    params: { name: post.author.did },
+                    params: {name: post.author.did},
                   }}
                   style={[a.flex_1, a.flex_row, a.gap_md, a.align_center]}>
                   <UserAvatar
@@ -890,7 +891,7 @@ function Overlay({
                 />
               )}
               {record && (
-                <View style={[{ left: -5 }]}>
+                <View style={[{left: -5}]}>
                   <PostControls
                     richText={richText}
                     post={post}
@@ -948,13 +949,13 @@ function ExpandableRichTextView({
   value: RichTextAPI
   authorHandle?: string
 }) {
-  const { height: screenHeight } = useSafeAreaFrame()
+  const {height: screenHeight} = useSafeAreaFrame()
   const [expanded, setExpanded] = useState(false)
   const [hasBeenExpanded, setHasBeenExpanded] = useState(false)
   const [constrained, setConstrained] = useState(false)
   const [contentHeight, setContentHeight] = useState(0)
-  const { _ } = useLingui()
-  const { screenReaderEnabled } = useA11y()
+  const {_} = useLingui()
+  const {screenReaderEnabled} = useA11y()
 
   if (expanded && !hasBeenExpanded) {
     setHasBeenExpanded(true)
@@ -967,12 +968,12 @@ function ExpandableRichTextView({
         if (hasBeenExpanded) {
           LayoutAnimation.configureNext({
             duration: 500,
-            update: { type: 'spring', springDamping: 0.6 },
+            update: {type: 'spring', springDamping: 0.6},
           })
         }
         setContentHeight(h)
       }}
-      style={{ height: Math.min(contentHeight, screenHeight * 0.5) }}
+      style={{height: Math.min(contentHeight, screenHeight * 0.5)}}
       contentContainerStyle={[
         a.py_sm,
         a.gap_xs,
@@ -1014,7 +1015,7 @@ function VideoItemPlaceholder({
   style?: ImageStyle
   blur?: boolean
 }) {
-  const { bottom } = useSafeAreaInsets()
+  const {bottom} = useSafeAreaInsets()
   const src = embed.thumbnail
   let contentFit = isTallAspectRatio(embed.aspectRatio)
     ? ('cover' as const)
@@ -1025,17 +1026,17 @@ function VideoItemPlaceholder({
   return src ? (
     <Image
       accessibilityIgnoresInvertColors
-      source={{ uri: src }}
+      source={{uri: src}}
       style={[
         a.absolute,
         blur
           ? a.inset_0
           : {
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: bottom + VIDEO_PLAYER_BOTTOM_INSET,
-          },
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: bottom + VIDEO_PLAYER_BOTTOM_INSET,
+            },
         style,
       ]}
       contentFit={contentFit}
@@ -1055,7 +1056,7 @@ function PlayPauseTapArea({
   feedContext: string | undefined
   reqId: string | undefined
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const doubleTapRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const playHaptic = useHaptics()
   // TODO: implement viaQuote -sfn
@@ -1065,8 +1066,8 @@ function PlayPauseTapArea({
     undefined,
     'ImmersiveVideo',
   )
-  const { sendInteraction } = useFeedFeedbackContext()
-  const { isPlaying } = useEvent(player, 'playingChange', {
+  const {sendInteraction} = useFeedFeedbackContext()
+  const {isPlaying} = useEvent(player, 'playingChange', {
     isPlaying: player.playing,
   })
   const isMounted = useRef(false)
@@ -1089,7 +1090,7 @@ function PlayPauseTapArea({
         player.play()
       }
     } catch (err) {
-      logger.error('Could not toggle play/pause', { safeMessage: err })
+      logger.error('Could not toggle play/pause', {safeMessage: err})
     }
   })
 
@@ -1132,7 +1133,7 @@ function PlayPauseTapArea({
 
 function EndMessage() {
   const navigation = useNavigation<NavigationProp>()
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <View
@@ -1142,11 +1143,11 @@ function EndMessage() {
         a.px_lg,
         a.mx_auto,
         a.align_center,
-        { maxWidth: 350 },
+        {maxWidth: 350},
       ]}>
       <View
         style={[
-          { height: 100, width: 100 },
+          {height: 100, width: 100},
           a.rounded_full,
           t.atoms.bg_contrast_700,
           a.align_center,

@@ -1,7 +1,7 @@
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {urls} from '#/lib/constants'
 import {logger} from '#/logger'
@@ -40,8 +40,7 @@ export function Screen() {
           <SettingsList.Item>
             <Admonition type="tip" style={[a.flex_1]}>
               <Trans>
-                Verifications on PARA work differently than on other
-                platforms.{' '}
+                Verifications on PARA work differently than on other platforms.{' '}
                 <InlineLinkText
                   overridePresentation
                   to={urls.website.blog.initialVerificationAnnouncement}

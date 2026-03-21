@@ -1,9 +1,9 @@
-import React from 'react'
+import {useCallback} from 'react'
 import {View} from 'react-native'
 import {type $Typed, ComAtprotoLabelDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {
   useProfileQuery,
@@ -26,7 +26,7 @@ export function PwiOptOut() {
     profile?.labels?.some(l => l.val === '!no-unauthenticated') || false
   const canToggle = profile && !updateProfile.isPending
 
-  const onToggleOptOut = React.useCallback(() => {
+  const onToggleOptOut = useCallback(() => {
     if (!profile) {
       return
     }
@@ -98,8 +98,8 @@ export function PwiOptOut() {
 
       <Text style={[a.leading_snug, t.atoms.text_contrast_high]}>
         <Trans>
-          PARA will not show your profile and posts to logged-out users.
-          Other apps may not honor this request. This does not make your account
+          PARA will not show your profile and posts to logged-out users. Other
+          apps may not honor this request. This does not make your account
           private.
         </Trans>
       </Text>

@@ -1,7 +1,7 @@
 import {useMemo, useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useRoute} from '@react-navigation/native'
 
 import {usePalette} from '#/lib/hooks/usePalette'

@@ -1,17 +1,17 @@
-import React from 'react'
-import { Alert } from 'react-native'
+import {useCallback, useEffect} from 'react'
+import {Alert} from 'react-native'
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { parseLinkingUrl } from '#/lib/parseLinkingUrl'
-import { logger } from '#/logger'
-import { useSession } from '#/state/session'
-import { useCloseAllActiveElements } from '#/state/util'
-import { useIntentDialogs } from '#/components/intents/IntentDialogs'
-import { IS_IOS, IS_NATIVE } from '#/env'
-import { Referrer } from '../../../modules/expo-bluesky-swiss-army'
-import { useApplyPullRequestOTAUpdate } from './useOTAUpdates'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {parseLinkingUrl} from '#/lib/parseLinkingUrl'
+import {logger} from '#/logger'
+import {useSession} from '#/state/session'
+import {useCloseAllActiveElements} from '#/state/util'
+import {useIntentDialogs} from '#/components/intents/IntentDialogs'
+import {IS_IOS, IS_NATIVE} from '#/env'
+import {Referrer} from '../../../modules/expo-bluesky-swiss-army'
+import {useApplyPullRequestOTAUpdate} from './useOTAUpdates'
 
 type IntentType = 'compose' | 'verify-email' | 'age-assurance' | 'apply-ota'
 
@@ -24,14 +24,14 @@ export function useIntentHandler() {
   const incomingUrl = Linking.useLinkingURL()
   const composeIntent = useComposeIntent()
   const verifyEmailIntent = useVerifyEmailIntent()
-  const { currentAccount } = useSession()
-  const { tryApplyUpdate } = useApplyPullRequestOTAUpdate()
+  const {currentAccount} = useSession()
+  const {tryApplyUpdate} = useApplyPullRequestOTAUpdate()
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleIncomingURL = async (url: string) => {
       if (IS_IOS) {
         // Close in-app browser if it's open (iOS only)
-        await WebBrowser.dismissBrowser().catch(() => { })
+        await WebBrowser.dismissBrowser().catch(() => {})
       }
 
       const referrerInfo = Referrer.getReferrerInfo()
@@ -105,10 +105,10 @@ export function useIntentHandler() {
 
 export function useComposeIntent() {
   const closeAllActiveElements = useCloseAllActiveElements()
-  const { openComposer } = useOpenComposer()
-  const { hasSession } = useSession()
+  const {openComposer} = useOpenComposer()
+  const {hasSession} = useSession()
 
-  return React.useCallback(
+  return useCallback(
     ({
       text,
       imageUrisStr,
@@ -126,7 +126,7 @@ export function useComposeIntent() {
         const [uri, width, height] = videoUri.split('|')
         openComposer({
           text: text ?? undefined,
-          videoUri: { uri, width: Number(width), height: Number(height) },
+          videoUri: {uri, width: Number(width), height: Number(height)},
           logContext: 'Deeplink',
         })
         return
@@ -146,7 +146,7 @@ export function useComposeIntent() {
         })
         .map(part => {
           const [uri, width, height] = part.split('|')
-          return { uri, width: Number(width), height: Number(height) }
+          return {uri, width: Number(width), height: Number(height)}
         })
 
       setTimeout(() => {
@@ -163,9 +163,9 @@ export function useComposeIntent() {
 
 function useVerifyEmailIntent() {
   const closeAllActiveElements = useCloseAllActiveElements()
-  const { verifyEmailDialogControl: control, setVerifyEmailState: setState } =
+  const {verifyEmailDialogControl: control, setVerifyEmailState: setState} =
     useIntentDialogs()
-  return React.useCallback(
+  return useCallback(
     (code: string) => {
       closeAllActiveElements()
       setState({

@@ -1,9 +1,9 @@
-import React, {useCallback, useState} from 'react'
+import {memo} from 'react'
 import {Alert, SectionList, StyleSheet, View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
 import {
@@ -24,7 +24,7 @@ import {VotingButtonHorizontal} from '#/components/VotingButtonHorizontal'
 // We wrap the individual question row in React.memo.
 // This prevents all 96 buttons from re-rendering when one changes.
 // ------------------------------------------------------------------
-const QuestionRow = React.memo(
+const QuestionRow = memo(
   ({
     item,
     onVote,

@@ -3,7 +3,6 @@ import {type AppBskyUnspeccedGetPostThreadV2} from '@atproto/api'
 import {useFocusEffect} from '@react-navigation/native'
 import debounce from 'lodash.debounce'
 
-import {useAnalytics} from '#/analytics'
 import {useCallOnce} from '#/lib/once'
 import {logger} from '#/logger'
 import {
@@ -11,6 +10,7 @@ import {
   useSetThreadViewPreferencesMutation,
 } from '#/state/queries/preferences'
 import {type ThreadViewPreferences} from '#/state/queries/preferences/types'
+import {useAnalytics} from '#/analytics'
 import {type Literal} from '#/types/utils'
 
 export type ThreadSortOption = Literal<

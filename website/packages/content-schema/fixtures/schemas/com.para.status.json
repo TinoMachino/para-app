@@ -1,0 +1,46 @@
+{
+  "id": "com.para.status",
+  "title": "com.para.status",
+  "summary": "Literal-self record for a Para account's public status and optional party or community affiliation.",
+  "status": "stable",
+  "tags": ["actors", "status", "records"],
+  "backendOwner": "lexicons/com/para/status.json",
+  "sourcePath": "watx/lexicons/com/para/status.json",
+  "examples": [
+    "{\"$type\":\"com.para.status\",\"status\":\"Working on housing reform outreach this week.\",\"community\":\"mx-federal\",\"createdAt\":\"2026-03-18T00:00:00.000Z\"}"
+  ],
+  "relationships": [
+    "Complements com.para.actor.defs#statusView.",
+    "Feeds public profile surfaces and moderation/reporting flows."
+  ],
+  "constraints": [
+    "`status` and `createdAt` are required.",
+    "The record key is literal:self rather than a generated tid."
+  ],
+  "fields": [
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "description": "User's public status message."
+    },
+    {
+      "name": "party",
+      "type": "string",
+      "required": false,
+      "description": "Optional political party affiliation."
+    },
+    {
+      "name": "community",
+      "type": "string",
+      "required": false,
+      "description": "Optional primary community label."
+    },
+    {
+      "name": "createdAt",
+      "type": "datetime",
+      "required": true,
+      "description": "Timestamp when the status was set."
+    }
+  ]
+}

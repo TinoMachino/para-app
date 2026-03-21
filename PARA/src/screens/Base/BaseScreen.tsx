@@ -504,9 +504,7 @@ export function BaseScreen() {
                         entities: ['PRI', 'DERECHA'],
                       })
                     }>
-                    <Text style={[styles.dataCardTitle, t.atoms.text]}>
-                      VS
-                    </Text>
+                    <Text style={[styles.dataCardTitle, t.atoms.text]}>VS</Text>
                     <View
                       style={{
                         flexDirection: 'row',

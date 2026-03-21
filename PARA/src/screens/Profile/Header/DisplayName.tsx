@@ -1,11 +1,11 @@
 import {View} from 'react-native'
 import {type AppBskyActorDefs, type ModerationDecision} from '@atproto/api'
 
-import {sanitizeDisplayName} from '#/lib/strings/display-names'
-import {sanitizeHandle} from '#/lib/strings/handles'
+import {formatUserDisplayName} from '#/lib/strings/profile-names'
 import {type Shadow} from '#/state/cache/types'
 import {atoms as a, useBreakpoints, useTheme} from '#/alf'
 import {Text} from '#/components/Typography'
+import {useSimpleVerificationState} from '#/components/verification'
 
 export function ProfileHeaderDisplayName({
   profile,
@@ -16,6 +16,7 @@ export function ProfileHeaderDisplayName({
 }) {
   const t = useTheme()
   const {gtMobile} = useBreakpoints()
+  const verification = useSimpleVerificationState({profile})
 
   return (
     <View pointerEvents="none">
@@ -28,10 +29,12 @@ export function ProfileHeaderDisplayName({
           a.self_start,
           a.font_bold,
         ]}>
-        {sanitizeDisplayName(
-          profile.displayName || sanitizeHandle(profile.handle),
-          moderation.ui('displayName'),
-        )}
+        {formatUserDisplayName({
+          displayName: profile.displayName,
+          handle: profile.handle,
+          isFigure: verification.isVerified,
+          moderation: moderation.ui('displayName'),
+        })}
       </Text>
     </View>
   )

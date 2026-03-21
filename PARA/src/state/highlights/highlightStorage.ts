@@ -31,16 +31,19 @@ export function getHighlightsForPost(postUri: string): HighlightData[] {
  */
 export function saveHighlight(
   postUri: string,
-  highlight: Omit<HighlightData, 'id' | 'postUri' | 'createdAt'>,
+  highlight: Omit<HighlightData, 'id' | 'postUri' | 'createdAt'> & {
+    id?: string
+    createdAt?: number
+  },
 ): HighlightData {
   const key = `${HIGHLIGHTS_KEY_PREFIX}${postUri}`
   const existing = getHighlightsForPost(postUri)
 
   const newHighlight: HighlightData = {
     ...highlight,
-    id: nanoid(),
+    id: highlight.id || nanoid(),
     postUri,
-    createdAt: Date.now(),
+    createdAt: highlight.createdAt || Date.now(),
   }
 
   const updated = [...existing, newHighlight]

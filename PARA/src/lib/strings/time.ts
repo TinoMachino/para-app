@@ -1,4 +1,4 @@
-import { type I18n } from '@lingui/core'
+import {type I18n} from '@lingui/core'
 import {msg} from '@lingui/core/macro'
 
 export function niceDate(
@@ -12,7 +12,7 @@ export function niceDate(
     return i18n._(
       msg({
         context: 'date and time formatted like this: [time] · [date]',
-        message: `${i18n.date(d, { timeStyle: 'short' })} · ${i18n.date(d, { dateStyle: 'medium' })}`,
+        message: `${i18n.date(d, {timeStyle: 'short'})} · ${i18n.date(d, {dateStyle: 'medium'})}`,
       }),
     )
   }

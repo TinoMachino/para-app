@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -41,7 +41,7 @@ export function LocationSelectorModal({
   }, [tempState, searchQuery])
 
   // Sync municipality when state changes
-  React.useEffect(() => {
+  useEffect(() => {
     const list = MOCK_MUNICIPALITIES[tempState] || ['All']
     setTempMunicipality(prev => (list.includes(prev) ? prev : 'All'))
   }, [tempState])

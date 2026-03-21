@@ -1,28 +1,28 @@
-import { useMemo, useState } from 'react'
+import {useMemo, useState} from 'react'
 import {
   LayoutAnimation,
   type StyleProp,
   View,
   type ViewStyle,
 } from 'react-native'
-import { type ModerationUI } from '@atproto/api'
+import {type ModerationUI} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { ADULT_CONTENT_LABELS, isJustAMute } from '#/lib/moderation'
-import { useGlobalLabelStrings } from '#/lib/moderation/useGlobalLabelStrings'
-import { getDefinition, getLabelStrings } from '#/lib/moderation/useLabelInfo'
-import { useModerationCauseDescription } from '#/lib/moderation/useModerationCauseDescription'
-import { sanitizeDisplayName } from '#/lib/strings/display-names'
-import { useLabelDefinitions } from '#/state/preferences'
-import { atoms as a, useBreakpoints, useTheme, web } from '#/alf'
-import { Button } from '#/components/Button'
+import {ADULT_CONTENT_LABELS, isJustAMute} from '#/lib/moderation'
+import {useGlobalLabelStrings} from '#/lib/moderation/useGlobalLabelStrings'
+import {getDefinition, getLabelStrings} from '#/lib/moderation/useLabelInfo'
+import {useModerationCauseDescription} from '#/lib/moderation/useModerationCauseDescription'
+import {sanitizeDisplayName} from '#/lib/strings/display-names'
+import {useLabelDefinitions} from '#/state/preferences'
+import {atoms as a, useBreakpoints, useTheme, web} from '#/alf'
+import {Button} from '#/components/Button'
 import {
   ModerationDetailsDialog,
   useModerationDetailsDialogControl,
 } from '#/components/moderation/ModerationDetailsDialog'
-import { Text } from '#/components/Typography'
+import {Text} from '#/components/Typography'
 
 export function ContentHider({
   testID,
@@ -39,13 +39,13 @@ export function ContentHider({
   style?: StyleProp<ViewStyle>
   activeStyle?: StyleProp<ViewStyle>
   childContainerStyle?: StyleProp<ViewStyle>
-  children?: React.ReactNode | ((props: { active: boolean }) => React.ReactNode)
+  children?: React.ReactNode | ((props: {active: boolean}) => React.ReactNode)
 }) {
   const blur = modui?.blurs[0]
   if (!blur || (ignoreMute && isJustAMute(modui))) {
     return (
       <View testID={testID} style={style}>
-        {typeof children === 'function' ? children({ active: false }) : children}
+        {typeof children === 'function' ? children({active: false}) : children}
       </View>
     )
   }
@@ -55,7 +55,7 @@ export function ContentHider({
       modui={modui}
       style={[style, activeStyle]}
       childContainerStyle={childContainerStyle}>
-      {typeof children === 'function' ? children({ active: true }) : children}
+      {typeof children === 'function' ? children({active: true}) : children}
     </ContentHiderActive>
   )
 }
@@ -74,13 +74,13 @@ function ContentHiderActive({
   children?: React.ReactNode
 }) {
   const t = useTheme()
-  const { _ } = useLingui()
-  const { gtMobile } = useBreakpoints()
+  const {_} = useLingui()
+  const {gtMobile} = useBreakpoints()
   const [override, setOverride] = useState(false)
   const control = useModerationDetailsDialogControl()
-  const { labelDefs } = useLabelDefinitions()
+  const {labelDefs} = useLabelDefinitions()
   const globalLabelStrings = useGlobalLabelStrings()
-  const { i18n } = useLingui()
+  const {i18n} = useLingui()
   const blur = modui?.blurs[0]
   const desc = useModerationCauseDescription(blur)
 
@@ -185,7 +185,7 @@ function ContentHiderActive({
             <desc.icon
               size="md"
               fill={t.atoms.text_contrast_medium.color}
-              style={{ marginLeft: -2 }}
+              style={{marginLeft: -2}}
             />
             <Text
               style={[
@@ -248,9 +248,9 @@ function ContentHiderActive({
               )}{' '}
               <Text
                 style={[
-                  { color: t.palette.primary_500 },
+                  {color: t.palette.primary_500},
                   a.text_sm,
-                  state.hovered && [web({ textDecoration: 'underline' })],
+                  state.hovered && [web({textDecoration: 'underline'})],
                 ]}>
                 <Trans>Learn more.</Trans>
               </Text>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useImperativeHandle, useState } from 'react'
+import {useCallback, useEffect, useImperativeHandle, useState} from 'react'
 import {
   findNodeHandle,
   type ListRenderItemInfo,
@@ -7,36 +7,36 @@ import {
   View,
   type ViewStyle,
 } from 'react-native'
-import { type AppBskyGraphDefs } from '@atproto/api'
+import {type AppBskyGraphDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
-import { useNavigation } from '@react-navigation/native'
+import {useNavigation} from '@react-navigation/native'
 
-import { useGenerateStarterPackMutation } from '#/lib/generate-starterpack'
-import { useBottomBarOffset } from '#/lib/hooks/useBottomBarOffset'
-import { useRequireEmailVerification } from '#/lib/hooks/useRequireEmailVerification'
-import { useWebMediaQueries } from '#/lib/hooks/useWebMediaQueries'
-import { type NavigationProp } from '#/lib/routes/types'
-import { parseStarterPackUri } from '#/lib/strings/starter-pack'
-import { logger } from '#/logger'
-import { useActorStarterPacksQuery } from '#/state/queries/actor-starter-packs'
+import {useGenerateStarterPackMutation} from '#/lib/generate-starterpack'
+import {useBottomBarOffset} from '#/lib/hooks/useBottomBarOffset'
+import {useRequireEmailVerification} from '#/lib/hooks/useRequireEmailVerification'
+import {useWebMediaQueries} from '#/lib/hooks/useWebMediaQueries'
+import {type NavigationProp} from '#/lib/routes/types'
+import {parseStarterPackUri} from '#/lib/strings/starter-pack'
+import {logger} from '#/logger'
+import {useActorStarterPacksQuery} from '#/state/queries/actor-starter-packs'
 import {
   EmptyState,
   type EmptyStateButtonProps,
 } from '#/view/com/util/EmptyState'
-import { List, type ListRef } from '#/view/com/util/List'
-import { FeedLoadingPlaceholder } from '#/view/com/util/LoadingPlaceholder'
-import { atoms as a, ios, useTheme } from '#/alf'
-import { Button, ButtonIcon, ButtonText } from '#/components/Button'
-import { useDialogControl } from '#/components/Dialog'
-import { PlusSmall_Stroke2_Corner0_Rounded as Plus } from '#/components/icons/Plus'
-import { LinearGradientBackground } from '#/components/LinearGradientBackground'
-import { Loader } from '#/components/Loader'
+import {List, type ListRef} from '#/view/com/util/List'
+import {FeedLoadingPlaceholder} from '#/view/com/util/LoadingPlaceholder'
+import {atoms as a, ios, useTheme} from '#/alf'
+import {Button, ButtonIcon, ButtonText} from '#/components/Button'
+import {useDialogControl} from '#/components/Dialog'
+import {PlusSmall_Stroke2_Corner0_Rounded as Plus} from '#/components/icons/Plus'
+import {LinearGradientBackground} from '#/components/LinearGradientBackground'
+import {Loader} from '#/components/Loader'
 import * as Prompt from '#/components/Prompt'
-import { Default as StarterPackCard } from '#/components/StarterPack/StarterPackCard'
-import { Text } from '#/components/Typography'
-import { IS_IOS } from '#/env'
+import {Default as StarterPackCard} from '#/components/StarterPack/StarterPackCard'
+import {Text} from '#/components/Typography'
+import {IS_IOS} from '#/env'
 
 interface SectionRef {
   scrollToTop: () => void
@@ -77,7 +77,7 @@ export function ProfileStarterPacks({
 }: ProfileFeedgensProps) {
   const t = useTheme()
   const bottomBarOffset = useBottomBarOffset(100)
-  const { height } = useWindowDimensions()
+  const {height} = useWindowDimensions()
   const [isPTRing, setIsPTRing] = useState(false)
   const {
     data,
@@ -86,11 +86,11 @@ export function ProfileStarterPacks({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useActorStarterPacksQuery({ did, enabled })
-  const { isTabletOrDesktop } = useWebMediaQueries()
+  } = useActorStarterPacksQuery({did, enabled})
+  const {isTabletOrDesktop} = useWebMediaQueries()
 
   const items = data?.pages.flatMap(page => page.starterPacks)
-  const { _ } = useLingui()
+  const {_} = useLingui()
 
   const EmptyComponent = useCallback(() => {
     if (emptyStateMessage || emptyStateButton || emptyStateIcon) {
@@ -114,7 +114,7 @@ export function ProfileStarterPacks({
   }, [_, emptyStateMessage, emptyStateButton, emptyStateIcon])
 
   useImperativeHandle(ref, () => ({
-    scrollToTop: () => { },
+    scrollToTop: () => {},
   }))
 
   const onRefresh = useCallback(async () => {
@@ -122,7 +122,7 @@ export function ProfileStarterPacks({
     try {
       await refetch()
     } catch (err) {
-      logger.error('Failed to refresh starter packs', { message: err })
+      logger.error('Failed to refresh starter packs', {message: err})
     }
     setIsPTRing(false)
   }, [refetch, setIsPTRing])
@@ -132,7 +132,7 @@ export function ProfileStarterPacks({
     try {
       await fetchNextPage()
     } catch (err) {
-      logger.error('Failed to load more starter packs', { message: err })
+      logger.error('Failed to load more starter packs', {message: err})
     }
   }, [isFetchingNextPage, hasNextPage, isError, fetchNextPage])
 
@@ -144,7 +144,7 @@ export function ProfileStarterPacks({
   }, [enabled, scrollElRef, setScrollViewTag])
 
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<AppBskyGraphDefs.StarterPackView>) => {
+    ({item, index}: ListRenderItemInfo<AppBskyGraphDefs.StarterPackView>) => {
       return (
         <View
           style={[
@@ -190,7 +190,7 @@ export function ProfileStarterPacks({
 }
 
 function CreateAnother() {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   const navigation = useNavigation<NavigationProp>()
 
@@ -220,7 +220,7 @@ function CreateAnother() {
 }
 
 function Empty() {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const navigation = useNavigation<NavigationProp>()
   const confirmDialogControl = useDialogControl()
   const followersDialogControl = useDialogControl()
@@ -229,8 +229,8 @@ function Empty() {
 
   const [isGenerating, setIsGenerating] = useState(false)
 
-  const { mutate: generateStarterPack } = useGenerateStarterPackMutation({
-    onSuccess: ({ uri }) => {
+  const {mutate: generateStarterPack} = useGenerateStarterPackMutation({
+    onSuccess: ({uri}) => {
       const parsed = parseStarterPackUri(uri)
       if (parsed) {
         navigation.push('StarterPack', {
@@ -241,7 +241,7 @@ function Empty() {
       setIsGenerating(false)
     },
     onError: e => {
-      logger.error('Failed to generate starter pack', { safeMessage: e })
+      logger.error('Failed to generate starter pack', {safeMessage: e})
       setIsGenerating(false)
       if (e.message.includes('NOT_ENOUGH_FOLLOWERS')) {
         followersDialogControl.open()
@@ -285,20 +285,20 @@ function Empty() {
         a.justify_between,
         a.gap_lg,
         a.shadow_lg,
-        { marginTop: a.border.borderWidth },
+        {marginTop: a.border.borderWidth},
       ]}>
       <View style={[a.gap_xs]}>
-        <Text style={[a.font_semi_bold, a.text_lg, { color: 'white' }]}>
+        <Text style={[a.font_semi_bold, a.text_lg, {color: 'white'}]}>
           <Trans>You haven't created a starter pack yet!</Trans>
         </Text>
-        <Text style={[a.text_md, { color: 'white' }]}>
+        <Text style={[a.text_md, {color: 'white'}]}>
           <Trans>
             Starter packs let you easily share your favorite feeds and people
             with your friends.
           </Trans>
         </Text>
       </View>
-      <View style={[a.flex_row, a.gap_md, { marginLeft: 'auto' }]}>
+      <View style={[a.flex_row, a.gap_md, {marginLeft: 'auto'}]}>
         <Button
           label={_(msg`Create a starter pack for me`)}
           variant="ghost"
@@ -306,8 +306,8 @@ function Empty() {
           size="small"
           disabled={isGenerating}
           onPress={wrappedOpenConfirmDialog}
-          style={{ backgroundColor: 'transparent' }}>
-          <ButtonText style={{ color: 'white' }}>
+          style={{backgroundColor: 'transparent'}}>
+          <ButtonText style={{color: 'white'}}>
             <Trans>Make one for me</Trans>
           </ButtonText>
           {isGenerating && <Loader size="md" />}
@@ -324,7 +324,7 @@ function Empty() {
             borderColor: 'white',
             width: 100,
           }}
-          hoverStyle={[{ backgroundColor: '#dfdfdf' }]}>
+          hoverStyle={[{backgroundColor: '#dfdfdf'}]}>
           <ButtonText>
             <Trans>Create</Trans>
           </ButtonText>
@@ -338,8 +338,8 @@ function Empty() {
           </Prompt.TitleText>
           <Prompt.DescriptionText>
             <Trans>
-              PARA will choose a set of recommended accounts from people in
-              your network.
+              PARA will choose a set of recommended accounts from people in your
+              network.
             </Trans>
           </Prompt.DescriptionText>
           <Prompt.Actions>
@@ -364,7 +364,7 @@ function Empty() {
         description={_(
           msg`You must be following at least seven other people to generate a starter pack.`,
         )}
-        onConfirm={() => { }}
+        onConfirm={() => {}}
         showCancel={false}
       />
       <Prompt.Basic

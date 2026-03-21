@@ -2,12 +2,11 @@ import {useCallback, useMemo, useRef, useState} from 'react'
 import {View, type ViewabilityConfig} from 'react-native'
 import {type AppBskyActorDefs, type AppBskyFeedDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useQueryClient} from '@tanstack/react-query'
 import * as bcp47Match from 'bcp-47-match'
 
-import {popularInterests, useInterestsDisplayNames} from '#/lib/interests'
 import {cleanError} from '#/lib/strings/errors'
 import {sanitizeHandle} from '#/lib/strings/handles'
 import {useLanguagePrefs} from '#/state/preferences/languages'
@@ -49,7 +48,6 @@ import {
 } from '#/components/icons/common'
 import {ListSparkle_Stroke2_Corner0_Rounded as ListSparkle} from '#/components/icons/ListSparkle'
 import {UserCircle_Stroke2_Corner0_Rounded as Person} from '#/components/icons/UserCircle'
-import {boostInterests} from '#/components/InterestTabs'
 import {Loader} from '#/components/Loader'
 import * as ProfileCard from '#/components/ProfileCard'
 import {SubtleHover} from '#/components/SubtleHover'
@@ -57,10 +55,7 @@ import {Text} from '#/components/Typography'
 import {type Metrics, useAnalytics} from '#/analytics'
 import {ExploreScreenLiveEventFeedsBanner} from '#/features/liveEvents/components/ExploreScreenLiveEventFeedsBanner'
 import * as ModuleHeader from './components/ModuleHeader'
-import {
-  SuggestedAccountsTabBar,
-  SuggestedProfileCard,
-} from './modules/ExploreSuggestedAccounts'
+import {SuggestedProfileCard} from './modules/ExploreSuggestedAccounts'
 
 function LoadMore({item}: {item: ExploreScreenItems & {type: 'loadMore'}}) {
   const t = useTheme()
@@ -196,7 +191,6 @@ export function Explore({
   const t = useTheme()
   const {data: preferences, error: preferencesError} = usePreferencesQuery()
   const moderationOpts = useModerationOpts()
-  const [selectedInterest, setSelectedInterest] = useState<string | null>(null)
 
   /*
    * Begin special language handling
@@ -206,19 +200,15 @@ export function Explore({
     if (contentLanguages.length === 0) return true
     return bcp47Match.basicFilter('en', contentLanguages).length > 0
   }, [contentLanguages])
-  const personalizedInterests = preferences?.interests?.tags
-  const interestsDisplayNames = useInterestsDisplayNames()
-  const interests = Object.keys(interestsDisplayNames)
-    .sort(boostInterests(popularInterests))
-    .sort(boostInterests(personalizedInterests))
   const {
     data: suggestedUsers,
     isLoading: suggestedUsersIsLoading,
     error: suggestedUsersError,
     isRefetching: suggestedUsersIsRefetching,
   } = useSuggestedUsers({
-    category: selectedInterest || (useFullExperience ? null : interests[0]),
-    search: !useFullExperience,
+    // Ignore Suggested Accounts interest filters for now.
+    category: null,
+    search: false,
   })
   /* End special language handling */
 
@@ -326,7 +316,7 @@ export function Explore({
   const suggestedFollowsModule = useMemo(() => {
     const i: ExploreScreenItems[] = []
     i.push({
-      type: 'tabbedHeader',
+      type: 'header',
       key: 'suggested-accounts-header',
       title: _(msg`Suggested Accounts`),
       icon: Person,
@@ -335,7 +325,6 @@ export function Explore({
         metricsTag: 'suggestedAccounts',
         tab: 'user',
       },
-      hideDefaultTab: !useFullExperience,
     })
 
     if (suggestedUsersIsLoading || suggestedUsersIsRefetching) {
@@ -372,7 +361,7 @@ export function Explore({
               key: 'profileEmpty',
             })
           } else {
-            if (selectedInterest === null && useFullExperience) {
+            if (useFullExperience) {
               // First "For You" tab, only show 5 to keep screen short
               i.push(...profileItems.slice(0, 5))
             } else {
@@ -397,7 +386,6 @@ export function Explore({
     suggestedUsersIsLoading,
     suggestedUsersIsRefetching,
     suggestedUsersError,
-    selectedInterest,
     useFullExperience,
   ])
   const suggestedFeedsModule = useMemo(() => {
@@ -670,25 +658,18 @@ export function Explore({
         }
         case 'tabbedHeader': {
           return (
-            <View style={[a.pb_md]}>
-              <ModuleHeader.Container style={[a.pb_xs]}>
-                <ModuleHeader.Icon icon={item.icon} />
-                <ModuleHeader.TitleText>{item.title}</ModuleHeader.TitleText>
-                {item.searchButton && (
-                  <ModuleHeader.SearchButton
-                    {...item.searchButton}
-                    onPress={() =>
-                      focusSearchInput(item.searchButton?.tab || 'user')
-                    }
-                  />
-                )}
-              </ModuleHeader.Container>
-              <SuggestedAccountsTabBar
-                selectedInterest={selectedInterest}
-                onSelectInterest={setSelectedInterest}
-                hideDefaultTab={item.hideDefaultTab}
-              />
-            </View>
+            <ModuleHeader.Container style={[a.pb_xs]}>
+              <ModuleHeader.Icon icon={item.icon} />
+              <ModuleHeader.TitleText>{item.title}</ModuleHeader.TitleText>
+              {item.searchButton && (
+                <ModuleHeader.SearchButton
+                  {...item.searchButton}
+                  onPress={() =>
+                    focusSearchInput(item.searchButton?.tab || 'user')
+                  }
+                />
+              )}
+            </ModuleHeader.Container>
           )
         }
         case 'trendingTopics': {
@@ -718,13 +699,7 @@ export function Explore({
           return (
             <View style={[a.px_lg, a.pb_lg]}>
               <Admonition>
-                {selectedInterest ? (
-                  <Trans>
-                    No results for "{interestsDisplayNames[selectedInterest]}".
-                  </Trans>
-                ) : (
-                  <Trans>No results.</Trans>
-                )}
+                <Trans>No results.</Trans>
               </Admonition>
             </View>
           )
@@ -927,9 +902,7 @@ export function Explore({
       t.atoms.bg,
       t.palette.negative_400,
       focusSearchInput,
-      selectedInterest,
       moderationOpts,
-      interestsDisplayNames,
       useFullExperience,
       _,
       fetchNextPageFeedPreviews,

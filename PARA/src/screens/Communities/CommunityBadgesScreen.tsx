@@ -15,7 +15,6 @@ import {Trans} from '@lingui/react/macro'
 import {useNavigation, useRoute} from '@react-navigation/native'
 
 import {
-  buildMockCommunityGovernance,
   canManageGovernance,
   communityGovernanceHandleLabel,
   type CommunityGovernanceView,
@@ -24,6 +23,10 @@ import {
 } from '#/lib/community-governance'
 import {getPostBadges, type PostBadge} from '#/lib/post-flairs'
 import {type NavigationProp} from '#/lib/routes/types'
+import {
+  buildCommunitySearchQuery,
+  formatCommunityName,
+} from '#/lib/strings/community-names'
 import {cleanError} from '#/lib/strings/errors'
 import {
   publishDeputySelection,
@@ -58,6 +61,20 @@ type BadgeSection = {
   badge: PostBadge
   description: string
   holders: BadgeHolder[]
+}
+
+const EMPTY_GOVERNANCE: CommunityGovernanceView = {
+  source: 'network',
+  community: '',
+  communityId: undefined,
+  slug: '',
+  createdAt: '',
+  updatedAt: '',
+  moderators: [],
+  officials: [],
+  deputies: [],
+  metadata: undefined,
+  editHistory: [],
 }
 
 function describeBadge(badge: PostBadge) {
@@ -102,6 +119,10 @@ export function CommunityBadgesScreen() {
     params: CommunityBadgeParams
   }>()
   const {communityName = 'Community', communityId} = route.params || {}
+  const formattedCommunity = useMemo(
+    () => formatCommunityName(communityName),
+    [communityName],
+  )
   const [isPTR, setIsPTR] = useState(false)
   const [editingRoleKey, setEditingRoleKey] = useState<string | null>(null)
   const [roleDescriptionDraft, setRoleDescriptionDraft] = useState('')
@@ -118,7 +139,12 @@ export function CommunityBadgesScreen() {
     mandate: '',
   })
 
-  const {data: fetchedGovernance} = useCommunityGovernanceQuery({
+  const {
+    data: fetchedGovernance,
+    isLoading: isGovernanceLoading,
+    isError: isGovernanceError,
+    refetch: refetchGovernance,
+  } = useCommunityGovernanceQuery({
     communityName,
     communityId,
   })
@@ -126,9 +152,16 @@ export function CommunityBadgesScreen() {
     communityName,
     communityId,
   })
-  const governance =
-    fetchedGovernance ||
-    buildMockCommunityGovernance(communityName, communityId)
+  const governance = fetchedGovernance || EMPTY_GOVERNANCE
+  const communitySearchQuery = useMemo(
+    () =>
+      buildCommunitySearchQuery(communityName, fetchedGovernance?.community),
+    [communityName, fetchedGovernance?.community],
+  )
+  const governanceCommunity = fetchedGovernance?.community
+  const displayCommunityName = governanceCommunity
+    ? formatCommunityName(governanceCommunity).displayName
+    : formattedCommunity.displayName
   const viewerDid = currentAccount?.did
   const viewerHandle = currentAccount?.handle
   const isModerator = isCommunityModerator(governance, viewerDid)
@@ -145,7 +178,7 @@ export function CommunityBadgesScreen() {
     refetch,
     fetchNextPage,
     hasNextPage,
-  } = useSearchPostsQuery({query: communityName, sort: 'latest'})
+  } = useSearchPostsQuery({query: communitySearchQuery, sort: 'latest'})
 
   const posts = useMemo(
     () => data?.pages.flatMap(page => page.posts) || [],
@@ -241,9 +274,9 @@ export function CommunityBadgesScreen() {
 
   const onRefresh = useCallback(async () => {
     setIsPTR(true)
-    await refetch()
+    await Promise.all([refetch(), refetchGovernance()])
     setIsPTR(false)
-  }, [refetch])
+  }, [refetch, refetchGovernance])
   const onPullToRefresh = useCallback(() => {
     void onRefresh()
   }, [onRefresh])
@@ -416,7 +449,7 @@ export function CommunityBadgesScreen() {
               t.atoms.border_contrast_low,
             ]}>
             <Text style={[a.text_2xl, a.font_bold, t.atoms.text]}>
-              p/{communityName}
+              {displayCommunityName}
             </Text>
             <Text style={[a.text_sm, a.mt_xs, t.atoms.text_contrast_medium]}>
               {badgeSections.length} badge types, {holderCount} visible holders
@@ -434,16 +467,39 @@ export function CommunityBadgesScreen() {
                   t.atoms.border_contrast_low,
                 ]}>
                 <Text style={[a.text_sm, a.font_bold, t.atoms.text]}>
-                  {governance.source === 'mock'
-                    ? 'Sample governance'
-                    : 'Published governance'}
+                  {isGovernanceLoading
+                    ? 'Loading governance'
+                    : fetchedGovernance
+                      ? 'Published governance'
+                      : 'No governance record'}
                 </Text>
                 <Text
                   style={[a.text_sm, a.mt_2xs, t.atoms.text_contrast_medium]}>
-                  {governance.source === 'mock'
-                    ? 'This community has not published a governance record yet, so the directory is showing a structured fallback.'
-                    : `Authority record loaded${governance.repoDid ? ` from ${governance.repoDid}` : ''}.`}
+                  {isGovernanceLoading
+                    ? 'Fetching the current governance record from the network.'
+                    : isGovernanceError
+                      ? 'Governance could not be loaded right now.'
+                      : fetchedGovernance
+                        ? `Authority record loaded${governance.repoDid ? ` from ${governance.repoDid}` : ''}.`
+                        : 'This community has not published a governance record yet.'}
                 </Text>
+                {isGovernanceError ? (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    onPress={() => void refetchGovernance()}
+                    style={[
+                      styles.inlineAction,
+                      {backgroundColor: t.palette.secondary_25},
+                    ]}>
+                    <Text
+                      style={[
+                        styles.inlineActionText,
+                        {color: t.palette.secondary_700},
+                      ]}>
+                      Retry governance
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
               <View
                 style={[

@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -6,10 +6,7 @@ import React, {
   useState,
 } from 'react'
 
-type ViewMode =
-  | 'View official parties'
-  | "View by 9th's"
-  | 'Followed policies'
+type ViewMode = 'View official parties' | "View by 9th's" | 'Followed policies'
 
 interface BaseFilterContextValue {
   selectedFilters: string[]
@@ -50,16 +47,19 @@ export function BaseFilterProvider({children}: {children: React.ReactNode}) {
     setActiveState(selectedState)
   }, [selectedFilters, selectedState])
 
-  const removeActiveFilter = useCallback((name: string) => {
-    setActiveFilters(prev => prev.filter(item => item !== name))
-    setSelectedFilters(prev => prev.filter(item => item !== name))
-    if (selectedState === name) {
-      setSelectedState('None')
-    }
-    if (activeState === name) {
-      setActiveState('None')
-    }
-  }, [activeState, selectedState])
+  const removeActiveFilter = useCallback(
+    (name: string) => {
+      setActiveFilters(prev => prev.filter(item => item !== name))
+      setSelectedFilters(prev => prev.filter(item => item !== name))
+      if (selectedState === name) {
+        setSelectedState('None')
+      }
+      if (activeState === name) {
+        setActiveState('None')
+      }
+    },
+    [activeState, selectedState],
+  )
 
   const resetFilters = useCallback(() => {
     setSelectedFilters([])

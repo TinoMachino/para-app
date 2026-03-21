@@ -1,7 +1,7 @@
-import React from 'react'
-import { type GestureResponderEvent, View } from 'react-native'
+import {createContext, useCallback, useContext, useId, useMemo} from 'react'
+import {type GestureResponderEvent, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
+import {useLingui} from '@lingui/react'
 
 import {
   atoms as a,
@@ -10,17 +10,17 @@ import {
   type ViewStyleProp,
   web,
 } from '#/alf'
-import { Button, type ButtonColor, ButtonText } from '#/components/Button'
+import {Button, type ButtonColor, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
-import { Text } from '#/components/Typography'
-import { type BottomSheetViewProps } from '../../modules/bottom-sheet'
+import {Text} from '#/components/Typography'
+import {type BottomSheetViewProps} from '../../modules/bottom-sheet'
 
 export {
   type DialogControlProps as PromptControlProps,
   useDialogControl as usePromptControl,
 } from '#/components/Dialog'
 
-const Context = React.createContext<{
+const Context = createContext<{
   titleId: string
   descriptionId: string
 }>({
@@ -41,11 +41,11 @@ export function Outer({
   nativeOptions?: Omit<BottomSheetViewProps, 'children'>
   webOptions?: any
 }>) {
-  const titleId = React.useId()
-  const descriptionId = React.useId()
+  const titleId = useId()
+  const descriptionId = useId()
 
-  const context = React.useMemo(
-    () => ({ titleId, descriptionId }),
+  const context = useMemo(
+    () => ({titleId, descriptionId}),
     [titleId, descriptionId],
   )
 
@@ -53,21 +53,21 @@ export function Outer({
     <Dialog.Outer
       control={control}
       testID={testID}
-      webOptions={webOptions || { alignCenter: true }}
-      nativeOptions={{ preventExpansion: true, ...nativeOptions }}>
+      webOptions={webOptions || {alignCenter: true}}
+      nativeOptions={{preventExpansion: true, ...nativeOptions}}>
       <Dialog.Handle />
       <Context.Provider value={context}>{children}</Context.Provider>
     </Dialog.Outer>
   )
 }
 
-export function Content({ children }: React.PropsWithChildren<{}>) {
-  const { titleId, descriptionId } = React.useContext(Context)
+export function Content({children}: React.PropsWithChildren<{}>) {
+  const {titleId, descriptionId} = useContext(Context)
   return (
     <Dialog.ScrollableInner
       accessibilityLabelledBy={titleId}
       accessibilityDescribedBy={descriptionId}
-      style={web({ maxWidth: 400 })}>
+      style={web({maxWidth: 400})}>
       {children}
     </Dialog.ScrollableInner>
   )
@@ -77,7 +77,7 @@ export function TitleText({
   children,
   style,
 }: React.PropsWithChildren<ViewStyleProp>) {
-  const { titleId } = React.useContext(Context)
+  const {titleId} = useContext(Context)
   return (
     <Text
       nativeID={titleId}
@@ -97,9 +97,9 @@ export function TitleText({
 export function DescriptionText({
   children,
   selectable,
-}: React.PropsWithChildren<{ selectable?: boolean }>) {
+}: React.PropsWithChildren<{selectable?: boolean}>) {
   const t = useTheme()
-  const { descriptionId } = React.useContext(Context)
+  const {descriptionId} = useContext(Context)
   return (
     <Text
       nativeID={descriptionId}
@@ -110,8 +110,8 @@ export function DescriptionText({
   )
 }
 
-export function Actions({ children }: React.PropsWithChildren<{}>) {
-  const { gtMobile } = useBreakpoints()
+export function Actions({children}: React.PropsWithChildren<{}>) {
+  const {gtMobile} = useBreakpoints()
 
   return (
     <View
@@ -136,10 +136,10 @@ export function Cancel({
    */
   cta?: string
 }) {
-  const { _ } = useLingui()
-  const { gtMobile } = useBreakpoints()
-  const { close } = Dialog.useDialogContext()
-  const onPress = React.useCallback(() => {
+  const {_} = useLingui()
+  const {gtMobile} = useBreakpoints()
+  const {close} = Dialog.useDialogContext()
+  const onPress = useCallback(() => {
     close()
   }, [close])
 
@@ -176,10 +176,10 @@ export function Action({
   cta?: string
   testID?: string
 }) {
-  const { _ } = useLingui()
-  const { gtMobile } = useBreakpoints()
-  const { close } = Dialog.useDialogContext()
-  const handleOnPress = React.useCallback(
+  const {_} = useLingui()
+  const {gtMobile} = useBreakpoints()
+  const {close} = Dialog.useDialogContext()
+  const handleOnPress = useCallback(
     (e: GestureResponderEvent) => {
       close(() => onPress?.(e))
     },

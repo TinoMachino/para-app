@@ -1,4 +1,4 @@
-import React from 'react'
+import {useCallback, useState} from 'react'
 import {
   Modal,
   Pressable,
@@ -9,8 +9,8 @@ import {
 } from 'react-native'
 import {AtUri} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useFocusEffect, useNavigation} from '@react-navigation/native'
 
 import {
@@ -50,34 +50,32 @@ export function MyBaseScreen() {
   const currentDid = currentAccount!.did
   const {data: currentProfile} = useProfileQuery({did: currentDid})
   const {affiliation} = usePoliticalAffiliation()
-  const [activeDetail, setActiveDetail] = React.useState<
+  const [activeDetail, setActiveDetail] = useState<
     'Influence' | 'Votes' | 'Posts' | null
   >(null)
-  const [activeCategory, setActiveCategory] =
-    React.useState<CategoryData | null>(null)
-  const [myHighlights, setMyHighlights] = React.useState<HighlightData[]>([])
-  const [selectedFlair, setSelectedFlair] = React.useState<
+  const [activeCategory, setActiveCategory] = useState<CategoryData | null>(
+    null,
+  )
+  const [myHighlights, setMyHighlights] = useState<HighlightData[]>([])
+  const [selectedFlair, setSelectedFlair] = useState<
     (typeof USER_FLAIRS)[keyof typeof USER_FLAIRS]
   >(USER_FLAIRS.CENTRISM)
 
-  const [showFlairModal, setShowFlairModal] = React.useState(false)
+  const [showFlairModal, setShowFlairModal] = useState(false)
 
   // Load highlights on mount
   // Load highlights on focus
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       setMyHighlights(getAllHighlights())
     }, []),
   )
 
   // Handle delete highlight
-  const handleDeleteHighlight = React.useCallback(
-    (highlight: HighlightData) => {
-      deleteHighlight(highlight.postUri, highlight.id)
-      setMyHighlights(getAllHighlights())
-    },
-    [],
-  )
+  const handleDeleteHighlight = useCallback((highlight: HighlightData) => {
+    deleteHighlight(highlight.postUri, highlight.id)
+    setMyHighlights(getAllHighlights())
+  }, [])
 
   // Followed topics/items
   const {items: followedItems, unfollow: unfollowItem} = useFollowedItems()

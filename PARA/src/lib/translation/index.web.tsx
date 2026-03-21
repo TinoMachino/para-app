@@ -1,49 +1,72 @@
-import {useCallback, useContext, useMemo} from 'react'
+import {type PropsWithChildren, useCallback, useEffect, useState} from 'react'
 
 import {useGoogleTranslate} from '#/lib/hooks/useGoogleTranslate'
 import {useAnalytics} from '#/analytics'
-import {Context} from './context'
-import {type TranslationFunctionParams, type TranslationState} from './types'
+import {
+  type TranslationFunctionParams,
+  type TranslationOptions,
+  type TranslationState,
+} from './types'
 
 export * from './types'
 export * from './utils'
 
-const translationState: Record<string, TranslationState> = {}
-const acquireTranslation = (_key: string) => {
-  return () => {}
+const translationStateStore: Record<string, TranslationState> = {}
+const subscribers = new Set<() => void>()
+
+function emitStoreUpdate() {
+  subscribers.forEach(subscriber => subscriber())
 }
-const clearTranslation = (_key: string) => {}
 
-/**
- * Web always opens Google Translate.
- */
-export function useTranslate({
-  key,
-}: {
-  key: string
-  forceGoogleTranslate?: boolean
-}) {
-  const context = useContext(Context)
-  if (!context) {
-    throw new Error(
-      'useTranslate must be used within a TranslateOnDeviceProvider',
-    )
-  }
+function clearTranslationForKey(key: string) {
+  delete translationStateStore[key]
+  emitStoreUpdate()
+}
 
-  // Always call hooks in consistent order
+export function useTranslate({key}: TranslationOptions) {
+  const [, setVersion] = useState(0)
+  const ax = useAnalytics()
+  const googleTranslate = useGoogleTranslate()
+
+  useEffect(() => {
+    const onStoreUpdate = () => {
+      setVersion(version => version + 1)
+    }
+    subscribers.add(onStoreUpdate)
+    return () => {
+      subscribers.delete(onStoreUpdate)
+    }
+  }, [])
+
   const translate = useCallback(
-    async (params: TranslationFunctionParams) => {
-      return context.translate({...params, key, forceGoogleTranslate: true})
+    async ({
+      text,
+      expectedTargetLanguage,
+      expectedSourceLanguage,
+      possibleSourceLanguages,
+    }: TranslationFunctionParams) => {
+      ax.metric('translate', {
+        os: 'web',
+        possibleSourceLanguages,
+        expectedTargetLanguage,
+        textLength: text.length,
+        googleTranslate: true,
+      })
+      await googleTranslate(
+        text,
+        expectedTargetLanguage,
+        expectedSourceLanguage,
+      )
     },
-    [key, context],
+    [ax, googleTranslate],
   )
 
   const clearTranslation = useCallback(() => {
-    return context.clearTranslation(key)
-  }, [key, context])
+    clearTranslationForKey(key)
+  }, [key])
 
   return {
-    translationState: context.translationState[key] ?? {
+    translationState: translationStateStore[key] ?? {
       status: 'idle' as const,
     },
     translate,
@@ -51,36 +74,6 @@ export function useTranslate({
   }
 }
 
-export function Provider({children}: React.PropsWithChildren<unknown>) {
-  const ax = useAnalytics()
-  const googleTranslate = useGoogleTranslate()
-
-  const translate = useCallback(
-    async ({
-      text,
-      targetLangCode,
-      sourceLangCode,
-    }: {
-      key: string
-      text: string
-      targetLangCode: string
-      sourceLangCode?: string
-    }) => {
-      ax.metric('translate:result', {
-        method: 'google-translate',
-        os: 'web',
-        sourceLanguage: sourceLangCode ?? null,
-        targetLanguage: targetLangCode,
-      })
-      await googleTranslate(text, targetLangCode, sourceLangCode)
-    },
-    [ax, googleTranslate],
-  )
-
-  const ctx = useMemo(
-    () => ({acquireTranslation, clearTranslation, translate, translationState}),
-    [translate],
-  )
-
-  return <Context.Provider value={ctx}>{children}</Context.Provider>
+export function Provider({children}: PropsWithChildren<unknown>) {
+  return children
 }

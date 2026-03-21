@@ -1,7 +1,7 @@
-import { type LocationGeocodedAddress } from 'expo-location'
+import {type LocationGeocodedAddress} from 'expo-location'
 
-import { logger } from '#/geolocation/logger'
-import { type Geolocation } from '#/geolocation/types'
+import {logger} from '#/geolocation/logger'
+import {type Geolocation} from '#/geolocation/types'
 
 /**
  * Maps full US region names to their short codes.
@@ -11,58 +11,58 @@ import { type Geolocation } from '#/geolocation/types'
  * countries, hence the prefix.
  */
 export const USRegionNameToRegionCode: {
-    [regionName: string]: string
+  [regionName: string]: string
 } = {
-    Alabama: 'AL',
-    Alaska: 'AK',
-    Arizona: 'AZ',
-    Arkansas: 'AR',
-    California: 'CA',
-    Colorado: 'CO',
-    Connecticut: 'CT',
-    Delaware: 'DE',
-    Florida: 'FL',
-    Georgia: 'GA',
-    Hawaii: 'HI',
-    Idaho: 'ID',
-    Illinois: 'IL',
-    Indiana: 'IN',
-    Iowa: 'IA',
-    Kansas: 'KS',
-    Kentucky: 'KY',
-    Louisiana: 'LA',
-    Maine: 'ME',
-    Maryland: 'MD',
-    Massachusetts: 'MA',
-    Michigan: 'MI',
-    Minnesota: 'MN',
-    Mississippi: 'MS',
-    Missouri: 'MO',
-    Montana: 'MT',
-    Nebraska: 'NE',
-    Nevada: 'NV',
-    ['New Hampshire']: 'NH',
-    ['New Jersey']: 'NJ',
-    ['New Mexico']: 'NM',
-    ['New York']: 'NY',
-    ['North Carolina']: 'NC',
-    ['North Dakota']: 'ND',
-    Ohio: 'OH',
-    Oklahoma: 'OK',
-    Oregon: 'OR',
-    Pennsylvania: 'PA',
-    ['Rhode Island']: 'RI',
-    ['South Carolina']: 'SC',
-    ['South Dakota']: 'SD',
-    Tennessee: 'TN',
-    Texas: 'TX',
-    Utah: 'UT',
-    Vermont: 'VT',
-    Virginia: 'VA',
-    Washington: 'WA',
-    ['West Virginia']: 'WV',
-    Wisconsin: 'WI',
-    Wyoming: 'WY',
+  Alabama: 'AL',
+  Alaska: 'AK',
+  Arizona: 'AZ',
+  Arkansas: 'AR',
+  California: 'CA',
+  Colorado: 'CO',
+  Connecticut: 'CT',
+  Delaware: 'DE',
+  Florida: 'FL',
+  Georgia: 'GA',
+  Hawaii: 'HI',
+  Idaho: 'ID',
+  Illinois: 'IL',
+  Indiana: 'IN',
+  Iowa: 'IA',
+  Kansas: 'KS',
+  Kentucky: 'KY',
+  Louisiana: 'LA',
+  Maine: 'ME',
+  Maryland: 'MD',
+  Massachusetts: 'MA',
+  Michigan: 'MI',
+  Minnesota: 'MN',
+  Mississippi: 'MS',
+  Missouri: 'MO',
+  Montana: 'MT',
+  Nebraska: 'NE',
+  Nevada: 'NV',
+  ['New Hampshire']: 'NH',
+  ['New Jersey']: 'NJ',
+  ['New Mexico']: 'NM',
+  ['New York']: 'NY',
+  ['North Carolina']: 'NC',
+  ['North Dakota']: 'ND',
+  Ohio: 'OH',
+  Oklahoma: 'OK',
+  Oregon: 'OR',
+  Pennsylvania: 'PA',
+  ['Rhode Island']: 'RI',
+  ['South Carolina']: 'SC',
+  ['South Dakota']: 'SD',
+  Tennessee: 'TN',
+  Texas: 'TX',
+  Utah: 'UT',
+  Vermont: 'VT',
+  Virginia: 'VA',
+  Washington: 'WA',
+  ['West Virginia']: 'WV',
+  Wisconsin: 'WI',
+  Wyoming: 'WY',
 }
 
 /**
@@ -72,20 +72,20 @@ export const USRegionNameToRegionCode: {
  * normalize certain fields, like region, into the format we need.
  */
 export function normalizeDeviceLocation(
-    location: LocationGeocodedAddress,
+  location: LocationGeocodedAddress,
 ): Geolocation {
-    let { isoCountryCode, region } = location
+  let {isoCountryCode, region} = location
 
-    if (region) {
-        if (isoCountryCode === 'US') {
-            region = USRegionNameToRegionCode[region] ?? region
-        }
+  if (region) {
+    if (isoCountryCode === 'US') {
+      region = USRegionNameToRegionCode[region] ?? region
     }
+  }
 
-    return {
-        countryCode: isoCountryCode ?? undefined,
-        regionCode: region ?? undefined,
-    }
+  return {
+    countryCode: isoCountryCode ?? undefined,
+    regionCode: region ?? undefined,
+  }
 }
 
 /**
@@ -93,21 +93,21 @@ export function normalizeDeviceLocation(
  * IP service, with preference to the precise data.
  */
 export function mergeGeolocations(
-    device?: Geolocation,
-    geolocationService?: Geolocation,
+  device?: Geolocation,
+  geolocationService?: Geolocation,
 ): Geolocation {
-    let geolocation: Geolocation = {
-        countryCode: geolocationService?.countryCode ?? undefined,
-        regionCode: geolocationService?.regionCode ?? undefined,
-    }
-    // prefer GPS
-    if (device?.countryCode) {
-        geolocation = device
-    }
-    logger.debug('merged geolocation data', {
-        device,
-        service: geolocationService,
-        merged: geolocation,
-    })
-    return geolocation
+  let geolocation: Geolocation = {
+    countryCode: geolocationService?.countryCode ?? undefined,
+    regionCode: geolocationService?.regionCode ?? undefined,
+  }
+  // prefer GPS
+  if (device?.countryCode) {
+    geolocation = device
+  }
+  logger.debug('merged geolocation data', {
+    device,
+    service: geolocationService,
+    merged: geolocation,
+  })
+  return geolocation
 }

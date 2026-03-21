@@ -1,4 +1,4 @@
-import React from 'react'
+import {useCallback, useMemo} from 'react'
 import {StyleSheet, View} from 'react-native'
 import {Trans} from '@lingui/react/macro'
 
@@ -25,11 +25,11 @@ export function Component({}: {}) {
   const setLangPrefs = useLanguagePrefsApi()
   const pal = usePalette('default')
   const {isMobile} = useWebMediaQueries()
-  const onPressDone = React.useCallback(() => {
+  const onPressDone = useCallback(() => {
     closeModal()
   }, [closeModal])
 
-  const languages = React.useMemo(() => {
+  const languages = useMemo(() => {
     const langs = LANGUAGES.filter(
       lang =>
         !!lang.code2.trim() &&
@@ -50,7 +50,7 @@ export function Component({}: {}) {
     return langs
   }, [langPrefs])
 
-  const onPress = React.useCallback(
+  const onPress = useCallback(
     (code2: string) => {
       setLangPrefs.toggleContentLanguage(code2)
     },

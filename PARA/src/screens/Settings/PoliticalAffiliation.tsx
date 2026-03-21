@@ -1,8 +1,8 @@
-import React from 'react'
+import {useCallback, useState} from 'react'
 import {ActivityIndicator, ScrollView, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useFocusEffect} from '@react-navigation/native'
 
 import {
@@ -51,12 +51,10 @@ export function PoliticalAffiliationScreen({}: Props) {
   const t = useTheme()
   const {_} = useLingui()
   const {affiliation, setAffiliation, isLoading} = usePoliticalAffiliation()
-  const [localAffiliation, setLocalAffiliation] = React.useState<string | null>(
-    null,
-  )
+  const [localAffiliation, setLocalAffiliation] = useState<string | null>(null)
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       setLocalAffiliation(affiliation)
     }, [affiliation]),
   )

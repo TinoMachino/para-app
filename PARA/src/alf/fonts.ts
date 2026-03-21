@@ -39,6 +39,25 @@ export function setFontFamily(fontFamily: Device['fontFamily']) {
  */
 export function applyFonts(style: TextStyle, fontFamily: 'system' | 'theme') {
   if (fontFamily === 'theme') {
+    const explicitFontFamily = style.fontFamily
+
+    if (explicitFontFamily) {
+      if (IS_WEB && !String(explicitFontFamily).includes(WEB_FONT_FAMILIES)) {
+        style.fontFamily = `${explicitFontFamily}, ${WEB_FONT_FAMILIES}`
+      }
+
+      if (IS_ANDROID) {
+        /*
+         * Android custom fonts should be selected by family name, not by
+         * combining family + weight/style at render time.
+         */
+        delete style.fontWeight
+        delete style.fontStyle
+      }
+
+      return
+    }
+
     if (IS_ANDROID) {
       style.fontFamily =
         {

@@ -1,36 +1,36 @@
-import { useEffect, useMemo, useState } from 'react'
-import { type AppBskyActorDefs, type AppBskyNotificationDefs } from '@atproto/api'
-import { type QueryClient } from '@tanstack/react-query'
+import {useEffect, useMemo, useState} from 'react'
+import {type AppBskyActorDefs, type AppBskyNotificationDefs} from '@atproto/api'
+import {type QueryClient} from '@tanstack/react-query'
 import EventEmitter from 'eventemitter3'
 
-import { batchedUpdates } from '#/lib/batchedUpdates'
-import { findAllProfilesInQueryData as findAllProfilesInActivitySubscriptionsQueryData } from '#/state/queries/activity-subscriptions'
-import { findAllProfilesInQueryData as findAllProfilesInActorSearchQueryData } from '#/state/queries/actor-search'
-import { findAllProfilesInQueryData as findAllProfilesInExploreFeedPreviewsQueryData } from '#/state/queries/explore-feed-previews'
-import { findAllProfilesInQueryData as findAllProfilesInContactMatchesQueryData } from '#/state/queries/find-contacts'
-import { findAllProfilesInQueryData as findAllProfilesInKnownFollowersQueryData } from '#/state/queries/known-followers'
-import { findAllProfilesInQueryData as findAllProfilesInListMembersQueryData } from '#/state/queries/list-members'
-import { findAllProfilesInQueryData as findAllProfilesInListConvosQueryData } from '#/state/queries/messages/list-conversations'
-import { findAllProfilesInQueryData as findAllProfilesInMyBlockedAccountsQueryData } from '#/state/queries/my-blocked-accounts'
-import { findAllProfilesInQueryData as findAllProfilesInMyMutedAccountsQueryData } from '#/state/queries/my-muted-accounts'
-import { findAllProfilesInQueryData as findAllProfilesInNotifsQueryData } from '#/state/queries/notifications/feed'
+import {batchedUpdates} from '#/lib/batchedUpdates'
+import {findAllProfilesInQueryData as findAllProfilesInActivitySubscriptionsQueryData} from '#/state/queries/activity-subscriptions'
+import {findAllProfilesInQueryData as findAllProfilesInActorSearchQueryData} from '#/state/queries/actor-search'
+import {findAllProfilesInQueryData as findAllProfilesInExploreFeedPreviewsQueryData} from '#/state/queries/explore-feed-previews'
+import {findAllProfilesInQueryData as findAllProfilesInContactMatchesQueryData} from '#/state/queries/find-contacts'
+import {findAllProfilesInQueryData as findAllProfilesInKnownFollowersQueryData} from '#/state/queries/known-followers'
+import {findAllProfilesInQueryData as findAllProfilesInListMembersQueryData} from '#/state/queries/list-members'
+import {findAllProfilesInQueryData as findAllProfilesInListConvosQueryData} from '#/state/queries/messages/list-conversations'
+import {findAllProfilesInQueryData as findAllProfilesInMyBlockedAccountsQueryData} from '#/state/queries/my-blocked-accounts'
+import {findAllProfilesInQueryData as findAllProfilesInMyMutedAccountsQueryData} from '#/state/queries/my-muted-accounts'
+import {findAllProfilesInQueryData as findAllProfilesInNotifsQueryData} from '#/state/queries/notifications/feed'
 import {
   type FeedPage,
   findAllProfilesInQueryData as findAllProfilesInFeedsQueryData,
 } from '#/state/queries/post-feed'
-import { findAllProfilesInQueryData as findAllProfilesInPostLikedByQueryData } from '#/state/queries/post-liked-by'
-import { findAllProfilesInQueryData as findAllProfilesInPostQuotesQueryData } from '#/state/queries/post-quotes'
-import { findAllProfilesInQueryData as findAllProfilesInPostRepostedByQueryData } from '#/state/queries/post-reposted-by'
-import { findAllProfilesInQueryData as findAllProfilesInProfileQueryData } from '#/state/queries/profile'
-import { findAllProfilesInQueryData as findAllProfilesInProfileFollowersQueryData } from '#/state/queries/profile-followers'
-import { findAllProfilesInQueryData as findAllProfilesInProfileFollowsQueryData } from '#/state/queries/profile-follows'
-import { findAllProfilesInQueryData as findAllProfilesInSuggestedFollowsQueryData } from '#/state/queries/suggested-follows'
-import { findAllProfilesInQueryData as findAllProfilesInSuggestedUsersQueryData } from '#/state/queries/trending/useGetSuggestedUsersQuery'
-import { findAllProfilesInQueryData as findAllProfilesInPostThreadV2QueryData } from '#/state/queries/usePostThread/queryCache'
+import {findAllProfilesInQueryData as findAllProfilesInPostLikedByQueryData} from '#/state/queries/post-liked-by'
+import {findAllProfilesInQueryData as findAllProfilesInPostQuotesQueryData} from '#/state/queries/post-quotes'
+import {findAllProfilesInQueryData as findAllProfilesInPostRepostedByQueryData} from '#/state/queries/post-reposted-by'
+import {findAllProfilesInQueryData as findAllProfilesInProfileQueryData} from '#/state/queries/profile'
+import {findAllProfilesInQueryData as findAllProfilesInProfileFollowersQueryData} from '#/state/queries/profile-followers'
+import {findAllProfilesInQueryData as findAllProfilesInProfileFollowsQueryData} from '#/state/queries/profile-follows'
+import {findAllProfilesInQueryData as findAllProfilesInSuggestedFollowsQueryData} from '#/state/queries/suggested-follows'
+import {findAllProfilesInQueryData as findAllProfilesInSuggestedUsersQueryData} from '#/state/queries/trending/useGetSuggestedUsersQuery'
+import {findAllProfilesInQueryData as findAllProfilesInPostThreadV2QueryData} from '#/state/queries/usePostThread/queryCache'
 import type * as bsky from '#/types/bsky'
-import { castAsShadow, type Shadow } from './types'
+import {castAsShadow, type Shadow} from './types'
 
-export type { Shadow } from './types'
+export type {Shadow} from './types'
 
 export interface ProfileShadow {
   followingUri: string | undefined
@@ -130,7 +130,7 @@ export function usePostAuthorShadowFilter(data?: FeedPage[]) {
       ) ?? [],
   )
   const [authors, setAuthors] = useState(
-    new Map<string, { muted: boolean; blocked: boolean }>(),
+    new Map<string, {muted: boolean; blocked: boolean}>(),
   )
 
   const [prevData, setPrevData] = useState(data)
@@ -196,7 +196,7 @@ export function updateProfileShadow(
 ) {
   const cachedProfiles = findProfilesInCache(queryClient, did)
   for (let profile of cachedProfiles) {
-    shadows.set(profile, { ...shadows.get(profile), ...value })
+    shadows.set(profile, {...shadows.get(profile), ...value})
   }
   batchedUpdates(() => {
     emitter.emit(did, value)

@@ -9,6 +9,17 @@ Run a production-like demo where:
 - PDS and AppView are reachable via public HTTPS hostnames.
 - Relay can crawl your PDS host (no localhost/private-host rejection).
 - Tap can consume relay events.
+- Backend state can survive normal restarts when using the persistent launcher.
+
+Persistent shared-demo shortcut
+------------------------------
+If you want stable local state on the host machine instead of the ephemeral
+`run-dev-env` path, use the new persistent launcher and env template:
+
+  cp -n .env.shared-demo.example .env.shared-demo
+  make run-dev-env-persistent
+
+See `PARAMX_SHARED_DEMO.md` for the `paramx.social` runbook.
 
 
 Part 1: How to get your ngrok token

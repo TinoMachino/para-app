@@ -223,11 +223,16 @@ import * as ComAtprotoTempFetchLabels from './types/com/atproto/temp/fetchLabels
 import * as ComAtprotoTempRequestPhoneVerification from './types/com/atproto/temp/requestPhoneVerification.js'
 import * as ComAtprotoTempRevokeAccountCredentials from './types/com/atproto/temp/revokeAccountCredentials.js'
 import * as ComParaActorGetProfileStats from './types/com/para/actor/getProfileStats.js'
+import * as ComParaCivicGetCabildeo from './types/com/para/civic/getCabildeo.js'
+import * as ComParaCivicListCabildeoPositions from './types/com/para/civic/listCabildeoPositions.js'
+import * as ComParaCivicListCabildeos from './types/com/para/civic/listCabildeos.js'
 import * as ComParaCommunityGetGovernance from './types/com/para/community/getGovernance.js'
 import * as ComParaFeedGetAuthorFeed from './types/com/para/feed/getAuthorFeed.js'
 import * as ComParaFeedGetPostThread from './types/com/para/feed/getPostThread.js'
 import * as ComParaFeedGetPosts from './types/com/para/feed/getPosts.js'
 import * as ComParaFeedGetTimeline from './types/com/para/feed/getTimeline.js'
+import * as ComParaHighlightGetHighlight from './types/com/para/highlight/getHighlight.js'
+import * as ComParaHighlightListHighlights from './types/com/para/highlight/listHighlights.js'
 import * as ComParaSocialGetPostMeta from './types/com/para/social/getPostMeta.js'
 import * as ToolsOzoneCommunicationCreateTemplate from './types/tools/ozone/communication/createTemplate.js'
 import * as ToolsOzoneCommunicationDeleteTemplate from './types/tools/ozone/communication/deleteTemplate.js'
@@ -3257,6 +3262,7 @@ export class ComParaNS {
   civic: ComParaCivicNS
   community: ComParaCommunityNS
   feed: ComParaFeedNS
+  highlight: ComParaHighlightNS
   social: ComParaSocialNS
 
   constructor(server: Server) {
@@ -3265,6 +3271,7 @@ export class ComParaNS {
     this.civic = new ComParaCivicNS(server)
     this.community = new ComParaCommunityNS(server)
     this.feed = new ComParaFeedNS(server)
+    this.highlight = new ComParaHighlightNS(server)
     this.social = new ComParaSocialNS(server)
   }
 }
@@ -3294,6 +3301,42 @@ export class ComParaCivicNS {
 
   constructor(server: Server) {
     this._server = server
+  }
+
+  getCabildeo<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaCivicGetCabildeo.QueryParams,
+      ComParaCivicGetCabildeo.HandlerInput,
+      ComParaCivicGetCabildeo.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.civic.getCabildeo' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  listCabildeoPositions<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaCivicListCabildeoPositions.QueryParams,
+      ComParaCivicListCabildeoPositions.HandlerInput,
+      ComParaCivicListCabildeoPositions.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.civic.listCabildeoPositions' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  listCabildeos<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaCivicListCabildeos.QueryParams,
+      ComParaCivicListCabildeos.HandlerInput,
+      ComParaCivicListCabildeos.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.civic.listCabildeos' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
   }
 }
 
@@ -3369,6 +3412,38 @@ export class ComParaFeedNS {
     >,
   ) {
     const nsid = 'com.para.feed.getTimeline' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+}
+
+export class ComParaHighlightNS {
+  _server: Server
+
+  constructor(server: Server) {
+    this._server = server
+  }
+
+  getHighlight<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaHighlightGetHighlight.QueryParams,
+      ComParaHighlightGetHighlight.HandlerInput,
+      ComParaHighlightGetHighlight.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.highlight.getHighlight' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  listHighlights<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaHighlightListHighlights.QueryParams,
+      ComParaHighlightListHighlights.HandlerInput,
+      ComParaHighlightListHighlights.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.highlight.listHighlights' // @ts-ignore
     return this._server.xrpc.method(nsid, cfg)
   }
 }

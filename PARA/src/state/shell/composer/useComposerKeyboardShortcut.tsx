@@ -1,11 +1,11 @@
-import React from 'react'
+import {useEffect} from 'react'
 
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { useDialogStateContext } from '#/state/dialogs'
-import { useLightbox } from '#/state/lightbox'
-import { useModals } from '#/state/modals'
-import { useSession } from '#/state/session'
-import { useIsDrawerOpen } from '#/state/shell/drawer-open'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {useDialogStateContext} from '#/state/dialogs'
+import {useLightbox} from '#/state/lightbox'
+import {useModals} from '#/state/modals'
+import {useSession} from '#/state/session'
+import {useIsDrawerOpen} from '#/state/shell/drawer-open'
 
 /**
  * Based on {@link https://github.com/jaywcjlove/hotkeys-js/blob/b0038773f3b902574f22af747f3bb003a850f1da/src/index.js#L51C1-L64C2}
@@ -13,7 +13,7 @@ import { useIsDrawerOpen } from '#/state/shell/drawer-open'
 function shouldIgnore(event: KeyboardEvent) {
   const target: any = event.target || event.srcElement
   if (!target) return false
-  const { tagName } = target
+  const {tagName} = target
   if (!tagName) return false
   const isInput =
     tagName === 'INPUT' &&
@@ -39,14 +39,14 @@ function shouldIgnore(event: KeyboardEvent) {
 }
 
 export function useComposerKeyboardShortcut() {
-  const { openComposer } = useOpenComposer()
-  const { openDialogs } = useDialogStateContext()
-  const { isModalActive } = useModals()
-  const { activeLightbox } = useLightbox()
+  const {openComposer} = useOpenComposer()
+  const {openDialogs} = useDialogStateContext()
+  const {isModalActive} = useModals()
+  const {activeLightbox} = useLightbox()
   const isDrawerOpen = useIsDrawerOpen()
-  const { hasSession } = useSession()
+  const {hasSession} = useSession()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!hasSession) {
       return
     }
@@ -61,7 +61,7 @@ export function useComposerKeyboardShortcut() {
       )
         return
       if (event.key === 'n' || event.key === 'N') {
-        openComposer({ logContext: 'Other' })
+        openComposer({logContext: 'Other'})
       }
     }
     document.addEventListener('keydown', handler)

@@ -1,5 +1,5 @@
-import React from 'react'
-import { View } from 'react-native'
+import {useEffect, useRef, useState} from 'react'
+import {View} from 'react-native'
 import Animated, {
   Easing,
   LayoutAnimationConfig,
@@ -7,11 +7,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import { decideShouldRoll } from '#/lib/custom-animations/util'
-import { s } from '#/lib/styles'
-import { Text } from '#/view/com/util/text/Text'
-import { atoms as a, useTheme } from '#/alf'
-import { useFormatPostStatCount } from '#/components/PostControls/util'
+import {decideShouldRoll} from '#/lib/custom-animations/util'
+import {s} from '#/lib/styles'
+import {Text} from '#/view/com/util/text/Text'
+import {atoms as a, useTheme} from '#/alf'
+import {useFormatPostStatCount} from '#/components/PostControls/util'
 
 const animationConfig = {
   duration: 400,
@@ -22,11 +22,11 @@ function EnteringUp() {
   'worklet'
   const animations = {
     opacity: withTiming(1, animationConfig),
-    transform: [{ translateY: withTiming(0, animationConfig) }],
+    transform: [{translateY: withTiming(0, animationConfig)}],
   }
   const initialValues = {
     opacity: 0,
-    transform: [{ translateY: 18 }],
+    transform: [{translateY: 18}],
   }
   return {
     animations,
@@ -38,11 +38,11 @@ function EnteringDown() {
   'worklet'
   const animations = {
     opacity: withTiming(1, animationConfig),
-    transform: [{ translateY: withTiming(0, animationConfig) }],
+    transform: [{translateY: withTiming(0, animationConfig)}],
   }
   const initialValues = {
     opacity: 0,
-    transform: [{ translateY: -18 }],
+    transform: [{translateY: -18}],
   }
   return {
     animations,
@@ -62,7 +62,7 @@ function ExitingUp() {
   }
   const initialValues = {
     opacity: 1,
-    transform: [{ translateY: 0 }],
+    transform: [{translateY: 0}],
   }
   return {
     animations,
@@ -74,11 +74,11 @@ function ExitingDown() {
   'worklet'
   const animations = {
     opacity: withTiming(0, animationConfig),
-    transform: [{ translateY: withTiming(18, animationConfig) }],
+    transform: [{translateY: withTiming(18, animationConfig)}],
   }
   const initialValues = {
     opacity: 1,
-    transform: [{ translateY: 0 }],
+    transform: [{translateY: 0}],
   }
   return {
     animations,
@@ -109,17 +109,20 @@ export function CountWheel({
   // animation
   // The initial entering/exiting animations will get skipped, since these will happen on screen mounts and would
   // be unnecessary
-  const [key, setKey] = React.useState(0)
-  const [prevCount, setPrevCount] = React.useState(likeCount)
-  const prevIsLiked = React.useRef(isLiked)
-  const prevDirection = React.useRef(direction)
+  const [key, setKey] = useState(0)
+  const [prevCount, setPrevCount] = useState(likeCount)
+  const prevIsLiked = useRef(isLiked)
+  const prevDirection = useRef(direction)
   const formatPostStatCount = useFormatPostStatCount()
   const formattedCount = formatPostStatCount(likeCount)
   const formattedPrevCount = formatPostStatCount(prevCount)
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Trigger animation on either vote state change or direction change
-    if (isLiked === prevIsLiked.current && direction === prevDirection.current) {
+    if (
+      isLiked === prevIsLiked.current &&
+      direction === prevDirection.current
+    ) {
       return
     }
 
@@ -135,14 +138,14 @@ export function CountWheel({
   const enteringAnimation =
     shouldAnimate && shouldRoll
       ? direction === 'down'
-        ? EnteringDown  // Numbers come from top
-        : EnteringUp    // Numbers come from bottom
+        ? EnteringDown // Numbers come from top
+        : EnteringUp // Numbers come from bottom
       : undefined
   const exitingAnimation =
     shouldAnimate && shouldRoll
       ? direction === 'down'
-        ? ExitingDown   // Numbers exit to bottom
-        : ExitingUp     // Numbers exit to top
+        ? ExitingDown // Numbers exit to bottom
+        : ExitingUp // Numbers exit to top
       : undefined
 
   return (
@@ -155,11 +158,11 @@ export function CountWheel({
               style={[
                 big ? a.text_md : a.text_sm,
                 a.user_select_none,
-                voteColor  // Add this check first
-                  ? [a.font_semi_bold, { color: voteColor }]
+                voteColor // Add this check first
+                  ? [a.font_semi_bold, {color: voteColor}]
                   : direction === 'down'
                     ? [a.font_semi_bold, s.likeColor]
-                    : { color: t.palette.contrast_500 },
+                    : {color: t.palette.contrast_500},
               ]}>
               {formattedCount}
             </Text>
@@ -169,17 +172,17 @@ export function CountWheel({
               entering={exitingAnimation}
               // Add 2 to the key so there are never duplicates
               key={key + 2}
-              style={[a.absolute, { width: 50, opacity: 0 }]}
+              style={[a.absolute, {width: 50, opacity: 0}]}
               aria-disabled={true}>
               <Text
                 style={[
                   big ? a.text_md : a.text_sm,
                   a.user_select_none,
-                  voteColor  // Add this check first
-                    ? [a.font_semi_bold, { color: voteColor }]
+                  voteColor // Add this check first
+                    ? [a.font_semi_bold, {color: voteColor}]
                     : direction === 'down'
                       ? [a.font_semi_bold, s.likeColor]
-                      : { color: t.palette.contrast_500 },
+                      : {color: t.palette.contrast_500},
                 ]}>
                 {formattedPrevCount}
               </Text>

@@ -7,8 +7,8 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated'
 import {msg} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Plural, Trans} from '@lingui/react/macro'
 
 import {
   createFullHandle,

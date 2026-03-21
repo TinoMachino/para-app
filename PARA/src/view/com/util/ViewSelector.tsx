@@ -1,4 +1,15 @@
-import React, {type JSX, useEffect, useState} from 'react'
+import {
+  type ComponentType,
+  forwardRef,
+  type JSX,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -25,7 +36,7 @@ export type ViewSelectorHandle = {
   scrollToTop: () => void
 }
 
-export const ViewSelector = React.forwardRef<
+export const ViewSelector = forwardRef<
   ViewSelectorHandle,
   {
     sections: string[]
@@ -35,8 +46,8 @@ export const ViewSelector = React.forwardRef<
     renderHeader?: () => JSX.Element
     renderItem: (item: any) => JSX.Element
     ListFooterComponent?:
-      | React.ComponentType<any>
-      | React.ReactElement<any>
+      | ComponentType<any>
+      | ReactElement<any>
       | null
       | undefined
     onSelectView?: (viewIndex: number) => void
@@ -61,14 +72,14 @@ export const ViewSelector = React.forwardRef<
 ) {
   const pal = usePalette('default')
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
-  const flatListRef = React.useRef<FlatList_INTERNAL>(null)
+  const flatListRef = useRef<FlatList_INTERNAL>(null)
 
   // events
   // =
 
-  const keyExtractor = React.useCallback((item: any) => item._reactKey, [])
+  const keyExtractor = useCallback((item: any) => item._reactKey, [])
 
-  const onPressSelection = React.useCallback(
+  const onPressSelection = useCallback(
     (index: number) => setSelectedIndex(clamp(index, 0, sections.length)),
     [setSelectedIndex, sections],
   )
@@ -76,7 +87,7 @@ export const ViewSelector = React.forwardRef<
     onSelectView?.(selectedIndex)
   }, [selectedIndex, onSelectView])
 
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
     scrollToTop: () => {
       flatListRef.current?.scrollToOffset({offset: 0})
     },
@@ -85,7 +96,7 @@ export const ViewSelector = React.forwardRef<
   // rendering
   // =
 
-  const renderItemInternal = React.useCallback(
+  const renderItemInternal = useCallback(
     ({item}: {item: any}) => {
       if (item === HEADER_ITEM) {
         if (renderHeader) {
@@ -107,10 +118,7 @@ export const ViewSelector = React.forwardRef<
     [sections, selectedIndex, onPressSelection, renderHeader, renderItem],
   )
 
-  const data = React.useMemo(
-    () => [HEADER_ITEM, SELECTOR_ITEM, ...items],
-    [items],
-  )
+  const data = useMemo(() => [HEADER_ITEM, SELECTOR_ITEM, ...items], [items])
   return (
     <FlatList_INTERNAL
       // @ts-expect-error FlatList_INTERNAL ref type is wrong -sfn

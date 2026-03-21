@@ -1,4 +1,13 @@
-import React from 'react'
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type MutableRefObject,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import {Pressable, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -17,12 +26,12 @@ import {
   type Emoji,
   type EmojiPickerPosition,
 } from '#/view/com/composer/text-input/web/EmojiPicker'
-import * as Toast from '#/view/com/util/Toast'
 import {atoms as a, flatten, useTheme} from '#/alf'
 import {Button} from '#/components/Button'
 import {useSharedInputStyles} from '#/components/forms/TextField'
 import {EmojiArc_Stroke2_Corner0_Rounded as EmojiSmile} from '#/components/icons/Emoji'
 import {PaperPlane_Stroke2_Corner0_Rounded as PaperPlane} from '#/components/icons/PaperPlane'
+import * as Toast from '#/components/Toast'
 import {IS_WEB_SAFARI, IS_WEB_TOUCH_DEVICE} from '#/env'
 import {useExtractEmbedFromFacets} from './MessageInputEmbed'
 
@@ -36,28 +45,30 @@ export function MessageInput({
   onSendMessage: (message: string) => void
   hasEmbed: boolean
   setEmbed: (embedUrl: string | undefined) => void
-  children?: React.ReactNode
+  children?: ReactNode
   openEmojiPicker?: (pos: EmojiPickerPosition) => void
 }) {
   const {isMobile} = useWebMediaQueries()
   const {_} = useLingui()
   const t = useTheme()
   const {getDraft, clearDraft} = useMessageDraft()
-  const [message, setMessage] = React.useState(getDraft)
+  const [message, setMessage] = useState(getDraft)
 
   const inputStyles = useSharedInputStyles()
-  const isComposing = React.useRef(false)
-  const [isFocused, setIsFocused] = React.useState(false)
-  const [isHovered, setIsHovered] = React.useState(false)
-  const [textAreaHeight, setTextAreaHeight] = React.useState(38)
-  const textAreaRef = React.useRef<HTMLTextAreaElement>(null)
+  const isComposing = useRef(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [textAreaHeight, setTextAreaHeight] = useState(38)
+  const textAreaRef = useRef<HTMLTextAreaElement>(null)
 
-  const onSubmit = React.useCallback(() => {
+  const onSubmit = useCallback(() => {
     if (!hasEmbed && message.trim() === '') {
       return
     }
     if (countGraphemes(message) > MAX_DM_GRAPHEME_LENGTH) {
-      Toast.show(_(msg`Message is too long`), 'xmark')
+      Toast.show(_(msg`Message is too long`), {
+        type: 'error',
+      })
       return
     }
     clearDraft()
@@ -66,8 +77,8 @@ export function MessageInput({
     setEmbed(undefined)
   }, [message, onSendMessage, _, clearDraft, hasEmbed, setEmbed])
 
-  const onKeyDown = React.useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTextAreaElement>) => {
       // Don't submit the form when the Japanese or any other IME is composing
       if (isComposing.current) return
 
@@ -98,14 +109,11 @@ export function MessageInput({
     [onSubmit],
   )
 
-  const onChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setMessage(e.target.value)
-    },
-    [],
-  )
+  const onChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value)
+  }, [])
 
-  const onEmojiInserted = React.useCallback(
+  const onEmojiInserted = useCallback(
     (emoji: Emoji) => {
       if (!textAreaRef.current) {
         return
@@ -123,7 +131,7 @@ export function MessageInput({
     },
     [setMessage],
   )
-  React.useEffect(() => {
+  useEffect(() => {
     textInputWebEmitter.addListener('emoji-inserted', onEmojiInserted)
     return () => {
       textInputWebEmitter.removeListener('emoji-inserted', onEmojiInserted)
@@ -163,7 +171,7 @@ export function MessageInput({
                 right: px,
                 bottom: py,
                 nextFocusRef:
-                  textAreaRef as unknown as React.MutableRefObject<HTMLElement>,
+                  textAreaRef as unknown as MutableRefObject<HTMLElement>,
               })
             })
           }}

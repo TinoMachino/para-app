@@ -22,6 +22,20 @@ export type CategoryData = {
   policies?: PolicyItem[]
 }
 
+export type CommunityData = {
+  communityId: string
+  communityName: string
+  name: string
+  members: string
+  desc: string
+  color: string
+  directoryGroup: 'civic' | 'political'
+  subtitle?: string
+  eyebrow?: string
+  region?: string
+  accent?: string
+}
+
 export const VOTED_POLICIES: CategoryData[] = [
   {
     title: 'Public Services',
@@ -121,69 +135,130 @@ export const MATTER_CATEGORIES = [
   },
 ]
 
-export const COMMUNITY_DATA = [
+export const COMMUNITY_DATA: CommunityData[] = [
   {
+    communityId: 'mx-jalisco',
+    communityName: 'p/Jalisco',
+    name: 'Jalisco',
+    members: '184k',
+    desc: 'Agua, coordinación metropolitana y agenda pública estatal.',
+    color: '#0F766E',
+    directoryGroup: 'civic',
+    subtitle: 'Gestión hídrica y coordinación metropolitana',
+    eyebrow: 'Civic Territory',
+    region: 'Jalisco',
+    accent: '#14B8A6',
+  },
+  {
+    communityId: 'mx-cdmx',
+    communityName: 'p/CDMX',
+    name: 'CDMX',
+    members: '263k',
+    desc: 'Movilidad, vivienda y gobierno urbano para la capital.',
+    color: '#0F172A',
+    directoryGroup: 'civic',
+    subtitle: 'Movilidad y vida pública de la capital',
+    eyebrow: 'Civic Territory',
+    region: 'CDMX',
+    accent: '#38BDF8',
+  },
+  {
+    communityId: 'mx-oaxaca',
+    communityName: 'p/Oaxaca',
+    name: 'Oaxaca',
+    members: '92k',
+    desc: 'Territorio, medio ambiente y coordinación intermunicipal.',
+    color: '#9A3412',
+    directoryGroup: 'civic',
+    subtitle: 'Territorio y gobernanza ambiental',
+    eyebrow: 'Civic Territory',
+    region: 'Oaxaca',
+    accent: '#FB923C',
+  },
+  {
+    communityId: 'mx-nuevoleon',
+    communityName: 'p/NuevoLeon',
+    name: 'Nuevo León',
+    members: '151k',
+    desc: 'Vivienda, industria y crecimiento metropolitano del norte.',
+    color: '#1D4ED8',
+    directoryGroup: 'civic',
+    subtitle: 'Vivienda e impulso metropolitano',
+    eyebrow: 'Civic Territory',
+    region: 'Nuevo León',
+    accent: '#60A5FA',
+  },
+  {
+    communityId: 'pan',
+    communityName: 'p/PAN',
     name: 'PAN',
     members: '1.2M',
-    desc: 'Centro-derecha, democracia cristiana',
+    desc: 'Centro-derecha con red territorial y agenda institucional.',
     color: '#003087',
-    category: 'Officials',
+    directoryGroup: 'political',
+    subtitle: 'Democracia cristiana y agenda institucional',
+    eyebrow: 'Political Community',
+    accent: '#3B82F6',
   },
   {
+    communityId: 'morena',
+    communityName: 'p/Morena',
     name: 'Morena',
     members: '2.8M',
-    desc: 'Izquierda nacionalista, soberanía',
+    desc: 'Mayoría nacional con conversación soberanista y social.',
     color: '#8B1538',
-    category: 'Officials',
+    directoryGroup: 'political',
+    subtitle: 'Movimiento gobernante y soberanía social',
+    eyebrow: 'Political Community',
+    accent: '#E11D48',
   },
   {
-    name: 'PRI',
-    members: '890k',
-    desc: 'Centro, histórico institucional',
-    color: '#00923F',
-    category: 'Officials',
-  },
-  {
+    communityId: 'mc',
+    communityName: 'p/MC',
     name: 'MC',
     members: '456k',
-    desc: 'Liberal progresista, ciudadanía',
+    desc: 'Liberal progresista, ciudadanía y política urbana.',
     color: '#FF6B00',
-    category: "9th's",
+    directoryGroup: 'political',
+    subtitle: 'Ciudadanía, innovación y política urbana',
+    eyebrow: 'Political Community',
+    accent: '#FB923C',
   },
   {
-    name: 'PRD',
-    members: '234k',
-    desc: 'Izquierda democrática, social',
-    color: '#FFD700',
-    category: 'Affiliates',
+    communityId: 'pri',
+    communityName: 'p/PRI',
+    name: 'PRI',
+    members: '890k',
+    desc: 'Centro institucional con estructura histórica nacional.',
+    color: '#00923F',
+    directoryGroup: 'political',
+    subtitle: 'Estructura histórica e institucional',
+    eyebrow: 'Political Community',
+    accent: '#22C55E',
   },
   {
+    communityId: 'pvem',
+    communityName: 'p/PVEM',
     name: 'PVEM',
     members: '178k',
-    desc: 'Ecologista, sustentabilidad',
+    desc: 'Organización ecologista enfocada en agenda ambiental.',
     color: '#228B22',
-    category: 'Affiliates',
+    directoryGroup: 'political',
+    subtitle: 'Agenda verde y sustentabilidad',
+    eyebrow: 'Political Community',
+    accent: '#4ADE80',
   },
   {
-    name: 'PT',
-    members: '145k',
-    desc: 'Izquierda laborista, trabajadores',
-    color: '#DC143C',
-    category: "25th's",
-  },
-  {
+    communityId: 'libertarios-mx',
+    communityName: 'p/Libertarios MX',
     name: 'Libertarios MX',
     members: '89k',
-    desc: 'Liberalismo clásico, mercado libre',
+    desc: 'Mercado libre, derechos civiles y liberalismo clásico.',
     color: '#FF9500',
-    category: "9th's",
-  },
-  {
-    name: 'Centro Radical',
-    members: '67k',
-    desc: 'Centrismo pragmático, reformas',
-    color: '#9B59B6',
-    category: "25th's",
+    directoryGroup: 'political',
+    subtitle: 'Liberalismo clásico y mercado libre',
+    eyebrow: 'Political Community',
+    accent: '#F59E0B',
   },
 ]
 

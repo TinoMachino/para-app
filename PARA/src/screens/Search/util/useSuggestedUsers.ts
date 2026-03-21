@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import {useMemo} from 'react'
 
-import { useInterestsDisplayNames } from '#/lib/interests'
-import { useActorSearch } from '#/state/queries/actor-search'
-import { useGetSuggestedUsersQuery } from '#/state/queries/trending/useGetSuggestedUsersQuery'
+import {useInterestsDisplayNames} from '#/lib/interests'
+import {useActorSearch} from '#/state/queries/actor-search'
+import {useGetSuggestedUsersQuery} from '#/state/queries/trending/useGetSuggestedUsersQuery'
 
 /**
  * Conditional hook, used in case a user is a non-english speaker, in which
@@ -44,9 +44,9 @@ export function useSuggestedUsers({
         // we're not paginating right now
         data: searched?.data
           ? {
-            actors: searched.data.pages.flatMap(p => p.actors) ?? [],
-            recId: undefined,
-          }
+              actors: searched.data.pages.flatMap(p => p.actors) ?? [],
+              recId: undefined,
+            }
           : undefined,
         isLoading: searched.isLoading,
         error: searched.error,

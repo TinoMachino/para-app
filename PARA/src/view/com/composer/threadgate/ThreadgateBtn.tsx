@@ -3,8 +3,8 @@ import {Keyboard, type StyleProp, type ViewStyle} from 'react-native'
 import {type AnimatedStyle} from 'react-native-reanimated'
 import {type AppBskyFeedPostgate} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import deepEqual from 'fast-deep-equal'
 
 import {isNetworkError} from '#/lib/strings/errors'
@@ -152,7 +152,9 @@ export function ThreadgateBtn({
               msg`Opens a dialog to choose who can interact with this post`,
             )}>
             <ButtonIcon icon={anyoneCanInteract ? EarthIcon : GroupIcon} />
-            <ButtonText numberOfLines={1}>{label}</ButtonText>
+            <ButtonText numberOfLines={1} maxFontSizeMultiplier={2}>
+              {label}
+            </ButtonText>
             <ButtonIcon icon={TinyChevronIcon} size="2xs" />
           </Button>
         </Tooltip.Target>

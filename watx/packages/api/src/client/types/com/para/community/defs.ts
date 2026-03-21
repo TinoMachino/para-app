@@ -33,79 +33,147 @@ export function validateSummary<V>(v: V) {
   return validate<Summary & V>(v, id, hashSummary)
 }
 
-export interface Member {
-  $type?: 'com.para.community.defs#member'
-  did: string
+export interface Person {
+  $type?: 'com.para.community.defs#person'
+  did?: string
   handle?: string
   displayName?: string
   avatar?: string
-  party?: string
-  influence: number
-  votesReceivedAllTime: number
-  votesCastAllTime: number
-  policyPosts: number
-  matterPosts: number
 }
 
-const hashMember = 'member'
+const hashPerson = 'person'
 
-export function isMember<V>(v: V) {
-  return is$typed(v, id, hashMember)
+export function isPerson<V>(v: V) {
+  return is$typed(v, id, hashPerson)
 }
 
-export function validateMember<V>(v: V) {
-  return validate<Member & V>(v, id, hashMember)
+export function validatePerson<V>(v: V) {
+  return validate<Person & V>(v, id, hashPerson)
 }
 
-export interface Moderator {
-  $type?: 'com.para.community.defs#moderator'
-  member: Member
+export interface ModeratorView {
+  $type?: 'com.para.community.defs#moderatorView'
+  did?: string
+  handle?: string
+  displayName?: string
+  avatar?: string
   role: string
   badge: string
+  capabilities: string[]
 }
 
-const hashModerator = 'moderator'
+const hashModeratorView = 'moderatorView'
 
-export function isModerator<V>(v: V) {
-  return is$typed(v, id, hashModerator)
+export function isModeratorView<V>(v: V) {
+  return is$typed(v, id, hashModeratorView)
 }
 
-export function validateModerator<V>(v: V) {
-  return validate<Moderator & V>(v, id, hashModerator)
+export function validateModeratorView<V>(v: V) {
+  return validate<ModeratorView & V>(v, id, hashModeratorView)
 }
 
-export interface Official {
-  $type?: 'com.para.community.defs#official'
-  member: Member
+export interface OfficialView {
+  $type?: 'com.para.community.defs#officialView'
+  did?: string
+  handle?: string
+  displayName?: string
+  avatar?: string
   office: string
   mandate: string
 }
 
-const hashOfficial = 'official'
+const hashOfficialView = 'officialView'
 
-export function isOfficial<V>(v: V) {
-  return is$typed(v, id, hashOfficial)
+export function isOfficialView<V>(v: V) {
+  return is$typed(v, id, hashOfficialView)
 }
 
-export function validateOfficial<V>(v: V) {
-  return validate<Official & V>(v, id, hashOfficial)
+export function validateOfficialView<V>(v: V) {
+  return validate<OfficialView & V>(v, id, hashOfficialView)
 }
 
-export interface DeputyRole {
-  $type?: 'com.para.community.defs#deputyRole'
+export interface Applicant {
+  $type?: 'com.para.community.defs#applicant'
+  did?: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+  appliedAt: string
+  status: 'applied' | 'approved' | 'rejected' | (string & {})
+  note?: string
+}
+
+const hashApplicant = 'applicant'
+
+export function isApplicant<V>(v: V) {
+  return is$typed(v, id, hashApplicant)
+}
+
+export function validateApplicant<V>(v: V) {
+  return validate<Applicant & V>(v, id, hashApplicant)
+}
+
+export interface DeputyRoleView {
+  $type?: 'com.para.community.defs#deputyRoleView'
+  key: string
   tier: string
   role: string
-  activeHolder: Member
-  votesBackingRole: number
-  applicants: string[]
+  description: string
+  capabilities: string[]
+  activeHolder?: Person
+  activeSince?: string
+  votes: number
+  applicants: Applicant[]
 }
 
-const hashDeputyRole = 'deputyRole'
+const hashDeputyRoleView = 'deputyRoleView'
 
-export function isDeputyRole<V>(v: V) {
-  return is$typed(v, id, hashDeputyRole)
+export function isDeputyRoleView<V>(v: V) {
+  return is$typed(v, id, hashDeputyRoleView)
 }
 
-export function validateDeputyRole<V>(v: V) {
-  return validate<DeputyRole & V>(v, id, hashDeputyRole)
+export function validateDeputyRoleView<V>(v: V) {
+  return validate<DeputyRoleView & V>(v, id, hashDeputyRoleView)
+}
+
+export interface Metadata {
+  $type?: 'com.para.community.defs#metadata'
+  termLengthDays?: number
+  reviewCadence?: string
+  escalationPath?: string
+  publicContact?: string
+  lastPublishedAt?: string
+  state?: string
+  matterFlairIds?: string[]
+  policyFlairIds?: string[]
+}
+
+const hashMetadata = 'metadata'
+
+export function isMetadata<V>(v: V) {
+  return is$typed(v, id, hashMetadata)
+}
+
+export function validateMetadata<V>(v: V) {
+  return validate<Metadata & V>(v, id, hashMetadata)
+}
+
+export interface HistoryEntry {
+  $type?: 'com.para.community.defs#historyEntry'
+  id: string
+  action: string
+  actorDid?: string
+  actorHandle?: string
+  createdAt: string
+  summary: string
+}
+
+const hashHistoryEntry = 'historyEntry'
+
+export function isHistoryEntry<V>(v: V) {
+  return is$typed(v, id, hashHistoryEntry)
+}
+
+export function validateHistoryEntry<V>(v: V) {
+  return validate<HistoryEntry & V>(v, id, hashHistoryEntry)
 }

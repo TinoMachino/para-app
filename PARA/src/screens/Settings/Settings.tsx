@@ -3,8 +3,8 @@ import {Alert, LayoutAnimation, Linking, Pressable, View} from 'react-native'
 import {useReducedMotion} from 'react-native-reanimated'
 import {type AppBskyActorDefs, moderateProfile} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
@@ -29,7 +29,6 @@ import {type SessionAccount, useSession, useSessionApi} from '#/state/session'
 import {useOnboardingDispatch} from '#/state/shell'
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useCloseAllActiveElements} from '#/state/util'
-import * as Toast from '#/view/com/util/Toast'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
 import * as SettingsList from '#/screens/Settings/components/SettingsList'
 import {atoms as a, platform, tokens, useBreakpoints, useTheme} from '#/alf'
@@ -63,6 +62,7 @@ import {Loader} from '#/components/Loader'
 import * as Menu from '#/components/Menu'
 import {ID as PolicyUpdate202508} from '#/components/PolicyUpdateOverlay/updates/202508/config'
 import * as Prompt from '#/components/Prompt'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useFullVerificationState} from '#/components/verification'
 import {
@@ -527,7 +527,6 @@ function DevOptions() {
           </SettingsList.ItemText>
         </SettingsList.PressableItem>
       ) : null}
-
       <SettingsList.Divider />
       <View style={[a.p_xl, a.gap_md]}>
         <Text style={[a.text_lg, a.font_semi_bold]}>
@@ -552,7 +551,9 @@ function DevOptions() {
             onPress={() => {
               device.set([PolicyUpdate202508], false)
               agent.bskyAppRemoveNuxs([PolicyUpdate202508])
-              Toast.show(`Done`, 'info')
+              Toast.show(`Done`, {
+                type: 'info',
+              })
             }}
             label="Reset policy update nux"
             color="secondary"

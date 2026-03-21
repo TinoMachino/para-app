@@ -1,12 +1,12 @@
-import React from 'react'
-import { View } from 'react-native'
-import { useReducedMotion } from 'react-native-reanimated'
+import {useEffect, useRef, useState} from 'react'
+import {View} from 'react-native'
+import {useReducedMotion} from 'react-native-reanimated'
 
-import { decideShouldRoll } from '#/lib/custom-animations/util'
-import { s } from '#/lib/styles'
-import { Text } from '#/view/com/util/text/Text'
-import { atoms as a, useTheme } from '#/alf'
-import { useFormatPostStatCount } from '#/components/PostControls/util'
+import {decideShouldRoll} from '#/lib/custom-animations/util'
+import {s} from '#/lib/styles'
+import {Text} from '#/view/com/util/text/Text'
+import {atoms as a, useTheme} from '#/alf'
+import {useFormatPostStatCount} from '#/components/PostControls/util'
 
 const animationConfig = {
   duration: 400,
@@ -15,23 +15,23 @@ const animationConfig = {
 }
 
 const enteringUpKeyframe = [
-  { opacity: 0, transform: 'translateY(18px)' },
-  { opacity: 1, transform: 'translateY(0)' },
+  {opacity: 0, transform: 'translateY(18px)'},
+  {opacity: 1, transform: 'translateY(0)'},
 ]
 
 const enteringDownKeyframe = [
-  { opacity: 0, transform: 'translateY(-18px)' },
-  { opacity: 1, transform: 'translateY(0)' },
+  {opacity: 0, transform: 'translateY(-18px)'},
+  {opacity: 1, transform: 'translateY(0)'},
 ]
 
 const exitingUpKeyframe = [
-  { opacity: 1, transform: 'translateY(0)' },
-  { opacity: 0, transform: 'translateY(-18px)' },
+  {opacity: 1, transform: 'translateY(0)'},
+  {opacity: 0, transform: 'translateY(-18px)'},
 ]
 
 const exitingDownKeyframe = [
-  { opacity: 1, transform: 'translateY(0)' },
-  { opacity: 0, transform: 'translateY(18px)' },
+  {opacity: 1, transform: 'translateY(0)'},
+  {opacity: 0, transform: 'translateY(18px)'},
 ]
 
 export function CountWheel({
@@ -41,7 +41,6 @@ export function CountWheel({
   hasBeenToggled,
   direction = 'up',
   voteColor,
-
 }: {
   likeCount: number
   big?: boolean
@@ -54,18 +53,21 @@ export function CountWheel({
   const shouldAnimate = !useReducedMotion() && hasBeenToggled
   const shouldRoll = decideShouldRoll(isLiked, likeCount)
 
-  const countView = React.useRef<HTMLDivElement>(null)
-  const prevCountView = React.useRef<HTMLDivElement>(null)
-  const [prevCount, setPrevCount] = React.useState(likeCount)
-  const prevIsLiked = React.useRef(isLiked)
-  const prevDirection = React.useRef(direction)
+  const countView = useRef<HTMLDivElement>(null)
+  const prevCountView = useRef<HTMLDivElement>(null)
+  const [prevCount, setPrevCount] = useState(likeCount)
+  const prevIsLiked = useRef(isLiked)
+  const prevDirection = useRef(direction)
   const formatPostStatCount = useFormatPostStatCount()
   const formattedCount = formatPostStatCount(likeCount)
   const formattedPrevCount = formatPostStatCount(prevCount)
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Trigger animation on either vote state change or direction change
-    if (isLiked === prevIsLiked.current && direction === prevDirection.current) {
+    if (
+      isLiked === prevIsLiked.current &&
+      direction === prevDirection.current
+    ) {
       return
     }
 
@@ -104,18 +106,18 @@ export function CountWheel({
           style={[
             big ? a.text_md : a.text_sm,
             a.user_select_none,
-            voteColor  // Add this check first
-              ? [a.font_semi_bold, { color: voteColor }]
+            voteColor // Add this check first
+              ? [a.font_semi_bold, {color: voteColor}]
               : direction === 'down'
                 ? [a.font_semi_bold, s.likeColor]
-                : { color: t.palette.contrast_500 },
+                : {color: t.palette.contrast_500},
           ]}>
           {formattedCount}
         </Text>
       </View>
       {shouldAnimate && (likeCount > 1 || !isLiked) ? (
         <View
-          style={{ position: 'absolute', opacity: 0 }}
+          style={{position: 'absolute', opacity: 0}}
           aria-disabled={true}
           // @ts-expect-error is div
           ref={prevCountView}>
@@ -123,11 +125,11 @@ export function CountWheel({
             style={[
               big ? a.text_md : a.text_sm,
               a.user_select_none,
-              voteColor  // Add this check first
-                ? [a.font_semi_bold, { color: voteColor }]
+              voteColor // Add this check first
+                ? [a.font_semi_bold, {color: voteColor}]
                 : direction === 'down'
                   ? [a.font_semi_bold, s.likeColor]
-                  : { color: t.palette.contrast_500 },
+                  : {color: t.palette.contrast_500},
             ]}>
             {formattedPrevCount}
           </Text>

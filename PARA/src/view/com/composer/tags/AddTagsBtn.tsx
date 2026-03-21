@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {TouchableOpacity, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -246,7 +246,6 @@ function DialogInner({
                 />
               ))}
             </View>
-
             {/* Flairs Section */}
             <View style={[a.gap_sm]}>
               <Text
@@ -258,7 +257,6 @@ function DialogInner({
                 toggleFlair={toggleFlair}
               />
             </View>
-
             {/* Universal Marks Section */}
             <View style={[a.gap_sm]}>
               <Text
@@ -428,7 +426,7 @@ function FlairSelector({
     flairType === 'matter' ? FLAIR_GROUPS.MATTER : FLAIR_GROUPS.POLICY
   const groupKeys = Object.keys(groups)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setActiveGroup(Object.keys(groups)[0] || '')
   }, [flairType, groups])
 

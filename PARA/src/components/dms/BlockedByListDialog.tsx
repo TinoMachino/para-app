@@ -1,16 +1,16 @@
-import React from 'react'
-import { View } from 'react-native'
-import { type ModerationCause } from '@atproto/api'
+import {Fragment} from 'react'
+import {View} from 'react-native'
+import {type ModerationCause} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
+import {useLingui} from '@lingui/react'
 
-import { listUriToHref } from '#/lib/strings/url-helpers'
-import { atoms as a, useTheme } from '#/alf'
+import {listUriToHref} from '#/lib/strings/url-helpers'
+import {atoms as a, useTheme} from '#/alf'
 import * as Dialog from '#/components/Dialog'
-import { type DialogControlProps } from '#/components/Dialog'
-import { InlineLinkText } from '#/components/Link'
+import {type DialogControlProps} from '#/components/Dialog'
+import {InlineLinkText} from '#/components/Link'
 import * as Prompt from '#/components/Prompt'
-import { Text } from '#/components/Typography'
+import {Text} from '#/components/Typography'
 
 export function BlockedByListDialog({
   control,
@@ -19,7 +19,7 @@ export function BlockedByListDialog({
   control: DialogControlProps
   listBlocks: ModerationCause[]
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
 
   return (
@@ -40,7 +40,7 @@ export function BlockedByListDialog({
             {_(msg`Lists blocking this user:`)}{' '}
             {listBlocks.map((block, i) =>
               block.source.type === 'list' ? (
-                <React.Fragment key={block.source.list.uri}>
+                <Fragment key={block.source.list.uri}>
                   {i === 0 ? null : ', '}
                   <InlineLinkText
                     label={block.source.list.name}
@@ -48,14 +48,14 @@ export function BlockedByListDialog({
                     style={[a.text_md, a.leading_snug]}>
                     {block.source.list.name}
                   </InlineLinkText>
-                </React.Fragment>
+                </Fragment>
               ) : null,
             )}
           </Text>
         </View>
 
         <Prompt.Actions>
-          <Prompt.Action cta={_(msg`I understand`)} onPress={() => { }} />
+          <Prompt.Action cta={_(msg`I understand`)} onPress={() => {}} />
         </Prompt.Actions>
       </Prompt.Content>
 

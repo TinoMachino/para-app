@@ -11,17 +11,18 @@ import {
 import {Trans} from '@lingui/react/macro'
 import {useNavigation, useRoute} from '@react-navigation/native'
 
+import {publishCabildeoPosition} from '#/lib/api/cabildeo'
+import {type CabildeoPositionRecord} from '#/lib/api/para-lexicons'
 import {
-  type CabildeoPositionRecord,
-} from '#/lib/api/para-lexicons'
-import {type CommonNavigatorParams, type NavigationProp, type NativeStackScreenProps} from '#/lib/routes/types'
+  type CommonNavigatorParams,
+  type NativeStackScreenProps,
+  type NavigationProp,
+} from '#/lib/routes/types'
+import {useAgent} from '#/state/session'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
-
-import {publishCabildeoPosition} from '#/lib/api/cabildeo'
-import {useAgent} from '#/state/session'
-import * as Toast from '#/view/com/util/Toast'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'CreatePosition'>
 
@@ -63,7 +64,12 @@ export function CreatePositionScreen(_props: Props) {
     }
   }, [agent, cabildeoUri, stance, optionIndex, text, navigation])
 
-  const stances: Array<{value: typeof stance; label: string; icon: string; color: string}> = [
+  const stances: Array<{
+    value: typeof stance
+    label: string
+    icon: string
+    color: string
+  }> = [
     {value: 'for', label: 'A Favor', icon: '✅', color: '#34C759'},
     {value: 'against', label: 'En Contra', icon: '❌', color: '#FF3B30'},
     {value: 'amendment', label: 'Enmienda', icon: '✍️', color: '#FF9500'},
@@ -77,9 +83,7 @@ export function CreatePositionScreen(_props: Props) {
           <Layout.Header.TitleText>
             <Trans>Tomar Postura</Trans>
           </Layout.Header.TitleText>
-          <Layout.Header.SubtitleText>
-            Debate Cívico
-          </Layout.Header.SubtitleText>
+          <Layout.Header.SubtitleText>Debate Cívico</Layout.Header.SubtitleText>
         </Layout.Header.Content>
       </Layout.Header.Outer>
 
@@ -90,7 +94,6 @@ export function CreatePositionScreen(_props: Props) {
           style={styles.container}
           contentContainerStyle={styles.content}>
           <Layout.Center style={styles.center}>
-            
             <Text style={[styles.instruction, t.atoms.text_contrast_medium]}>
               {optionIndex !== undefined
                 ? `Estás argumentando sobre la Opción ${optionIndex + 1}`
@@ -99,7 +102,7 @@ export function CreatePositionScreen(_props: Props) {
 
             {/* Stance Selector */}
             <View style={styles.stanceRow}>
-              {stances.map((s) => (
+              {stances.map(s => (
                 <TouchableOpacity
                   accessibilityRole="button"
                   key={s.value}
@@ -107,7 +110,10 @@ export function CreatePositionScreen(_props: Props) {
                   style={[
                     styles.stanceButton,
                     t.atoms.bg_contrast_25,
-                    stance === s.value && {backgroundColor: s.color + '20', borderColor: s.color},
+                    stance === s.value && {
+                      backgroundColor: s.color + '20',
+                      borderColor: s.color,
+                    },
                   ]}>
                   <Text style={{fontSize: 20, marginBottom: 4}}>{s.icon}</Text>
                   <Text
@@ -150,13 +156,16 @@ export function CreatePositionScreen(_props: Props) {
               disabled={isSubmitting}
               style={[
                 styles.submitBtn,
-                {backgroundColor: isSubmitting ? t.palette.contrast_300 : t.palette.primary_500},
+                {
+                  backgroundColor: isSubmitting
+                    ? t.palette.contrast_300
+                    : t.palette.primary_500,
+                },
               ]}>
               <Text style={styles.submitBtnText}>
                 {isSubmitting ? 'Publicando...' : 'Publicar Argumento'}
               </Text>
             </TouchableOpacity>
-
           </Layout.Center>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -168,7 +177,7 @@ const styles = StyleSheet.create({
   container: {flex: 1},
   content: {paddingBottom: 60},
   center: {paddingHorizontal: 16, paddingTop: 16},
-  
+
   instruction: {
     fontSize: 14,
     marginBottom: 20,

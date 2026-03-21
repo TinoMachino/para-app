@@ -1,4 +1,4 @@
-import React from 'react'
+import {type ComponentType, useMemo} from 'react'
 import {
   BSKY_LABELER_DID,
   type ModerationCause,
@@ -20,7 +20,7 @@ import {useGlobalLabelStrings} from './useGlobalLabelStrings'
 import {getDefinition, getLabelStrings} from './useLabelInfo'
 
 export interface ModerationCauseDescription {
-  icon: React.ComponentType<SVGIconProps>
+  icon: ComponentType<SVGIconProps>
   name: string
   description: string
   source?: string
@@ -39,7 +39,7 @@ export function useModerationCauseDescription(
   const {labelDefs, labelers} = useLabelDefinitions()
   const globalLabelStrings = useGlobalLabelStrings()
 
-  return React.useMemo(() => {
+  return useMemo(() => {
     if (!cause) {
       return {
         icon: Warning,

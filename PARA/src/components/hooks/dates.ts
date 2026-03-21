@@ -7,7 +7,7 @@
  * {@link https://github.com/date-fns/date-fns/blob/main/docs/i18n.md}
  */
 
-import React from 'react'
+import {useCallback} from 'react'
 import {formatDistance, type Locale} from 'date-fns'
 import {
   ca,
@@ -103,7 +103,7 @@ const locales: Record<AppLanguage, Locale | undefined> = {
  */
 export function useFormatDistance() {
   const {appLanguage} = useLanguagePrefs()
-  return React.useCallback<typeof formatDistance>(
+  return useCallback<typeof formatDistance>(
     (date, baseDate, options) => {
       const locale = locales[appLanguage as AppLanguage]
       return formatDistance(date, baseDate, {...options, locale: locale})

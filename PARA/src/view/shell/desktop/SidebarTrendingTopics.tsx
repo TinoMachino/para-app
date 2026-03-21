@@ -1,8 +1,8 @@
-import React from 'react'
+import {useCallback} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {logger} from '#/logger'
 import {
@@ -35,7 +35,7 @@ function Inner() {
   const {data: trending, error, isLoading} = useTrendingTopics()
   const noTopics = !isLoading && !error && !trending?.topics?.length
 
-  const onConfirmHide = React.useCallback(() => {
+  const onConfirmHide = useCallback(() => {
     logger.metric('trendingTopics:hide', {context: 'sidebar'})
     setTrendingDisabled(true)
   }, [setTrendingDisabled])

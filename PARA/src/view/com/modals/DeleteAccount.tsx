@@ -1,4 +1,4 @@
-import React from 'react'
+import {useState} from 'react'
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -8,8 +8,8 @@ import {
 } from 'react-native'
 import {LinearGradient} from 'expo-linear-gradient'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {DM_SERVICE_HEADERS} from '#/lib/constants'
 import {usePalette} from '#/lib/hooks/usePalette'
@@ -41,11 +41,11 @@ export function Component({}: {}) {
   const {_} = useLingui()
   const {closeModal} = useModalControls()
   const {isMobile} = useWebMediaQueries()
-  const [isEmailSent, setIsEmailSent] = React.useState<boolean>(false)
-  const [confirmCode, setConfirmCode] = React.useState<string>('')
-  const [password, setPassword] = React.useState<string>('')
-  const [isProcessing, setIsProcessing] = React.useState<boolean>(false)
-  const [error, setError] = React.useState<string>('')
+  const [isEmailSent, setIsEmailSent] = useState<boolean>(false)
+  const [confirmCode, setConfirmCode] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
   const onPressSendEmail = async () => {
     setError('')
     setIsProcessing(true)

@@ -1,5 +1,5 @@
-import { memo, useCallback, useMemo, useState } from 'react'
-import { View } from 'react-native'
+import {memo, useCallback, useMemo, useState} from 'react'
+import {View} from 'react-native'
 import {
   type AppBskyActorDefs,
   type AppBskyLabelerDefs,
@@ -8,39 +8,39 @@ import {
   type RichText as RichTextAPI,
 } from '@atproto/api'
 import {msg, plural} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Plural, Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { MAX_LABELERS } from '#/lib/constants'
-import { useHaptics } from '#/lib/haptics'
-import { isAppLabeler } from '#/lib/moderation'
-import { logger } from '#/logger'
-import { useProfileShadow } from '#/state/cache/profile-shadow'
-import { type Shadow } from '#/state/cache/types'
-import { useLabelerSubscriptionMutation } from '#/state/queries/labeler'
-import { useLikeMutation, useUnlikeMutation } from '#/state/queries/like'
-import { usePreferencesQuery } from '#/state/queries/preferences'
-import { useRequireAuth, useSession } from '#/state/session'
-import { ProfileMenu } from '#/view/com/profile/ProfileMenu'
-import { atoms as a, tokens, useTheme } from '#/alf'
-import { Button, ButtonText } from '#/components/Button'
-import { type DialogOuterProps, useDialogControl } from '#/components/Dialog'
+import {MAX_LABELERS} from '#/lib/constants'
+import {useHaptics} from '#/lib/haptics'
+import {isAppLabeler} from '#/lib/moderation'
+import {logger} from '#/logger'
+import {useProfileShadow} from '#/state/cache/profile-shadow'
+import {type Shadow} from '#/state/cache/types'
+import {useLabelerSubscriptionMutation} from '#/state/queries/labeler'
+import {useLikeMutation, useUnlikeMutation} from '#/state/queries/like'
+import {usePreferencesQuery} from '#/state/queries/preferences'
+import {useRequireAuth, useSession} from '#/state/session'
+import {ProfileMenu} from '#/view/com/profile/ProfileMenu'
+import {atoms as a, tokens, useTheme} from '#/alf'
+import {Button, ButtonText} from '#/components/Button'
+import {type DialogOuterProps, useDialogControl} from '#/components/Dialog'
 import {
   Heart2_Filled_Stroke2_Corner0_Rounded as HeartFilled,
   Heart2_Stroke2_Corner0_Rounded as Heart,
 } from '#/components/icons/Heart2'
-import { Link } from '#/components/Link'
+import {Link} from '#/components/Link'
 import * as Prompt from '#/components/Prompt'
-import { RichText } from '#/components/RichText'
+import {RichText} from '#/components/RichText'
 import * as Toast from '#/components/Toast'
-import { Text } from '#/components/Typography'
-import { IS_IOS } from '#/env'
-import { ProfileHeaderDisplayName } from './DisplayName'
-import { EditProfileDialog } from './EditProfileDialog'
-import { ProfileHeaderHandle } from './Handle'
-import { ProfileHeaderMetrics } from './Metrics'
-import { ProfileHeaderShell } from './Shell'
+import {Text} from '#/components/Typography'
+import {IS_IOS} from '#/env'
+import {ProfileHeaderDisplayName} from './DisplayName'
+import {EditProfileDialog} from './EditProfileDialog'
+import {ProfileHeaderHandle} from './Handle'
+import {ProfileHeaderMetrics} from './Metrics'
+import {ProfileHeaderShell} from './Shell'
 
 interface Props {
   profile: AppBskyActorDefs.ProfileViewDetailed
@@ -62,8 +62,8 @@ let ProfileHeaderLabeler = ({
   const profile: Shadow<AppBskyActorDefs.ProfileViewDetailed> =
     useProfileShadow(profileUnshadowed)
   const t = useTheme()
-  const { _ } = useLingui()
-  const { currentAccount, hasSession } = useSession()
+  const {_} = useLingui()
+  const {currentAccount, hasSession} = useSession()
   const playHaptic = useHaptics()
   const isSelf = currentAccount?.did === profile.did
 
@@ -71,8 +71,8 @@ let ProfileHeaderLabeler = ({
     () => moderateProfile(profile, moderationOpts),
     [profile, moderationOpts],
   )
-  const { mutateAsync: likeMod, isPending: isLikePending } = useLikeMutation()
-  const { mutateAsync: unlikeMod, isPending: isUnlikePending } =
+  const {mutateAsync: likeMod, isPending: isLikePending} = useLikeMutation()
+  const {mutateAsync: unlikeMod, isPending: isUnlikePending} =
     useUnlikeMutation()
   const [likeUri, setLikeUri] = useState(labeler.viewer?.like || '')
   const [likeCount, setLikeCount] = useState(labeler.likeCount || 0)
@@ -85,11 +85,11 @@ let ProfileHeaderLabeler = ({
       playHaptic()
 
       if (likeUri) {
-        await unlikeMod({ uri: likeUri })
+        await unlikeMod({uri: likeUri})
         setLikeCount(c => c - 1)
         setLikeUri('')
       } else {
-        const res = await likeMod({ uri: labeler.uri, cid: labeler.cid })
+        const res = await likeMod({uri: labeler.uri, cid: labeler.cid})
         setLikeCount(c => c + 1)
         setLikeUri(res.uri)
       }
@@ -98,9 +98,9 @@ let ProfileHeaderLabeler = ({
         _(
           msg`There was an issue contacting the server, please check your internet connection and try again.`,
         ),
-        { type: 'error' },
+        {type: 'error'},
       )
-      logger.error(`Failed to toggle labeler like`, { message: e.message })
+      logger.error(`Failed to toggle labeler like`, {message: e.message})
     }
   }, [labeler, playHaptic, likeUri, unlikeMod, likeMod, _])
 
@@ -169,14 +169,14 @@ let ProfileHeaderLabeler = ({
                         other: '# users',
                       })}`,
                     )}>
-                    {({ hovered, focused, pressed }) => (
+                    {({hovered, focused, pressed}) => (
                       <Text
                         style={[
                           a.font_semi_bold,
                           a.text_sm,
                           t.atoms.text_contrast_medium,
                           (hovered || focused || pressed) &&
-                          t.atoms.text_contrast_high,
+                            t.atoms.text_contrast_high,
                         ]}>
                         <Trans>
                           Liked by{' '}
@@ -199,7 +199,7 @@ let ProfileHeaderLabeler = ({
   )
 }
 ProfileHeaderLabeler = memo(ProfileHeaderLabeler)
-export { ProfileHeaderLabeler }
+export {ProfileHeaderLabeler}
 
 /**
  * Keep this in sync with the value of {@link MAX_LABELERS}
@@ -209,7 +209,7 @@ function CantSubscribePrompt({
 }: {
   control: DialogOuterProps['control']
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   return (
     <Prompt.Outer control={control}>
       <Prompt.Content>
@@ -236,13 +236,13 @@ export function HeaderLabelerButtons({
   /** disable the subscribe button */
   minimal?: boolean
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
-  const { currentAccount } = useSession()
+  const {currentAccount} = useSession()
   const requireAuth = useRequireAuth()
   const playHaptic = useHaptics()
   const editProfileControl = useDialogControl()
-  const { data: preferences } = usePreferencesQuery()
+  const {data: preferences} = usePreferencesQuery()
   const {
     mutateAsync: toggleSubscription,
     variables,
@@ -272,7 +272,7 @@ export function HeaderLabelerButtons({
             ? 'moderation:subscribedToLabeler'
             : 'moderation:unsubscribedFromLabeler',
           {},
-          { statsig: true },
+          {statsig: true},
         )
       } catch (e: any) {
         reset()
@@ -280,7 +280,7 @@ export function HeaderLabelerButtons({
           cantSubscribePrompt.open()
           return
         }
-        logger.error(`Failed to subscribe to labeler`, { message: e.message })
+        logger.error(`Failed to subscribe to labeler`, {message: e.message})
       }
     })
   return (

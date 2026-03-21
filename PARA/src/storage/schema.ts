@@ -1,5 +1,5 @@
-import { type ID as PolicyUpdate202508 } from '#/components/PolicyUpdateOverlay/updates/202508/config'
-import { type Geolocation } from '#/geolocation/types'
+import {type ID as PolicyUpdate202508} from '#/components/PolicyUpdateOverlay/updates/202508/config'
+import {type Geolocation} from '#/geolocation/types'
 /**
  * Device data that's specific to the device and does not vary based account
  */

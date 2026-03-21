@@ -4,7 +4,13 @@
   "defs": {
     "summary": {
       "type": "object",
-      "required": ["members", "visiblePosters", "policyPosts", "matterPosts", "badgeHolders"],
+      "required": [
+        "members",
+        "visiblePosters",
+        "policyPosts",
+        "matterPosts",
+        "badgeHolders"
+      ],
       "properties": {
         "members": { "type": "integer" },
         "visiblePosters": { "type": "integer" },
@@ -13,52 +19,149 @@
         "badgeHolders": { "type": "integer" }
       }
     },
-    "member": {
+    "person": {
       "type": "object",
-      "required": ["did", "influence", "votesReceivedAllTime", "votesCastAllTime", "policyPosts", "matterPosts"],
       "properties": {
         "did": { "type": "string", "format": "did" },
         "handle": { "type": "string", "format": "handle" },
-        "displayName": { "type": "string", "maxGraphemes": 64, "maxLength": 640 },
+        "displayName": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "maxLength": 640
+        },
+        "avatar": { "type": "string", "format": "uri" }
+      }
+    },
+    "moderatorView": {
+      "type": "object",
+      "required": ["role", "badge", "capabilities"],
+      "properties": {
+        "did": { "type": "string", "format": "did" },
+        "handle": { "type": "string", "format": "handle" },
+        "displayName": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "maxLength": 640
+        },
         "avatar": { "type": "string", "format": "uri" },
-        "party": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
-        "influence": { "type": "integer" },
-        "votesReceivedAllTime": { "type": "integer" },
-        "votesCastAllTime": { "type": "integer" },
-        "policyPosts": { "type": "integer" },
-        "matterPosts": { "type": "integer" }
-      }
-    },
-    "moderator": {
-      "type": "object",
-      "required": ["member", "role", "badge"],
-      "properties": {
-        "member": { "type": "ref", "ref": "#member" },
         "role": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
-        "badge": { "type": "string", "maxGraphemes": 64, "maxLength": 64 }
+        "badge": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string", "maxGraphemes": 64, "maxLength": 128 }
+        }
       }
     },
-    "official": {
+    "officialView": {
       "type": "object",
-      "required": ["member", "office", "mandate"],
+      "required": ["office", "mandate"],
       "properties": {
-        "member": { "type": "ref", "ref": "#member" },
+        "did": { "type": "string", "format": "did" },
+        "handle": { "type": "string", "format": "handle" },
+        "displayName": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "maxLength": 640
+        },
+        "avatar": { "type": "string", "format": "uri" },
         "office": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
         "mandate": { "type": "string", "maxGraphemes": 200, "maxLength": 1000 }
       }
     },
-    "deputyRole": {
+    "applicant": {
       "type": "object",
-      "required": ["tier", "role", "activeHolder", "votesBackingRole", "applicants"],
+      "required": ["appliedAt", "status"],
       "properties": {
+        "did": { "type": "string", "format": "did" },
+        "handle": { "type": "string", "format": "handle" },
+        "displayName": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "maxLength": 640
+        },
+        "avatar": { "type": "string", "format": "uri" },
+        "appliedAt": { "type": "string", "format": "datetime" },
+        "status": {
+          "type": "string",
+          "knownValues": ["applied", "approved", "rejected"]
+        },
+        "note": { "type": "string", "maxGraphemes": 200, "maxLength": 1000 }
+      }
+    },
+    "deputyRoleView": {
+      "type": "object",
+      "required": [
+        "key",
+        "tier",
+        "role",
+        "description",
+        "capabilities",
+        "votes",
+        "applicants"
+      ],
+      "properties": {
+        "key": { "type": "string", "maxGraphemes": 128, "maxLength": 128 },
         "tier": { "type": "string", "maxGraphemes": 32, "maxLength": 32 },
         "role": { "type": "string", "maxGraphemes": 64, "maxLength": 64 },
-        "activeHolder": { "type": "ref", "ref": "#member" },
-        "votesBackingRole": { "type": "integer" },
+        "description": {
+          "type": "string",
+          "maxGraphemes": 300,
+          "maxLength": 2000
+        },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string", "maxGraphemes": 64, "maxLength": 128 }
+        },
+        "activeHolder": { "type": "ref", "ref": "#person" },
+        "activeSince": { "type": "string", "format": "datetime" },
+        "votes": { "type": "integer" },
         "applicants": {
           "type": "array",
-          "items": { "type": "string", "maxGraphemes": 64, "maxLength": 640 }
+          "items": { "type": "ref", "ref": "#applicant" }
         }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "termLengthDays": { "type": "integer" },
+        "reviewCadence": {
+          "type": "string",
+          "maxGraphemes": 128,
+          "maxLength": 256
+        },
+        "escalationPath": {
+          "type": "string",
+          "maxGraphemes": 128,
+          "maxLength": 256
+        },
+        "publicContact": {
+          "type": "string",
+          "maxGraphemes": 128,
+          "maxLength": 256
+        },
+        "lastPublishedAt": { "type": "string", "format": "datetime" },
+        "state": { "type": "string", "maxGraphemes": 64, "maxLength": 128 },
+        "matterFlairIds": {
+          "type": "array",
+          "items": { "type": "string", "maxGraphemes": 128, "maxLength": 128 }
+        },
+        "policyFlairIds": {
+          "type": "array",
+          "items": { "type": "string", "maxGraphemes": 128, "maxLength": 128 }
+        }
+      }
+    },
+    "historyEntry": {
+      "type": "object",
+      "required": ["id", "action", "createdAt", "summary"],
+      "properties": {
+        "id": { "type": "string", "maxGraphemes": 128, "maxLength": 128 },
+        "action": { "type": "string", "maxGraphemes": 128, "maxLength": 128 },
+        "actorDid": { "type": "string", "format": "did" },
+        "actorHandle": { "type": "string", "format": "handle" },
+        "createdAt": { "type": "string", "format": "datetime" },
+        "summary": { "type": "string", "maxGraphemes": 300, "maxLength": 2000 }
       }
     }
   }

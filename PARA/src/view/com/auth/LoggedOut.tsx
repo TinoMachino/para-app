@@ -1,4 +1,4 @@
-import React from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import {View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg} from '@lingui/core/macro'
@@ -34,7 +34,7 @@ export function LoggedOut({onDismiss}: {onDismiss?: () => void}) {
   const insets = useSafeAreaInsets()
   const setMinimalShellMode = useSetMinimalShellMode()
   const {requestedAccountSwitchTo} = useLoggedOutView()
-  const [screenState, setScreenState] = React.useState<ScreenState>(() => {
+  const [screenState, setScreenState] = useState<ScreenState>(() => {
     if (requestedAccountSwitchTo === 'new') {
       return ScreenState.S_CreateAccount
     } else if (requestedAccountSwitchTo === 'starterpack') {
@@ -47,11 +47,11 @@ export function LoggedOut({onDismiss}: {onDismiss?: () => void}) {
   })
   const {clearRequestedAccount} = useLoggedOutViewControls()
 
-  React.useEffect(() => {
+  useEffect(() => {
     setMinimalShellMode(true)
   }, [setMinimalShellMode])
 
-  const onPressDismiss = React.useCallback(() => {
+  const onPressDismiss = useCallback(() => {
     if (onDismiss) {
       onDismiss()
     }

@@ -1,5 +1,24 @@
 import {useCallback} from 'react'
+import {type AppBskyFeedDefs} from '@atproto/api'
 import {useLingui} from '@lingui/react'
+
+type ParaSummaryPost = Pick<
+  AppBskyFeedDefs.PostView,
+  'likeCount' | 'replyCount' | 'quoteCount' | 'bookmarkCount'
+>
+
+export function getParaPostSummaryMetrics(
+  post: ParaSummaryPost,
+  highlightsCount: number,
+) {
+  return {
+    votes: post.likeCount ?? 0,
+    comments: post.replyCount ?? 0,
+    highlights: highlightsCount,
+    quotes: post.quoteCount ?? 0,
+    saves: post.bookmarkCount ?? 0,
+  }
+}
 
 /**
  * This matches `formatCount` from `view/com/util/numeric/format.ts`, but has

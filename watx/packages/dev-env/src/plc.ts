@@ -7,16 +7,27 @@ export class TestPlc {
   constructor(
     public url: string,
     public port: number,
+    public db: plc.PlcDatabase,
     public server: plc.PlcServer,
   ) {}
 
   static async create(cfg: PlcConfig): Promise<TestPlc> {
-    const db = plc.Database.mock()
+    let db: plc.PlcDatabase
+    if (cfg.dbUrl) {
+      const pgDb = plc.Database.postgres({
+        url: cfg.dbUrl,
+        schema: cfg.dbSchema,
+      })
+      await pgDb.migrateToLatestOrThrow()
+      db = pgDb
+    } else {
+      db = plc.Database.mock()
+    }
     const port = cfg.port || (await getPort())
     const url = `http://localhost:${port}`
-    const server = plc.PlcServer.create({ db, port, ...cfg })
+    const server = plc.PlcServer.create({ db, port, version: cfg.version })
     await server.start()
-    return new TestPlc(url, port, server)
+    return new TestPlc(url, port, db, server)
   }
 
   get ctx(): plc.AppContext {
@@ -29,5 +40,6 @@ export class TestPlc {
 
   async close() {
     await this.server.destroy()
+    await this.db.close()
   }
 }

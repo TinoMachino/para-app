@@ -1,0 +1,14 @@
+[
+  {
+    "id": "lexicon-core",
+    "title": "Lexicons as the contract surface",
+    "summary": "watx keeps com.atproto.*, app.bsky.*, and com.para.* lexicons as the canonical schema layer for records, queries, and views.",
+    "status": "active"
+  },
+  {
+    "id": "service-split",
+    "title": "PDS and AppView service split",
+    "summary": "The backend language should reflect the watx separation between personal data hosting, appview APIs, identity, repo, and xrpc service layers.",
+    "status": "active"
+  }
+]

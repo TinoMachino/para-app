@@ -4,10 +4,16 @@ import {Trans} from '@lingui/react/macro'
 import {useNavigation, useRoute} from '@react-navigation/native'
 
 import {type CabildeoPhase} from '#/lib/api/para-lexicons'
-import {MOCK_CABILDEOS} from '#/lib/constants/mockData'
+import {
+  countCabildeosByPhase,
+  filterCabildeos,
+  toCabildeoRouteParams,
+} from '#/lib/cabildeo-client'
 import {type NavigationProp} from '#/lib/routes/types'
+import {useCabildeosQuery} from '#/state/queries/cabildeo'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
+import {ListMaybePlaceholder} from '#/components/Lists'
 import {Text} from '#/components/Typography'
 
 const PHASE_CONFIG: Record<
@@ -31,33 +37,32 @@ export function CabildeoListScreen() {
   }>()
   const contextCommunity = route.params?.communityName
   const [activeFilter, setActiveFilter] = useState<CabildeoPhase | 'all'>('all')
+  const {
+    data: cabildeos = [],
+    isFetched,
+    isLoading,
+    isError,
+    refetch,
+  } = useCabildeosQuery()
 
   const filtered = useMemo(() => {
-    const normalizedContext = normalizeCommunity(contextCommunity)
-    const byCommunity = normalizedContext
-      ? MOCK_CABILDEOS.filter(cabildeo => {
-          const candidates = [
-            cabildeo.community,
-            ...(cabildeo.communities || []),
-            cabildeo.region || '',
-          ]
-          return candidates.some(
-            candidate => normalizeCommunity(candidate) === normalizedContext,
-          )
-        })
-      : MOCK_CABILDEOS
-
-    if (activeFilter === 'all') return byCommunity
-    return byCommunity.filter(c => c.phase === activeFilter)
-  }, [activeFilter, contextCommunity])
+    return filterCabildeos(cabildeos, {
+      communityName: contextCommunity,
+      phase: activeFilter,
+    })
+  }, [activeFilter, cabildeos, contextCommunity])
 
   const communityScopedStats = useMemo(
     () => ({
-      voting: filteredCountByPhase(contextCommunity, 'voting'),
-      deliberating: filteredCountByPhase(contextCommunity, 'deliberating'),
-      resolved: filteredCountByPhase(contextCommunity, 'resolved'),
+      voting: countCabildeosByPhase(cabildeos, contextCommunity, 'voting'),
+      deliberating: countCabildeosByPhase(
+        cabildeos,
+        contextCommunity,
+        'deliberating',
+      ),
+      resolved: countCabildeosByPhase(cabildeos, contextCommunity, 'resolved'),
     }),
-    [contextCommunity],
+    [cabildeos, contextCommunity],
   )
 
   const filters: Array<{key: CabildeoPhase | 'all'; label: string}> = [
@@ -180,162 +185,154 @@ export function CabildeoListScreen() {
 
           {/* Cabildeo Cards */}
           <View style={styles.cardList}>
-            {filtered.map((cabildeo, index) => {
-              const phase = PHASE_CONFIG[cabildeo.phase]
-              const isMultiCommunity =
-                cabildeo.communities && cabildeo.communities.length > 0
+            {!filtered.length ? (
+              <ListMaybePlaceholder
+                isLoading={isLoading || !isFetched}
+                isError={isError}
+                onRetry={refetch}
+                emptyType="results"
+                emptyMessage="No hay cabildeos disponibles para este filtro todavía."
+              />
+            ) : (
+              filtered.map(cabildeo => {
+                const phase = PHASE_CONFIG[cabildeo.phase]
+                const isMultiCommunity =
+                  cabildeo.communities && cabildeo.communities.length > 0
 
-              return (
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  key={index}
-                  activeOpacity={0.8}
-                  onPress={() => navigation.navigate('CabildeoDetail', {index})}
-                  style={[
-                    styles.card,
-                    t.atoms.bg_contrast_25,
-                    {borderLeftColor: phase.color, borderLeftWidth: 4},
-                  ]}>
-                  {/* Phase Badge + Region */}
-                  <View style={styles.cardHeader}>
-                    <View
-                      style={[
-                        styles.phaseBadge,
-                        {backgroundColor: phase.color + '20'},
-                      ]}>
-                      <Text
-                        style={[styles.phaseBadgeText, {color: phase.color}]}>
-                        {phase.icon} {phase.label}
-                      </Text>
-                    </View>
-                    {cabildeo.region && (
-                      <Text
-                        style={[
-                          styles.regionTag,
-                          t.atoms.text_contrast_medium,
-                        ]}>
-                        📍 {cabildeo.region}
-                      </Text>
-                    )}
-                  </View>
-
-                  {/* Title */}
-                  <Text
-                    style={[styles.cardTitle, t.atoms.text]}
-                    numberOfLines={2}>
-                    {cabildeo.title}
-                  </Text>
-
-                  {/* Description */}
-                  <Text
-                    style={[styles.cardDesc, t.atoms.text_contrast_medium]}
-                    numberOfLines={2}>
-                    {cabildeo.description}
-                  </Text>
-
-                  {/* Footer */}
-                  <View style={styles.cardFooter}>
-                    <Text
-                      style={[
-                        styles.communityTag,
-                        {color: t.palette.primary_500},
-                      ]}>
-                      {cabildeo.community}
-                    </Text>
-                    {isMultiCommunity && (
+                return (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    key={cabildeo.uri}
+                    activeOpacity={0.8}
+                    onPress={() =>
+                      navigation.navigate(
+                        'CabildeoDetail',
+                        toCabildeoRouteParams(cabildeo),
+                      )
+                    }
+                    style={[
+                      styles.card,
+                      t.atoms.bg_contrast_25,
+                      {borderLeftColor: phase.color, borderLeftWidth: 4},
+                    ]}>
+                    {/* Phase Badge + Region */}
+                    <View style={styles.cardHeader}>
                       <View
                         style={[
-                          styles.quadraticBadge,
-                          {backgroundColor: '#FF9500' + '20'},
+                          styles.phaseBadge,
+                          {backgroundColor: phase.color + '20'},
                         ]}>
                         <Text
-                          style={[styles.quadraticText, {color: '#FF9500'}]}>
-                          √ Cuadrático
+                          style={[styles.phaseBadgeText, {color: phase.color}]}>
+                          {phase.icon} {phase.label}
+                        </Text>
+                      </View>
+                      {cabildeo.region && (
+                        <Text
+                          style={[
+                            styles.regionTag,
+                            t.atoms.text_contrast_medium,
+                          ]}>
+                          📍 {cabildeo.region}
+                        </Text>
+                      )}
+                    </View>
+
+                    {/* Title */}
+                    <Text
+                      style={[styles.cardTitle, t.atoms.text]}
+                      numberOfLines={2}>
+                      {cabildeo.title}
+                    </Text>
+
+                    {/* Description */}
+                    <Text
+                      style={[styles.cardDesc, t.atoms.text_contrast_medium]}
+                      numberOfLines={2}>
+                      {cabildeo.description}
+                    </Text>
+
+                    {/* Footer */}
+                    <View style={styles.cardFooter}>
+                      <Text
+                        style={[
+                          styles.communityTag,
+                          {color: t.palette.primary_500},
+                        ]}>
+                        {cabildeo.community}
+                      </Text>
+                      {isMultiCommunity && (
+                        <View
+                          style={[
+                            styles.quadraticBadge,
+                            {backgroundColor: '#FF9500' + '20'},
+                          ]}>
+                          <Text
+                            style={[styles.quadraticText, {color: '#FF9500'}]}>
+                            √ Cuadrático
+                          </Text>
+                        </View>
+                      )}
+                      {cabildeo.geoRestricted && (
+                        <View
+                          style={[
+                            styles.quadraticBadge,
+                            {backgroundColor: '#FF3B30' + '15'},
+                          ]}>
+                          <Text
+                            style={[styles.quadraticText, {color: '#FF3B30'}]}>
+                            🔒 Solo {cabildeo.region}
+                          </Text>
+                        </View>
+                      )}
+                      <Text
+                        style={[
+                          styles.optionCount,
+                          t.atoms.text_contrast_medium,
+                        ]}>
+                        {cabildeo.options.length} opciones
+                      </Text>
+                    </View>
+
+                    {/* Resolved outcome preview */}
+                    {cabildeo.outcome && (
+                      <View
+                        style={[
+                          styles.outcomePreview,
+                          {borderTopColor: t.palette.contrast_100},
+                        ]}>
+                        <Text
+                          style={[
+                            styles.outcomeLabel,
+                            t.atoms.text_contrast_medium,
+                          ]}>
+                          Resultado:
+                        </Text>
+                        <Text
+                          style={[styles.outcomeWinner, {color: phase.color}]}>
+                          {
+                            cabildeo.options[cabildeo.outcome.winningOption]
+                              ?.label
+                          }
+                        </Text>
+                        <Text
+                          style={[
+                            styles.outcomeParticipants,
+                            t.atoms.text_contrast_medium,
+                          ]}>
+                          · {cabildeo.outcome.totalParticipants} participantes
                         </Text>
                       </View>
                     )}
-                    {cabildeo.geoRestricted && (
-                      <View
-                        style={[
-                          styles.quadraticBadge,
-                          {backgroundColor: '#FF3B30' + '15'},
-                        ]}>
-                        <Text
-                          style={[styles.quadraticText, {color: '#FF3B30'}]}>
-                          🔒 Solo {cabildeo.region}
-                        </Text>
-                      </View>
-                    )}
-                    <Text
-                      style={[
-                        styles.optionCount,
-                        t.atoms.text_contrast_medium,
-                      ]}>
-                      {cabildeo.options.length} opciones
-                    </Text>
-                  </View>
-
-                  {/* Resolved outcome preview */}
-                  {cabildeo.outcome && (
-                    <View
-                      style={[
-                        styles.outcomePreview,
-                        {borderTopColor: t.palette.contrast_100},
-                      ]}>
-                      <Text
-                        style={[
-                          styles.outcomeLabel,
-                          t.atoms.text_contrast_medium,
-                        ]}>
-                        Resultado:
-                      </Text>
-                      <Text
-                        style={[styles.outcomeWinner, {color: phase.color}]}>
-                        {
-                          cabildeo.options[cabildeo.outcome.winningOption]
-                            ?.label
-                        }
-                      </Text>
-                      <Text
-                        style={[
-                          styles.outcomeParticipants,
-                          t.atoms.text_contrast_medium,
-                        ]}>
-                        · {cabildeo.outcome.totalParticipants} participantes
-                      </Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              )
-            })}
+                  </TouchableOpacity>
+                )
+              })
+            )}
           </View>
         </Layout.Center>
       </ScrollView>
     </Layout.Screen>
   )
-}
-
-function normalizeCommunity(value: string | undefined) {
-  return value?.trim().replace(/^p\//i, '').toLowerCase() || ''
-}
-
-function filteredCountByPhase(
-  contextCommunity: string | undefined,
-  phase: CabildeoPhase,
-) {
-  const normalizedContext = normalizeCommunity(contextCommunity)
-  return MOCK_CABILDEOS.filter(cabildeo => {
-    if (cabildeo.phase !== phase) return false
-    if (!normalizedContext) return true
-    const candidates = [
-      cabildeo.community,
-      ...(cabildeo.communities || []),
-      cabildeo.region || '',
-    ]
-    return candidates.some(
-      candidate => normalizeCommunity(candidate) === normalizedContext,
-    )
-  }).length
 }
 
 const styles = StyleSheet.create({

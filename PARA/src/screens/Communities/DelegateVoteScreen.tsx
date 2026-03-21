@@ -2,10 +2,14 @@ import {useCallback, useMemo, useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {Trans} from '@lingui/react/macro'
 
-import {MOCK_CABILDEOS} from '#/lib/constants/mockData'
-import {type CommonNavigatorParams, type NativeStackScreenProps} from '#/lib/routes/types'
+import {
+  type CommonNavigatorParams,
+  type NativeStackScreenProps,
+} from '#/lib/routes/types'
+import {useCabildeoQuery} from '#/state/queries/cabildeo'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
+import {ListMaybePlaceholder} from '#/components/Lists'
 import {Text} from '#/components/Typography'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'DelegateVote'>
@@ -60,8 +64,14 @@ function calcQuadraticPower(delegationCount: number): number {
 
 export function DelegateVoteScreen({route, navigation}: Props) {
   const t = useTheme()
-  const {cabildeoIndex} = route.params
-  const cabildeo = MOCK_CABILDEOS[cabildeoIndex] ?? MOCK_CABILDEOS[0]
+  const {cabildeoUri} = route.params
+  const {
+    data: cabildeo = null,
+    isFetched,
+    isLoading,
+    isError,
+    refetch,
+  } = useCabildeoQuery(cabildeoUri)
 
   const [selectedRep, setSelectedRep] = useState<string | null>(null)
   const [hasDelegated, setHasDelegated] = useState(false)
@@ -76,6 +86,50 @@ export function DelegateVoteScreen({route, navigation}: Props) {
     () => MOCK_REPRESENTATIVES.find(r => r.did === selectedRep),
     [selectedRep],
   )
+
+  if (!cabildeo && (isLoading || !isFetched || isError)) {
+    return (
+      <Layout.Screen testID="delegateVoteScreen">
+        <Layout.Header.Outer noBottomBorder>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              <Trans>Delegar Voto</Trans>
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={isLoading || !isFetched}
+          isError={isError}
+          onRetry={refetch}
+          emptyType="page"
+          emptyMessage="Estamos cargando el cabildeo para delegación."
+        />
+      </Layout.Screen>
+    )
+  }
+
+  if (!cabildeo) {
+    return (
+      <Layout.Screen testID="delegateVoteScreen">
+        <Layout.Header.Outer noBottomBorder>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              <Trans>Delegar Voto</Trans>
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={false}
+          isError={false}
+          emptyType="page"
+          emptyTitle="Cabildeo no disponible"
+          emptyMessage="No se puede delegar porque este cabildeo ya no está disponible."
+        />
+      </Layout.Screen>
+    )
+  }
 
   return (
     <Layout.Screen testID="delegateVoteScreen">
@@ -96,15 +150,23 @@ export function DelegateVoteScreen({route, navigation}: Props) {
         contentContainerStyle={styles.content}>
         <Layout.Center style={styles.center}>
           {/* Explainer */}
-          <View style={[styles.explainer, {backgroundColor: '#FF9500' + '10', borderColor: '#FF9500' + '30'}]}>
+          <View
+            style={[
+              styles.explainer,
+              {
+                backgroundColor: '#FF9500' + '10',
+                borderColor: '#FF9500' + '30',
+              },
+            ]}>
             <Text style={[styles.explainerTitle, {color: '#FF9500'}]}>
               √ Votación Cuadrática
             </Text>
             <Text style={[styles.explainerText, t.atoms.text_contrast_medium]}>
-              Tu voto directo vale <Text style={[{fontWeight: '900'}, t.atoms.text]}>1.0</Text>.
+              Tu voto directo vale{' '}
+              <Text style={[{fontWeight: '900'}, t.atoms.text]}>1.0</Text>.
               {'\n'}Al delegar, el poder de tu representante crece como{' '}
-              <Text style={[{fontWeight: '900'}, t.atoms.text]}>√N</Text>
-              {' '}— incentivando la participación personal.
+              <Text style={[{fontWeight: '900'}, t.atoms.text]}>√N</Text> —
+              incentivando la participación personal.
             </Text>
           </View>
 
@@ -120,22 +182,38 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                   Tu voto directo
                 </Text>
               </View>
-              <View style={[styles.powerDivider, {backgroundColor: t.palette.contrast_100}]} />
+              <View
+                style={[
+                  styles.powerDivider,
+                  {backgroundColor: t.palette.contrast_100},
+                ]}
+              />
               <View style={styles.powerItem}>
                 <Text style={[styles.powerValue, {color: '#FF9500'}]}>
                   {selectedRepData
-                    ? calcQuadraticPower(selectedRepData.delegationCount).toFixed(1)
+                    ? calcQuadraticPower(
+                        selectedRepData.delegationCount,
+                      ).toFixed(1)
                     : '—'}
                 </Text>
                 <Text style={[styles.powerLabel, t.atoms.text_contrast_medium]}>
                   Poder del delegado
                 </Text>
               </View>
-              <View style={[styles.powerDivider, {backgroundColor: t.palette.contrast_100}]} />
+              <View
+                style={[
+                  styles.powerDivider,
+                  {backgroundColor: t.palette.contrast_100},
+                ]}
+              />
               <View style={styles.powerItem}>
                 <Text style={[styles.powerValue, {color: '#AF52DE'}]}>
                   {selectedRepData
-                    ? (1.0 / calcQuadraticPower(selectedRepData.delegationCount) * 100).toFixed(0) + '%'
+                    ? (
+                        (1.0 /
+                          calcQuadraticPower(selectedRepData.delegationCount)) *
+                        100
+                      ).toFixed(0) + '%'
                     : '—'}
                 </Text>
                 <Text style={[styles.powerLabel, t.atoms.text_contrast_medium]}>
@@ -169,7 +247,15 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                     <Text style={[styles.scaleN, t.atoms.text_contrast_medium]}>
                       {n}
                     </Text>
-                    <Text style={[styles.scalePower, {color: isHighlighted ? '#FF9500' : t.palette.contrast_300}]}>
+                    <Text
+                      style={[
+                        styles.scalePower,
+                        {
+                          color: isHighlighted
+                            ? '#FF9500'
+                            : t.palette.contrast_300,
+                        },
+                      ]}>
                       √{power.toFixed(1)}
                     </Text>
                   </View>
@@ -187,7 +273,11 @@ export function DelegateVoteScreen({route, navigation}: Props) {
           </Text>
 
           {hasDelegated ? (
-            <View style={[styles.delegatedConfirm, {borderColor: '#34C759' + '40'}]}>
+            <View
+              style={[
+                styles.delegatedConfirm,
+                {borderColor: '#34C759' + '40'},
+              ]}>
               <Text style={[styles.delegatedTitle, {color: '#34C759'}]}>
                 ✅ Voto delegado exitosamente
               </Text>
@@ -244,10 +334,15 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                         <Text style={[styles.repName, t.atoms.text]}>
                           {rep.displayName}
                         </Text>
-                        <Text style={[styles.repHandle, t.atoms.text_contrast_medium]}>
+                        <Text
+                          style={[
+                            styles.repHandle,
+                            t.atoms.text_contrast_medium,
+                          ]}>
                           {rep.handle}
                         </Text>
-                        <Text style={[styles.repBio, t.atoms.text_contrast_medium]}>
+                        <Text
+                          style={[styles.repBio, t.atoms.text_contrast_medium]}>
                           {rep.bio}
                         </Text>
                       </View>
@@ -258,27 +353,41 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                           <Text style={[styles.repStatValue, t.atoms.text]}>
                             {rep.delegationCount}
                           </Text>
-                          <Text style={[styles.repStatLabel, t.atoms.text_contrast_medium]}>
+                          <Text
+                            style={[
+                              styles.repStatLabel,
+                              t.atoms.text_contrast_medium,
+                            ]}>
                             delegaciones
                           </Text>
                         </View>
 
                         {/* Power */}
                         <View style={styles.repStatItem}>
-                          <Text style={[styles.repStatValue, {color: '#FF9500'}]}>
+                          <Text
+                            style={[styles.repStatValue, {color: '#FF9500'}]}>
                             √{power.toFixed(1)}
                           </Text>
-                          <Text style={[styles.repStatLabel, t.atoms.text_contrast_medium]}>
+                          <Text
+                            style={[
+                              styles.repStatLabel,
+                              t.atoms.text_contrast_medium,
+                            ]}>
                             poder actual
                           </Text>
                         </View>
 
                         {/* Power if you delegate */}
                         <View style={styles.repStatItem}>
-                          <Text style={[styles.repStatValue, {color: '#34C759'}]}>
+                          <Text
+                            style={[styles.repStatValue, {color: '#34C759'}]}>
                             →√{newPower.toFixed(1)}
                           </Text>
-                          <Text style={[styles.repStatLabel, t.atoms.text_contrast_medium]}>
+                          <Text
+                            style={[
+                              styles.repStatLabel,
+                              t.atoms.text_contrast_medium,
+                            ]}>
                             con tu voto
                           </Text>
                         </View>
@@ -289,7 +398,11 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                             styles.compassBadge,
                             {backgroundColor: t.palette.contrast_50},
                           ]}>
-                          <Text style={[styles.compassBadgeText, t.atoms.text_contrast_medium]}>
+                          <Text
+                            style={[
+                              styles.compassBadgeText,
+                              t.atoms.text_contrast_medium,
+                            ]}>
                             🧭 {rep.compassQuadrant}
                           </Text>
                         </View>
@@ -332,9 +445,7 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                       : t.palette.contrast_200,
                   },
                 ]}>
-                <Text style={styles.delegateBtnText}>
-                  🤝 Delegar mi voto
-                </Text>
+                <Text style={styles.delegateBtnText}>🤝 Delegar mi voto</Text>
                 {selectedRepData && (
                   <Text style={styles.delegateBtnSub}>
                     a {selectedRepData.displayName} · nuevo poder: √
@@ -383,7 +494,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 20,
   },
-  powerTitle: {fontSize: 13, fontWeight: '900', marginBottom: 12, textAlign: 'center'},
+  powerTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
   powerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -391,7 +507,12 @@ const styles = StyleSheet.create({
   },
   powerItem: {flex: 1, alignItems: 'center'},
   powerValue: {fontSize: 28, fontWeight: '900'},
-  powerLabel: {fontSize: 10, fontWeight: '600', marginTop: 2, textAlign: 'center'},
+  powerLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
+    textAlign: 'center',
+  },
   powerDivider: {width: 1, height: 40},
 
   // Scale
@@ -427,7 +548,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   delegatedTitle: {fontSize: 18, fontWeight: '900', marginBottom: 6},
-  delegatedSub: {fontSize: 13, textAlign: 'center', lineHeight: 18, marginBottom: 14},
+  delegatedSub: {
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
   revokeButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,

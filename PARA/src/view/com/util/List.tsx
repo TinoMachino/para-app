@@ -1,4 +1,4 @@
-import React, {memo} from 'react'
+import {forwardRef, memo, useMemo} from 'react'
 import {RefreshControl, type ViewToken} from 'react-native'
 import {
   type FlatListPropsWithLayout,
@@ -43,7 +43,7 @@ export type ListRef = React.RefObject<FlatList_INTERNAL | null>
 
 const SCROLLED_DOWN_LIMIT = 200
 
-let List = React.forwardRef<ListMethods, ListProps>(
+let List = forwardRef<ListMethods, ListProps>(
   (
     {
       onScrolledDownChange,
@@ -106,7 +106,7 @@ let List = React.forwardRef<ListMethods, ListProps>(
       },
     })
 
-    const [onViewableItemsChanged, viewabilityConfig] = React.useMemo(() => {
+    const [onViewableItemsChanged, viewabilityConfig] = useMemo(() => {
       if (!onItemSeen) {
         return [undefined, undefined]
       }

@@ -9,16 +9,16 @@ import {
 const CUSTOM_PALETTE: Palette = {
   ...DEFAULT_PALETTE,
   // Override primary colors with custom values
-  primary_25: 'rgba(72, 38, 127, 0.08)',   // Purple tint
+  primary_25: 'rgba(72, 38, 127, 0.08)', // Purple tint
   primary_50: 'rgba(72, 38, 127, 0.12)',
   primary_100: 'rgba(72, 38, 127, 0.20)',
   primary_200: 'rgba(72, 38, 127, 0.35)',
   primary_300: 'rgba(72, 38, 127, 0.50)',
   primary_400: 'rgba(72, 38, 127, 0.70)',
-  primary_500: '#474652',                  // Main color
-  primary_600: '#48267F',                  // From blue4
-  primary_700: '#2E2033',                  // From blue5
-  primary_800: '#281D33',                  // From blue6
+  primary_500: '#474652', // Main color
+  primary_600: '#48267F', // From blue4
+  primary_700: '#2E2033', // From blue5
+  primary_800: '#281D33', // From blue6
   primary_900: '#1a141f',
   primary_950: '#0f0a14',
   primary_975: '#08050a',
@@ -34,10 +34,10 @@ const CUSTOM_SUBDUED_PALETTE: Palette = {
   primary_200: 'rgba(72, 38, 127, 0.35)',
   primary_300: 'rgba(72, 38, 127, 0.50)',
   primary_400: 'rgba(72, 38, 127, 0.70)',
-  primary_500: '#474652',                  // Main color
-  primary_600: '#48267F',                  // From blue4
-  primary_700: '#2E203B',                  // From blue5
-  primary_800: '#281D33',                  // From blue6
+  primary_500: '#474652', // Main color
+  primary_600: '#48267F', // From blue4
+  primary_700: '#2E203B', // From blue5
+  primary_800: '#281D33', // From blue6
   primary_900: '#1a141f',
   primary_950: '#0f0a14',
   primary_975: '#08050a',

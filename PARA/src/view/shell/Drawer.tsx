@@ -1,31 +1,31 @@
-import React, { type ComponentProps, type JSX } from 'react'
-import { Linking, ScrollView, TouchableOpacity, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {memo, useCallback} from 'react'
+import {Linking, ScrollView, TouchableOpacity, View} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg, plural} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Plural, Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
-import { StackActions, useNavigation } from '@react-navigation/native'
+import {StackActions, useNavigation} from '@react-navigation/native'
 
-import { useActorStatus } from '#/lib/actor-status'
-import { FEEDBACK_FORM_URL, HELP_DESK_URL } from '#/lib/constants'
-import { type PressableScale } from '#/lib/custom-animations/PressableScale'
-import { useNavigationTabState } from '#/lib/hooks/useNavigationTabState'
-import { getTabState, TabState } from '#/lib/routes/helpers'
-import { type NavigationProp } from '#/lib/routes/types'
-import { sanitizeHandle } from '#/lib/strings/handles'
-import { colors } from '#/lib/styles'
-import { emitSoftReset } from '#/state/events'
-import { useKawaiiMode } from '#/state/preferences/kawaii'
-import { useUnreadNotifications } from '#/state/queries/notifications/unread'
-import { useProfileQuery } from '#/state/queries/profile'
-import { type SessionAccount, useSession } from '#/state/session'
-import { useSetDrawerOpen } from '#/state/shell'
-import { formatCount } from '#/view/com/util/numeric/format'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { NavSignupCard } from '#/view/shell/NavSignupCard'
-import { atoms as a, tokens, useTheme, web } from '#/alf'
-import { Button, ButtonIcon, ButtonText } from '#/components/Button'
-import { Divider } from '#/components/Divider'
+import {useActorStatus} from '#/lib/actor-status'
+import {FEEDBACK_FORM_URL, HELP_DESK_URL} from '#/lib/constants'
+import {type PressableScale} from '#/lib/custom-animations/PressableScale'
+import {useNavigationTabState} from '#/lib/hooks/useNavigationTabState'
+import {getTabState, TabState} from '#/lib/routes/helpers'
+import {type NavigationProp} from '#/lib/routes/types'
+import {sanitizeHandle} from '#/lib/strings/handles'
+import {colors} from '#/lib/styles'
+import {emitSoftReset} from '#/state/events'
+import {useKawaiiMode} from '#/state/preferences/kawaii'
+import {useUnreadNotifications} from '#/state/queries/notifications/unread'
+import {useProfileQuery} from '#/state/queries/profile'
+import {type SessionAccount, useSession} from '#/state/session'
+import {useSetDrawerOpen} from '#/state/shell'
+import {formatCount} from '#/view/com/util/numeric/format'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {NavSignupCard} from '#/view/shell/NavSignupCard'
+import {atoms as a, tokens, useTheme, web} from '#/alf'
+import {Button, ButtonIcon, ButtonText} from '#/components/Button'
+import {Divider} from '#/components/Divider'
 import {
   Book_Filled_Corner0_Rounded as BookFilled,
   Book_Stroke2_Corner0_Rounded as Book,
@@ -34,8 +34,8 @@ import {
   Bell_Filled_Corner0_Rounded as BellFilled,
   Bell_Stroke2_Corner0_Rounded as Bell,
 } from '#/components/icons/Bell'
-import { Bookmark, BookmarkFilled } from '#/components/icons/Bookmark'
-import { BulletList_Stroke2_Corner0_Rounded as List } from '#/components/icons/BulletList'
+import {Bookmark, BookmarkFilled} from '#/components/icons/Bookmark'
+import {BulletList_Stroke2_Corner0_Rounded as List} from '#/components/icons/BulletList'
 import {
   CommunityIcon_Filled as CommunityFilled,
   CommunityIcon_Stroke as Community,
@@ -48,22 +48,22 @@ import {
   HomeOpen_Filled_Corner0_Rounded as HomeFilled,
   HomeOpen_Stoke2_Corner0_Rounded as Home,
 } from '#/components/icons/HomeOpen'
-import { MagnifyingGlass_Filled_Stroke2_Corner0_Rounded as MagnifyingGlassFilled } from '#/components/icons/MagnifyingGlass'
-import { MagnifyingGlass_Stroke2_Corner0_Rounded as MagnifyingGlass } from '#/components/icons/MagnifyingGlass'
+import {MagnifyingGlass_Filled_Stroke2_Corner0_Rounded as MagnifyingGlassFilled} from '#/components/icons/MagnifyingGlass'
+import {MagnifyingGlass_Stroke2_Corner0_Rounded as MagnifyingGlass} from '#/components/icons/MagnifyingGlass'
 import {
   Message_Stroke2_Corner0_Rounded as Message,
   Message_Stroke2_Corner0_Rounded_Filled as MessageFilled,
 } from '#/components/icons/Message'
-import { SettingsGear2_Stroke2_Corner0_Rounded as Settings } from '#/components/icons/SettingsGear2'
+import {SettingsGear2_Stroke2_Corner0_Rounded as Settings} from '#/components/icons/SettingsGear2'
 import {
   UserCircle_Filled_Corner0_Rounded as UserCircleFilled,
   UserCircle_Stroke2_Corner0_Rounded as UserCircle,
 } from '#/components/icons/UserCircle'
-import { InlineLinkText } from '#/components/Link'
-import { Text } from '#/components/Typography'
-import { useSimpleVerificationState } from '#/components/verification'
-import { VerificationCheck } from '#/components/verification/VerificationCheck'
-import { IS_WEB } from '#/env'
+import {InlineLinkText} from '#/components/Link'
+import {Text} from '#/components/Typography'
+import {useSimpleVerificationState} from '#/components/verification'
+import {VerificationCheck} from '#/components/verification/VerificationCheck'
+import {IS_WEB} from '#/env'
 
 const iconWidth = 26
 
@@ -74,11 +74,11 @@ let DrawerProfileCard = ({
   account: SessionAccount
   onPressProfile: () => void
 }): React.ReactNode => {
-  const { _, i18n } = useLingui()
+  const {_, i18n} = useLingui()
   const t = useTheme()
-  const { data: profile } = useProfileQuery({ did: account.did })
-  const verification = useSimpleVerificationState({ profile })
-  const { isActive: live } = useActorStatus(profile)
+  const {data: profile} = useProfileQuery({did: account.did})
+  const verification = useSimpleVerificationState({profile})
+  const {isActive: live} = useActorStatus(profile)
 
   return (
     <TouchableOpacity
@@ -148,10 +148,10 @@ let DrawerProfileCard = ({
     </TouchableOpacity>
   )
 }
-DrawerProfileCard = React.memo(DrawerProfileCard)
-export { DrawerProfileCard }
+DrawerProfileCard = memo(DrawerProfileCard)
+export {DrawerProfileCard}
 
-let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
+let DrawerContent = ({}: React.PropsWithoutRef<{}>): React.ReactNode => {
   const t = useTheme()
   const insets = useSafeAreaInsets()
   const setDrawerOpen = useSetDrawerOpen()
@@ -166,19 +166,19 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
     isAtBase,
     isAtCommunities,
   } = useNavigationTabState()
-  const { hasSession, currentAccount } = useSession()
+  const {hasSession, currentAccount} = useSession()
 
   // events
   // =
 
-  const onPressTab = React.useCallback(
+  const onPressTab = useCallback(
     (tab: 'Home' | 'Search' | 'Notifications' | 'MyProfile') => {
       const state = navigation.getState()
       setDrawerOpen(false)
       if (IS_WEB) {
         // hack because we have flat navigator for web and MyProfile does not exist on the web navigator -ansh
         if (tab === 'MyProfile') {
-          navigation.navigate('Profile', { name: currentAccount!.handle })
+          navigation.navigate('Profile', {name: currentAccount!.handle})
         } else {
           // @ts-expect-error struggles with string unions, apparently
           navigation.navigate(tab)
@@ -201,7 +201,7 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
             // fallback: reset navigation
             navigation.reset({
               index: 0,
-              routes: [{ name: `${tab}Tab` }],
+              routes: [{name: `${tab}Tab`}],
             })
           }
         } else {
@@ -212,53 +212,50 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
     [navigation, setDrawerOpen, currentAccount],
   )
 
-  const onPressHome = React.useCallback(() => onPressTab('Home'), [onPressTab])
+  const onPressHome = useCallback(() => onPressTab('Home'), [onPressTab])
 
-  const onPressSearch = React.useCallback(
-    () => onPressTab('Search'),
-    [onPressTab],
-  )
+  const onPressSearch = useCallback(() => onPressTab('Search'), [onPressTab])
 
-  const onPressMessages = React.useCallback(() => {
+  const onPressMessages = useCallback(() => {
     navigation.navigate('Messages', {})
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressNotifications = React.useCallback(
+  const onPressNotifications = useCallback(
     () => onPressTab('Notifications'),
     [onPressTab],
   )
 
-  const onPressProfile = React.useCallback(() => {
+  const onPressProfile = useCallback(() => {
     onPressTab('MyProfile')
   }, [onPressTab])
 
-  const onPressMyFeeds = React.useCallback(() => {
+  const onPressMyFeeds = useCallback(() => {
     navigation.navigate('Feeds')
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressLists = React.useCallback(() => {
+  const onPressLists = useCallback(() => {
     navigation.navigate('Lists')
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressBookmarks = React.useCallback(() => {
+  const onPressBookmarks = useCallback(() => {
     navigation.navigate('Bookmarks')
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressSettings = React.useCallback(() => {
+  const onPressSettings = useCallback(() => {
     navigation.navigate('Settings')
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressCommunities = React.useCallback(() => {
+  const onPressCommunities = useCallback(() => {
     navigation.navigate('Communities')
     setDrawerOpen(false)
   }, [navigation, setDrawerOpen])
 
-  const onPressBase = React.useCallback(() => {
+  const onPressBase = useCallback(() => {
     if (IS_WEB) {
       navigation.navigate('Base')
     } else {
@@ -278,7 +275,7 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
         } else {
           navigation.reset({
             index: 0,
-            routes: [{ name: 'BaseTab' }],
+            routes: [{name: 'BaseTab'}],
           })
         }
       } else {
@@ -287,7 +284,7 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
     }
   }, [navigation, setDrawerOpen])
 
-  const onPressFeedback = React.useCallback(() => {
+  const onPressFeedback = useCallback(() => {
     Linking.openURL(
       FEEDBACK_FORM_URL({
         email: currentAccount?.email,
@@ -296,7 +293,7 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
     )
   }, [currentAccount])
 
-  const onPressHelp = React.useCallback(() => {
+  const onPressHelp = useCallback(() => {
     Linking.openURL(HELP_DESK_URL)
   }, [])
 
@@ -379,8 +376,8 @@ let DrawerContent = ({ }: React.PropsWithoutRef<{}>): React.ReactNode => {
     </View>
   )
 }
-DrawerContent = React.memo(DrawerContent)
-export { DrawerContent }
+DrawerContent = memo(DrawerContent)
+export {DrawerContent}
 
 let DrawerFooter = ({
   onPressFeedback,
@@ -389,7 +386,7 @@ let DrawerFooter = ({
   onPressFeedback: () => void
   onPressHelp: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const insets = useSafeAreaInsets()
   return (
     <View
@@ -433,7 +430,7 @@ let DrawerFooter = ({
     </View>
   )
 }
-DrawerFooter = React.memo(DrawerFooter)
+DrawerFooter = memo(DrawerFooter)
 
 interface MenuItemProps extends ComponentProps<typeof PressableScale> {
   icon: JSX.Element
@@ -449,7 +446,7 @@ let SearchMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -466,7 +463,7 @@ let SearchMenuItem = ({
     />
   )
 }
-SearchMenuItem = React.memo(SearchMenuItem)
+SearchMenuItem = memo(SearchMenuItem)
 
 let HomeMenuItem = ({
   isActive,
@@ -475,7 +472,7 @@ let HomeMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -492,7 +489,7 @@ let HomeMenuItem = ({
     />
   )
 }
-HomeMenuItem = React.memo(HomeMenuItem)
+HomeMenuItem = memo(HomeMenuItem)
 
 let ChatMenuItem = ({
   isActive,
@@ -501,7 +498,7 @@ let ChatMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -518,7 +515,7 @@ let ChatMenuItem = ({
     />
   )
 }
-ChatMenuItem = React.memo(ChatMenuItem)
+ChatMenuItem = memo(ChatMenuItem)
 
 let NotificationsMenuItem = ({
   isActive,
@@ -527,7 +524,7 @@ let NotificationsMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   const numUnreadNotifications = useUnreadNotifications()
   return (
@@ -544,11 +541,11 @@ let NotificationsMenuItem = ({
         numUnreadNotifications === ''
           ? ''
           : _(
-            plural(numUnreadNotifications ?? 0, {
-              one: '# unread item',
-              other: '# unread items',
-            }),
-          )
+              plural(numUnreadNotifications ?? 0, {
+                one: '# unread item',
+                other: '# unread items',
+              }),
+            )
       }
       count={numUnreadNotifications}
       bold={isActive}
@@ -556,7 +553,7 @@ let NotificationsMenuItem = ({
     />
   )
 }
-NotificationsMenuItem = React.memo(NotificationsMenuItem)
+NotificationsMenuItem = memo(NotificationsMenuItem)
 
 let FeedsMenuItem = ({
   isActive,
@@ -565,7 +562,7 @@ let FeedsMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -582,10 +579,10 @@ let FeedsMenuItem = ({
     />
   )
 }
-FeedsMenuItem = React.memo(FeedsMenuItem)
+FeedsMenuItem = memo(FeedsMenuItem)
 
-let ListsMenuItem = ({ onPress }: { onPress: () => void }): React.ReactNode => {
-  const { _ } = useLingui()
+let ListsMenuItem = ({onPress}: {onPress: () => void}): React.ReactNode => {
+  const {_} = useLingui()
   const t = useTheme()
 
   return (
@@ -596,7 +593,7 @@ let ListsMenuItem = ({ onPress }: { onPress: () => void }): React.ReactNode => {
     />
   )
 }
-ListsMenuItem = React.memo(ListsMenuItem)
+ListsMenuItem = memo(ListsMenuItem)
 
 let BookmarksMenuItem = ({
   isActive,
@@ -605,7 +602,7 @@ let BookmarksMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
 
   return (
@@ -617,12 +614,12 @@ let BookmarksMenuItem = ({
           <Bookmark style={[t.atoms.text]} width={iconWidth} />
         )
       }
-      label={_(msg({ message: 'Saved', context: 'link to bookmarks screen' }))}
+      label={_(msg({message: 'Saved', context: 'link to bookmarks screen'}))}
       onPress={onPress}
     />
   )
 }
-BookmarksMenuItem = React.memo(BookmarksMenuItem)
+BookmarksMenuItem = memo(BookmarksMenuItem)
 
 let ProfileMenuItem = ({
   isActive,
@@ -631,7 +628,7 @@ let ProfileMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -647,10 +644,10 @@ let ProfileMenuItem = ({
     />
   )
 }
-ProfileMenuItem = React.memo(ProfileMenuItem)
+ProfileMenuItem = memo(ProfileMenuItem)
 
-let SettingsMenuItem = ({ onPress }: { onPress: () => void }): React.ReactNode => {
-  const { _ } = useLingui()
+let SettingsMenuItem = ({onPress}: {onPress: () => void}): React.ReactNode => {
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -660,7 +657,7 @@ let SettingsMenuItem = ({ onPress }: { onPress: () => void }): React.ReactNode =
     />
   )
 }
-SettingsMenuItem = React.memo(SettingsMenuItem)
+SettingsMenuItem = memo(SettingsMenuItem)
 
 let CommunitiesMenuItem = ({
   isActive, // Add this prop
@@ -669,7 +666,7 @@ let CommunitiesMenuItem = ({
   isActive: boolean // Add this type
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -686,7 +683,7 @@ let CommunitiesMenuItem = ({
     />
   )
 }
-CommunitiesMenuItem = React.memo(CommunitiesMenuItem)
+CommunitiesMenuItem = memo(CommunitiesMenuItem)
 
 let BaseMenuItem = ({
   isActive,
@@ -695,7 +692,7 @@ let BaseMenuItem = ({
   isActive: boolean
   onPress: () => void
 }): React.ReactNode => {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   return (
     <MenuItem
@@ -712,9 +709,9 @@ let BaseMenuItem = ({
     />
   )
 }
-BaseMenuItem = React.memo(BaseMenuItem)
+BaseMenuItem = memo(BaseMenuItem)
 
-function MenuItem({ icon, label, count, bold, onPress }: MenuItemProps) {
+function MenuItem({icon, label, count, bold, onPress}: MenuItemProps) {
   const t = useTheme()
   return (
     <Button
@@ -722,7 +719,7 @@ function MenuItem({ icon, label, count, bold, onPress }: MenuItemProps) {
       onPress={onPress}
       accessibilityRole="tab"
       label={label}>
-      {({ hovered, pressed }) => (
+      {({hovered, pressed}) => (
         <View
           style={[
             a.flex_1,
@@ -741,7 +738,7 @@ function MenuItem({ icon, label, count, bold, onPress }: MenuItemProps) {
                   a.absolute,
                   a.inset_0,
                   a.align_end,
-                  { top: -4, right: a.gap_sm.gap * -1 },
+                  {top: -4, right: a.gap_sm.gap * -1},
                 ]}>
                 <View
                   style={[
@@ -787,7 +784,7 @@ function MenuItem({ icon, label, count, bold, onPress }: MenuItemProps) {
 }
 
 function ExtraLinks() {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   const kawaii = useKawaiiMode()
 

@@ -2,8 +2,8 @@ import {useCallback} from 'react'
 import {View} from 'react-native'
 import {Image} from 'expo-image'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {urls} from '#/lib/constants'
 import {logger} from '#/logger'
@@ -131,8 +131,7 @@ export function InitialVerificationAnnouncement() {
             <View style={[a.gap_sm]}>
               <Text style={[a.leading_snug, a.text_md]}>
                 <Trans>
-                  PARA will proactively verify notable and authentic
-                  accounts.
+                  PARA will proactively verify notable and authentic accounts.
                 </Trans>
               </Text>
               <Text style={[a.leading_snug, a.text_md]}>

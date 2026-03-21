@@ -1,5 +1,5 @@
-import {useState} from 'react'
-import {StyleSheet, View} from 'react-native'
+import {useMemo, useState} from 'react'
+import {Platform, StyleSheet, View} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Animated, {
   interpolateColor,
@@ -12,12 +12,18 @@ import Animated, {
 
 import {Text} from '#/view/com/util/text/Text'
 import {useTheme} from '#/alf'
-import {ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeft} from '#/components/icons/Arrow'
-import {ArrowRight_Stroke2_Corner0_Rounded as ArrowRight} from '#/components/icons/Arrow'
+import {
+  ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeft,
+  ArrowRight_Stroke2_Corner0_Rounded as ArrowRight,
+} from '#/components/icons/Arrow'
 
 interface VotingButtonHorizontalProps {
   initialVote?: number
   onVoteChange?: (vote: number) => void
+}
+
+type WebEventBoundary = {
+  stopPropagation?: () => void
 }
 
 export function VotingButtonHorizontal({
@@ -90,7 +96,7 @@ export function VotingButtonHorizontal({
           ? '#FF4444'
           : t.atoms.text.color
     return {
-      color: withTiming(color as string),
+      color: withTiming(color),
     }
   })
 
@@ -110,8 +116,26 @@ export function VotingButtonHorizontal({
     }
   })
 
+  const webEventBlockers = useMemo(() => {
+    if (Platform.OS !== 'web') return {}
+
+    const stopPropagation = (event: WebEventBoundary) => {
+      event.stopPropagation?.()
+    }
+
+    return {
+      onClickCapture: stopPropagation,
+      onMouseDown: stopPropagation,
+      onMouseUp: stopPropagation,
+      onPointerDown: stopPropagation,
+      onPointerUp: stopPropagation,
+      onStartShouldSetResponder: () => true,
+      onResponderTerminationRequest: () => false,
+    }
+  }, [])
+
   return (
-    <View style={styles.wrapper}>
+    <View style={styles.wrapper} {...webEventBlockers}>
       <Animated.View style={[styles.track, trackStyle]} />
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.control, controlStyle]}>

@@ -11,15 +11,18 @@ import {
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
+import {publishCabildeo} from '#/lib/api/cabildeo'
 import {type CabildeoOption} from '#/lib/api/para-lexicons'
-import {type CommonNavigatorParams, type NavigationProp, type NativeStackScreenProps} from '#/lib/routes/types'
+import {
+  type CommonNavigatorParams,
+  type NativeStackScreenProps,
+  type NavigationProp,
+} from '#/lib/routes/types'
+import {useAgent} from '#/state/session'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
-
-import {publishCabildeo} from '#/lib/api/cabildeo'
-import {useAgent} from '#/state/session'
-import * as Toast from '#/view/com/util/Toast'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'CreateCabildeo'>
 
@@ -33,7 +36,7 @@ export function CreateCabildeoScreen(_props: Props) {
   const [community, setCommunity] = useState('')
   const [region, setRegion] = useState('')
   const [geoRestricted, setGeoRestricted] = useState(false)
-  
+
   const [options, setOptions] = useState<CabildeoOption[]>([
     {label: '', description: ''},
     {label: '', description: ''},
@@ -94,7 +97,16 @@ export function CreateCabildeoScreen(_props: Props) {
     } finally {
       setIsSubmitting(false)
     }
-  }, [agent, title, description, community, region, geoRestricted, options, navigation])
+  }, [
+    agent,
+    title,
+    description,
+    community,
+    region,
+    geoRestricted,
+    options,
+    navigation,
+  ])
 
   return (
     <Layout.Screen testID="createCabildeoScreen">
@@ -117,13 +129,17 @@ export function CreateCabildeoScreen(_props: Props) {
           style={styles.container}
           contentContainerStyle={styles.content}>
           <Layout.Center style={styles.center}>
-            
             {/* Title */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, t.atoms.text]}>Título *</Text>
               <TextInput
                 accessibilityRole="text"
-                style={[styles.input, t.atoms.bg_contrast_25, t.atoms.text, {fontSize: 18, fontWeight: '800'}]}
+                style={[
+                  styles.input,
+                  t.atoms.bg_contrast_25,
+                  t.atoms.text,
+                  {fontSize: 18, fontWeight: '800'},
+                ]}
                 placeholder="¿Qué problema debemos resolver?"
                 placeholderTextColor={t.palette.contrast_500}
                 value={title}
@@ -138,7 +154,12 @@ export function CreateCabildeoScreen(_props: Props) {
               <Text style={[styles.label, t.atoms.text]}>Descripción *</Text>
               <TextInput
                 accessibilityRole="text"
-                style={[styles.input, t.atoms.bg_contrast_25, t.atoms.text, {minHeight: 100}]}
+                style={[
+                  styles.input,
+                  t.atoms.bg_contrast_25,
+                  t.atoms.text,
+                  {minHeight: 100},
+                ]}
                 placeholder="Contexto, implicaciones y urgencia de la propuesta..."
                 placeholderTextColor={t.palette.contrast_500}
                 value={description}
@@ -153,6 +174,7 @@ export function CreateCabildeoScreen(_props: Props) {
               <View style={[styles.inputGroup, {flex: 1}]}>
                 <Text style={[styles.label, t.atoms.text]}>Comunidad *</Text>
                 <TextInput
+                  accessibilityLabel="Text input field"
                   style={[styles.input, t.atoms.bg_contrast_25, t.atoms.text]}
                   placeholder="p/Jalisco"
                   placeholderTextColor={t.palette.contrast_500}
@@ -162,8 +184,11 @@ export function CreateCabildeoScreen(_props: Props) {
                 />
               </View>
               <View style={[styles.inputGroup, {flex: 1}]}>
-                <Text style={[styles.label, t.atoms.text]}>Región (opcional)</Text>
+                <Text style={[styles.label, t.atoms.text]}>
+                  Región (opcional)
+                </Text>
                 <TextInput
+                  accessibilityLabel="Text input field"
                   style={[styles.input, t.atoms.bg_contrast_25, t.atoms.text]}
                   placeholder="Ej. CDMX"
                   placeholderTextColor={t.palette.contrast_500}
@@ -181,20 +206,48 @@ export function CreateCabildeoScreen(_props: Props) {
                 onPress={() => setGeoRestricted(prev => !prev)}
                 style={[
                   styles.toggleCard,
-                  geoRestricted ? {backgroundColor: '#FF3B30' + '15', borderColor: '#FF3B30'} : t.atoms.bg_contrast_25,
+                  geoRestricted
+                    ? {
+                        backgroundColor: '#FF3B30' + '15',
+                        borderColor: '#FF3B30',
+                      }
+                    : t.atoms.bg_contrast_25,
                 ]}>
                 <View style={styles.toggleRow}>
                   <Text style={{fontSize: 20}}>🔒</Text>
                   <View style={{flex: 1}}>
-                    <Text style={[styles.toggleLabel, geoRestricted ? {color: '#FF3B30'} : t.atoms.text]}>
+                    <Text
+                      style={[
+                        styles.toggleLabel,
+                        geoRestricted ? {color: '#FF3B30'} : t.atoms.text,
+                      ]}>
                       Restringir a residentes de {region}
                     </Text>
-                    <Text style={[styles.toggleSub, geoRestricted ? {color: '#FF3B30'} : t.atoms.text_contrast_medium]}>
+                    <Text
+                      style={[
+                        styles.toggleSub,
+                        geoRestricted
+                          ? {color: '#FF3B30'}
+                          : t.atoms.text_contrast_medium,
+                      ]}>
                       Solo usuarios verificados podrán votar o delegar.
                     </Text>
                   </View>
-                  <View style={[styles.radioOuter, geoRestricted ? {borderColor: '#FF3B30'} : {borderColor: t.palette.contrast_200}]}>
-                    {geoRestricted && <View style={[styles.radioInner, {backgroundColor: '#FF3B30'}]} />}
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      geoRestricted
+                        ? {borderColor: '#FF3B30'}
+                        : {borderColor: t.palette.contrast_200},
+                    ]}>
+                    {geoRestricted && (
+                      <View
+                        style={[
+                          styles.radioInner,
+                          {backgroundColor: '#FF3B30'},
+                        ]}
+                      />
+                    )}
                   </View>
                 </View>
               </TouchableOpacity>
@@ -202,35 +255,66 @@ export function CreateCabildeoScreen(_props: Props) {
 
             {/* Options */}
             <View style={styles.optionsSection}>
-              <Text style={[styles.sectionTitle, t.atoms.text]}>Opciones a Votar</Text>
-              
+              <Text style={[styles.sectionTitle, t.atoms.text]}>
+                Opciones a Votar
+              </Text>
+
               {options.map((opt, index) => (
-                <View key={index} style={[styles.optionCard, t.atoms.bg_contrast_25, {borderColor: t.palette.contrast_100}]}>
+                <View
+                  key={index}
+                  style={[
+                    styles.optionCard,
+                    t.atoms.bg_contrast_25,
+                    {borderColor: t.palette.contrast_100},
+                  ]}>
                   <View style={styles.optionHeader}>
-                    <Text style={[styles.optionIndex, t.atoms.text]}>Opción {index + 1}</Text>
+                    <Text style={[styles.optionIndex, t.atoms.text]}>
+                      Opción {index + 1}
+                    </Text>
                     {options.length > 2 && (
                       <TouchableOpacity
                         accessibilityRole="button"
                         onPress={() => handleRemoveOption(index)}>
-                        <Text style={{color: '#FF3B30', fontSize: 13, fontWeight: '700'}}>Eliminar</Text>
+                        <Text
+                          style={{
+                            color: '#FF3B30',
+                            fontSize: 13,
+                            fontWeight: '700',
+                          }}>
+                          Eliminar
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
                   <TextInput
                     accessibilityRole="text"
-                    style={[styles.input, t.atoms.bg, t.atoms.text, {marginBottom: 8, fontWeight: '700'}]}
+                    style={[
+                      styles.input,
+                      t.atoms.bg,
+                      t.atoms.text,
+                      {marginBottom: 8, fontWeight: '700'},
+                    ]}
                     placeholder="Resumen corto..."
                     placeholderTextColor={t.palette.contrast_500}
                     value={opt.label}
-                    onChangeText={val => handleUpdateOption(index, 'label', val)}
+                    onChangeText={val =>
+                      handleUpdateOption(index, 'label', val)
+                    }
                   />
                   <TextInput
                     accessibilityRole="text"
-                    style={[styles.input, t.atoms.bg, t.atoms.text, {minHeight: 60}]}
+                    style={[
+                      styles.input,
+                      t.atoms.bg,
+                      t.atoms.text,
+                      {minHeight: 60},
+                    ]}
                     placeholder="Detalles de la implementación..."
                     placeholderTextColor={t.palette.contrast_500}
                     value={opt.description}
-                    onChangeText={val => handleUpdateOption(index, 'description', val)}
+                    onChangeText={val =>
+                      handleUpdateOption(index, 'description', val)
+                    }
                     multiline
                   />
                 </View>
@@ -239,8 +323,15 @@ export function CreateCabildeoScreen(_props: Props) {
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleAddOption}
-                style={[styles.addOptionBtn, {borderColor: t.palette.primary_500}]}>
-                <Text style={[styles.addOptionText, {color: t.palette.primary_500}]}>
+                style={[
+                  styles.addOptionBtn,
+                  {borderColor: t.palette.primary_500},
+                ]}>
+                <Text
+                  style={[
+                    styles.addOptionText,
+                    {color: t.palette.primary_500},
+                  ]}>
                   + Añadir Opción
                 </Text>
               </TouchableOpacity>
@@ -254,13 +345,18 @@ export function CreateCabildeoScreen(_props: Props) {
               disabled={isSubmitting}
               style={[
                 styles.submitBtn,
-                {backgroundColor: isSubmitting ? t.palette.contrast_300 : t.palette.primary_500},
+                {
+                  backgroundColor: isSubmitting
+                    ? t.palette.contrast_300
+                    : t.palette.primary_500,
+                },
               ]}>
               <Text style={styles.submitBtnText}>
-                {isSubmitting ? 'Publicando...' : 'Publicar Cabildeo (Fase Borrador)'}
+                {isSubmitting
+                  ? 'Publicando...'
+                  : 'Publicar Cabildeo (Fase Borrador)'}
               </Text>
             </TouchableOpacity>
-
           </Layout.Center>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -321,7 +417,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   optionIndex: {fontSize: 12, fontWeight: '800'},
-  
+
   addOptionBtn: {
     padding: 14,
     borderRadius: 12,

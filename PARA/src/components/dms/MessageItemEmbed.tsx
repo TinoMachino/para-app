@@ -1,4 +1,4 @@
-import React from 'react'
+import {memo, type ReactNode} from 'react'
 import {useWindowDimensions, View} from 'react-native'
 import {type $Typed, type AppBskyEmbedRecord} from '@atproto/api'
 
@@ -11,7 +11,7 @@ let MessageItemEmbed = ({
   embed,
 }: {
   embed: $Typed<AppBskyEmbedRecord.View>
-}): React.ReactNode => {
+}): ReactNode => {
   const t = useTheme()
   const screen = useWindowDimensions()
 
@@ -43,5 +43,5 @@ let MessageItemEmbed = ({
     </MessageContextProvider>
   )
 }
-MessageItemEmbed = React.memo(MessageItemEmbed)
+MessageItemEmbed = memo(MessageItemEmbed)
 export {MessageItemEmbed}

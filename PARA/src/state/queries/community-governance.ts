@@ -7,7 +7,6 @@ import {
 } from '#/lib/api/para-lexicons'
 import {
   appendGovernanceHistoryEntry,
-  buildMockCommunityGovernance,
   canManageGovernance,
   communityGovernanceRkey,
   type CommunityGovernanceView,
@@ -32,27 +31,16 @@ export function useCommunityGovernanceQuery({
   communityId?: string
 }) {
   const agent = useAgent()
-  const {currentAccount} = useSession()
 
-  return useQuery<CommunityGovernanceView>({
+  return useQuery<CommunityGovernanceView | null>({
     staleTime: STALE.SECONDS.THIRTY,
     queryKey: communityGovernanceQueryKey(communityName, communityId),
-    queryFn: async () => {
-      const fetched =
-        (await fetchGovernanceFromXrpc({
-          agent,
-          communityName,
-          communityId,
-        })) ||
-        (await fetchGovernanceFromRepo({
-          agent,
-          repo: currentAccount?.did,
-          communityName,
-          communityId,
-        }))
-
-      return fetched || buildMockCommunityGovernance(communityName, communityId)
-    },
+    queryFn: async () =>
+      fetchGovernanceFromXrpc({
+        agent,
+        communityName,
+        communityId,
+      }),
   })
 }
 
@@ -79,8 +67,14 @@ export function useCommunityGovernanceMutation({
       }
 
       const current =
-        queryClient.getQueryData<CommunityGovernanceView>(queryKey) ||
-        buildMockCommunityGovernance(communityName, communityId)
+        queryClient.getQueryData<CommunityGovernanceView | null>(queryKey) ||
+        null
+
+      if (!current) {
+        throw new Error(
+          'No published governance record was found for this community.',
+        )
+      }
 
       if (!canManageGovernance(current, currentAccount.did)) {
         throw new Error(
@@ -91,7 +85,7 @@ export function useCommunityGovernanceMutation({
       const next = updater({
         ...current,
         updatedAt: new Date().toISOString(),
-        source: current.source === 'mock' ? 'repo' : current.source,
+        source: 'repo',
         repoDid: currentAccount.did,
       })
 
@@ -199,47 +193,7 @@ async function fetchGovernanceFromXrpc({
     }
 
     const json = await res.json()
-    return normalizeCommunityGovernance(
-      json,
-      communityName,
-      communityId,
-      'network',
-    )
-  } catch {
-    return null
-  }
-}
-
-async function fetchGovernanceFromRepo({
-  agent,
-  repo,
-  communityName,
-  communityId,
-}: {
-  agent: ReturnType<typeof useAgent>
-  repo?: string
-  communityName: string
-  communityId?: string
-}) {
-  if (!repo) return null
-
-  try {
-    const res = await agent.com.atproto.repo.getRecord({
-      repo,
-      collection: PARA_COMMUNITY_GOVERNANCE_COLLECTION,
-      rkey: communityGovernanceRkey(communityName),
-    })
-
-    return normalizeCommunityGovernance(
-      {
-        ...(res.data.value as object),
-        uri: res.data.uri,
-        repoDid: repo,
-      },
-      communityName,
-      communityId,
-      'repo',
-    )
+    return normalizeCommunityGovernance(json, communityName, communityId)
   } catch {
     return null
   }

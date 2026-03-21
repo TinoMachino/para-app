@@ -1,4 +1,3 @@
-import React, {useRef} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {useNavigation} from '@react-navigation/native'
 

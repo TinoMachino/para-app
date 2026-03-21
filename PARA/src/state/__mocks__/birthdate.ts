@@ -1,1 +1,1 @@
-export const snoozeBirthdateUpdateAllowedForDid = () => { }
+export const snoozeBirthdateUpdateAllowedForDid = () => {}

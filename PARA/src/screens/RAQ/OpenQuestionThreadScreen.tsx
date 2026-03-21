@@ -1,4 +1,4 @@
-import React from 'react'
+import {Fragment} from 'react'
 import {ScrollView, View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Trans} from '@lingui/react/macro'
@@ -78,7 +78,6 @@ export default function OpenQuestionThreadScreen() {
           </Layout.Header.TitleText>
         </Layout.Header.Content>
       </Layout.Header.Outer>
-
       <ScrollView
         contentContainerStyle={{
           minHeight: '100%',
@@ -91,7 +90,7 @@ export default function OpenQuestionThreadScreen() {
           {/* Comments Section - Using OpenQuestionReply */}
           <View>
             {MOCK_COMMENTS.map((comment, index) => (
-              <React.Fragment key={comment.id}>
+              <Fragment key={comment.id}>
                 <OpenQuestionReply
                   reply={comment}
                   isFirst={index === 0}
@@ -103,7 +102,7 @@ export default function OpenQuestionThreadScreen() {
                 {comment.replies?.map(nestedReply => (
                   <OpenQuestionReply key={nestedReply.id} reply={nestedReply} />
                 ))}
-              </React.Fragment>
+              </Fragment>
             ))}
           </View>
         </Layout.Center>

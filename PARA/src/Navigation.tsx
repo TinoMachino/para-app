@@ -81,6 +81,7 @@ import {BookmarksScreen} from '#/screens/Bookmarks'
 import {CabildeoDetailScreen} from '#/screens/Communities/CabildeoDetailScreen'
 import {CabildeoListScreen} from '#/screens/Communities/CabildeoListScreen'
 import {CommunitiesScreen} from '#/screens/Communities/CommunitiesScreen'
+import {CommunityAgentProfileScreen} from '#/screens/Communities/CommunityAgentProfileScreen'
 import {CommunityBadgesScreen} from '#/screens/Communities/CommunityBadgesScreen'
 import {CommunityProfileScreen} from '#/screens/Communities/CommunityProfileScreen'
 import {CommunityRAQScreen} from '#/screens/Communities/CommunityRAQScreen'
@@ -108,6 +109,7 @@ import {ModerationScreen} from '#/screens/Moderation'
 import {Screen as ModerationVerificationSettings} from '#/screens/Moderation/VerificationSettings'
 import {Screen as ModerationInteractionSettings} from '#/screens/ModerationInteractionSettings'
 import {NotificationsActivityListScreen} from '#/screens/Notifications/ActivityList'
+import {PostHighlightsScreen} from '#/screens/Post/PostHighlights'
 import {PostLikedByScreen} from '#/screens/Post/PostLikedBy'
 import {PostQuotesScreen} from '#/screens/Post/PostQuotes'
 import {PostRepostedByScreen} from '#/screens/Post/PostRepostedBy'
@@ -313,6 +315,13 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
       <Stack.Screen
         name="PostRepostedBy"
         getComponent={() => PostRepostedByScreen}
+        options={({route}) => ({
+          title: title(msg`Post by @${route.params.name}`),
+        })}
+      />
+      <Stack.Screen
+        name="PostHighlights"
+        getComponent={() => PostHighlightsScreen}
         options={({route}) => ({
           title: title(msg`Post by @${route.params.name}`),
         })}
@@ -650,6 +659,11 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
         name="AgentChat"
         getComponent={() => AgentChatScreen}
         options={{title: title(msg`Agent Chat`), requireAuth: true}}
+      />
+      <Stack.Screen
+        name="CommunityAgentProfile"
+        getComponent={() => CommunityAgentProfileScreen}
+        options={{title: title(msg`Agent Profile`)}}
       />
       <Stack.Screen
         name="MessagesSettings"
@@ -1075,11 +1089,6 @@ const FlatNavigator = ({
         name="CommunityProfile"
         getComponent={() => CommunityProfileScreen}
         options={{title: title(msg`Community`)}}
-      />
-      <Flat.Screen
-        name="CommunityBadges"
-        getComponent={() => CommunityBadgesScreen}
-        options={{title: title(msg`Community Badges`)}}
       />
       <Flat.Screen
         name="PolicyDetails"

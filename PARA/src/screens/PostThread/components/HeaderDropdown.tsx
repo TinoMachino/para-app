@@ -1,6 +1,6 @@
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {HITSLOP_10} from '#/lib/constants'
 import {logger} from '#/logger'

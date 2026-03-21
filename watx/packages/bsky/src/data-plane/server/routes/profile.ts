@@ -247,10 +247,14 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
   },
 
   async getParaCommunityGovernance(req) {
-    const normalizeCommunity = (value: string) =>
-      value.trim().toLowerCase().replace(/^p\//, '')
-    const normCommunity = normalizeCommunity(req.community)
+    const normCommunity = normalizeCommunityKey(req.community)
     const limit = req.limit > 0 ? req.limit : 50
+
+    const publishedGovernance = await getPublishedGovernanceRecord({
+      db,
+      community: req.community,
+      normalizedCommunity: normCommunity,
+    })
 
     const members = await db.db
       .selectFrom('para_status as ps')
@@ -260,7 +264,7 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
       )
       .leftJoin('para_profile_stats as s', 's.did', 'ps.did')
       .where(
-        sql`lower(regexp_replace(coalesce(ps.community, ''), '^p/', ''))`,
+        sql`regexp_replace(lower(translate(regexp_replace(coalesce(ps.community, ''), '^p/', '', 'i'), ${COMMUNITY_TRANSLATION_SOURCE}, ${COMMUNITY_TRANSLATION_TARGET})), '[^a-z0-9]+', '', 'g')`,
         '=',
         normCommunity,
       )
@@ -319,63 +323,45 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
       }
     })
 
-    const moderators = mapped.slice(0, 3).map((member, index) => ({
-      member,
-      role:
-        index === 0
-          ? 'Lead moderator'
-          : index === 1
-            ? 'Case moderator'
-            : 'Process moderator',
-      badge:
-        index === 0
-          ? 'Moderation Lead'
-          : index === 1
-            ? 'Safety & Appeals'
-            : 'Procedure',
-    }))
+    const memberByDid = keyBy(mapped, 'did')
+    const moderators = (publishedGovernance?.moderators || []).map(
+      (moderator) => ({
+        member: resolveGovernanceMember(moderator, memberByDid),
+        role: moderator.role || 'Moderator',
+        badge: moderator.badge || 'Moderator',
+      }),
+    )
 
-    const partyMembers = mapped.filter((member) => !!member.party)
-    const officials = (partyMembers.length ? partyMembers : mapped)
-      .slice(0, 3)
-      .map((member, index) => ({
-        member,
-        office:
-          index === 0
-            ? 'Official representative'
-            : index === 1
-              ? 'Policy coordinator'
-              : 'Matter coordinator',
-        mandate:
-          index === 0
-            ? 'Policy comms and final statements'
-            : index === 1
-              ? 'Tracks active policy records and escalations'
-              : 'Curates local incidents and issue threads',
-      }))
+    const officials = (publishedGovernance?.officials || []).map(
+      (official) => ({
+        member: resolveGovernanceMember(official, memberByDid),
+        office: official.office || 'Representative',
+        mandate: official.mandate || 'No mandate published yet.',
+      }),
+    )
 
-    const deputySpecs = [
-      { tier: 'Tier I', role: 'Chief Digital Deputy' },
-      { tier: 'Tier II', role: 'Policy Deputy' },
-      { tier: 'Tier II', role: 'Matter Deputy' },
-      { tier: 'Tier III', role: 'Mobilization Deputy' },
-    ]
-    const deputies = deputySpecs
-      .map((spec, index) => {
-        const active = mapped[index] ?? mapped[0]
-        if (!active) return null
-        const applicants = mapped
-          .slice(index + 1, index + 4)
-          .map((member) => member.displayName || member.handle || member.did)
-        return {
-          tier: spec.tier,
-          role: spec.role,
-          activeHolder: active,
-          votesBackingRole: active.votesReceivedAllTime,
-          applicants,
-        }
+    const deputies = (publishedGovernance?.deputies || []).map((role) => {
+      const activeHolder = resolveGovernanceMember(
+        role.activeHolder || undefined,
+        memberByDid,
+      )
+      const applicants = (role.applicants || []).map((applicant) => {
+        if (!applicant) return 'Unknown applicant'
+        return (
+          applicant.displayName ||
+          applicant.handle ||
+          applicant.did ||
+          'Unknown applicant'
+        )
       })
-      .filter((item): item is NonNullable<typeof item> => !!item)
+      return {
+        tier: role.tier || 'Tier II',
+        role: role.role || 'Deputy Role',
+        activeHolder,
+        votesBackingRole: role.votes || activeHolder.votesReceivedAllTime,
+        applicants,
+      }
+    })
 
     const policyPosts = mapped.reduce((acc, item) => acc + item.policyPosts, 0)
     const matterPosts = mapped.reduce((acc, item) => acc + item.matterPosts, 0)
@@ -385,7 +371,7 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
     ).length
 
     return {
-      community: req.community,
+      community: publishedGovernance?.community || req.community,
       summary: {
         members: mapped.length,
         visiblePosters,
@@ -396,6 +382,8 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
       moderators,
       officials,
       deputies,
+      metadata: publishedGovernance?.metadata,
+      editHistory: publishedGovernance?.editHistory || [],
       computedAt: new Date().toISOString(),
     }
   },
@@ -409,3 +397,304 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
       .execute()
   },
 })
+
+type GovernanceRecord = {
+  community?: string
+  communityId?: string
+  slug?: string
+  moderators?: GovernancePersonWithRole[]
+  officials?: GovernanceOfficial[]
+  deputies?: GovernanceDeputyRole[]
+  metadata?: GovernanceMetadata
+  editHistory?: GovernanceHistoryEntry[]
+}
+
+type GovernancePerson = {
+  did?: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+}
+
+type GovernancePersonWithRole = GovernancePerson & {
+  role?: string
+  badge?: string
+}
+
+type GovernanceOfficial = GovernancePerson & {
+  office?: string
+  mandate?: string
+}
+
+type GovernanceApplicant = GovernancePerson
+
+type GovernanceDeputyRole = {
+  key?: string
+  tier?: string
+  role?: string
+  activeHolder?: GovernancePerson
+  votes?: number
+  applicants?: GovernanceApplicant[]
+}
+
+type GovernanceMetadata = {
+  termLengthDays?: number
+  reviewCadence?: string
+  escalationPath?: string
+  publicContact?: string
+  lastPublishedAt?: string
+  state?: string
+  matterFlairIds?: string[]
+  policyFlairIds?: string[]
+}
+
+type GovernanceHistoryEntry = {
+  id: string
+  action: string
+  actorDid?: string
+  actorHandle?: string
+  createdAt: string
+  summary: string
+}
+
+type GovernanceMemberView = {
+  did: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+  party?: string
+  influence: number
+  votesReceivedAllTime: number
+  votesCastAllTime: number
+  policyPosts: number
+  matterPosts: number
+  postCount: number
+}
+
+const normalizeCommunityKey = (value: string) =>
+  value
+    .trim()
+    .replace(/^p\//i, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+
+const normalizeCommunitySlug = (value: string) =>
+  value
+    .trim()
+    .replace(/^p\//i, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+const COMMUNITY_TRANSLATION_SOURCE =
+  'ÁÀÄÂÃáàäâãÉÈËÊéèëêÍÌÏÎíìïîÓÒÖÔÕóòöôõÚÙÜÛúùüûÑñÇç'
+const COMMUNITY_TRANSLATION_TARGET =
+  'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuNnCc'
+
+const getPublishedGovernanceRecord = async ({
+  db,
+  community,
+  normalizedCommunity,
+}: {
+  db: Database
+  community: string
+  normalizedCommunity: string
+}): Promise<GovernanceRecord | null> => {
+  const slug = normalizeCommunitySlug(community)
+  const suffix = `/com.para.community.governance/${slug || 'community'}`
+
+  const slugMatch = await db.db
+    .selectFrom('record')
+    .select(['json'])
+    .where('uri', 'like', `%${suffix}`)
+    .orderBy('indexedAt', 'desc')
+    .executeTakeFirst()
+  if (slugMatch) {
+    return parseGovernanceRecord(slugMatch.json)
+  }
+
+  const recordMatch = await db.db
+    .selectFrom('record')
+    .select(['json'])
+    .where('uri', 'like', '%/com.para.community.governance/%')
+    .where(
+      sql`regexp_replace(lower(translate(regexp_replace(coalesce(("record"."json"::jsonb ->> 'community'), ''), '^p/', '', 'i'), ${COMMUNITY_TRANSLATION_SOURCE}, ${COMMUNITY_TRANSLATION_TARGET})), '[^a-z0-9]+', '', 'g')`,
+      '=',
+      normalizedCommunity,
+    )
+    .orderBy('indexedAt', 'desc')
+    .executeTakeFirst()
+
+  return recordMatch ? parseGovernanceRecord(recordMatch.json) : null
+}
+
+const parseGovernanceRecord = (json: string): GovernanceRecord | null => {
+  try {
+    const parsed = JSON.parse(json) as Record<string, unknown>
+    return {
+      community: stringOr(parsed.community),
+      communityId: stringOr(parsed.communityId),
+      slug: stringOr(parsed.slug),
+      moderators: normalizeModerators(parsed.moderators),
+      officials: normalizeOfficials(parsed.officials),
+      deputies: normalizeDeputies(parsed.deputies),
+      metadata: normalizeGovernanceMetadata(parsed.metadata),
+      editHistory: normalizeGovernanceHistory(parsed.editHistory),
+    }
+  } catch {
+    return null
+  }
+}
+
+const normalizeModerators = (raw: unknown): GovernancePersonWithRole[] => {
+  if (!Array.isArray(raw)) return []
+  const out: GovernancePersonWithRole[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue
+    const value = item as Record<string, unknown>
+    out.push({
+      did: stringOr(value.did),
+      handle: stringOr(value.handle),
+      displayName: stringOr(value.displayName) || stringOr(value.name),
+      avatar: stringOr(value.avatar),
+      role: stringOr(value.role),
+      badge: stringOr(value.badge),
+    })
+  }
+  return out
+}
+
+const normalizeOfficials = (raw: unknown): GovernanceOfficial[] => {
+  if (!Array.isArray(raw)) return []
+  const out: GovernanceOfficial[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue
+    const value = item as Record<string, unknown>
+    out.push({
+      did: stringOr(value.did),
+      handle: stringOr(value.handle),
+      displayName: stringOr(value.displayName) || stringOr(value.name),
+      avatar: stringOr(value.avatar),
+      office: stringOr(value.office),
+      mandate: stringOr(value.mandate),
+    })
+  }
+  return out
+}
+
+const normalizeDeputies = (raw: unknown): GovernanceDeputyRole[] => {
+  if (!Array.isArray(raw)) return []
+  const out: GovernanceDeputyRole[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue
+    const value = item as Record<string, unknown>
+    out.push({
+      key: stringOr(value.key),
+      tier: stringOr(value.tier),
+      role: stringOr(value.role) || stringOr(value.title),
+      activeHolder: normalizePerson(value.activeHolder),
+      votes: numberOr(value.votes),
+      applicants: normalizeApplicants(value.applicants),
+    })
+  }
+  return out
+}
+
+const normalizeApplicants = (raw: unknown): GovernanceApplicant[] => {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((item) => {
+      if (typeof item === 'string') {
+        return { displayName: item }
+      }
+      return normalizePerson(item)
+    })
+    .filter((item): item is GovernanceApplicant => !!item)
+}
+
+const normalizePerson = (raw: unknown): GovernancePerson | undefined => {
+  if (!raw || typeof raw !== 'object') return undefined
+  const value = raw as Record<string, unknown>
+  const displayName = stringOr(value.displayName) || stringOr(value.name)
+  const handle = stringOr(value.handle)
+  const did = stringOr(value.did)
+  const avatar = stringOr(value.avatar)
+  if (!displayName && !handle && !did && !avatar) return undefined
+  return { did, handle, displayName, avatar }
+}
+
+const resolveGovernanceMember = (
+  source: GovernancePerson | undefined,
+  memberByDid: Map<string, GovernanceMemberView>,
+) => {
+  const did = source?.did || ''
+  const matched = did ? memberByDid.get(did) : undefined
+  return {
+    did: did || matched?.did || '',
+    handle: source?.handle || matched?.handle,
+    displayName: source?.displayName || matched?.displayName,
+    avatar: source?.avatar || matched?.avatar,
+    party: matched?.party,
+    influence: matched?.influence ?? 0,
+    votesReceivedAllTime: matched?.votesReceivedAllTime ?? 0,
+    votesCastAllTime: matched?.votesCastAllTime ?? 0,
+    policyPosts: matched?.policyPosts ?? 0,
+    matterPosts: matched?.matterPosts ?? 0,
+  }
+}
+
+const normalizeGovernanceMetadata = (
+  raw: unknown,
+): GovernanceMetadata | undefined => {
+  if (!raw || typeof raw !== 'object') return undefined
+  const value = raw as Record<string, unknown>
+  return {
+    termLengthDays: numberOr(value.termLengthDays),
+    reviewCadence: stringOr(value.reviewCadence),
+    escalationPath: stringOr(value.escalationPath),
+    publicContact: stringOr(value.publicContact),
+    lastPublishedAt: stringOr(value.lastPublishedAt),
+    state: stringOr(value.state),
+    matterFlairIds: optionalStringList(value.matterFlairIds),
+    policyFlairIds: optionalStringList(value.policyFlairIds),
+  }
+}
+
+const normalizeGovernanceHistory = (raw: unknown): GovernanceHistoryEntry[] => {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const value = item as Record<string, unknown>
+      return {
+        id:
+          stringOr(value.id) ||
+          `${stringOr(value.action) || 'publish-governance-updates'}-history`,
+        action: stringOr(value.action) || 'publish_governance_updates',
+        actorDid: stringOr(value.actorDid),
+        actorHandle: stringOr(value.actorHandle),
+        createdAt: stringOr(value.createdAt) || new Date().toISOString(),
+        summary: stringOr(value.summary) || 'Governance update published.',
+      }
+    })
+    .filter((item): item is GovernanceHistoryEntry => !!item)
+}
+
+const stringOr = (value: unknown) =>
+  typeof value === 'string' && value.trim().length > 0
+    ? value.trim()
+    : undefined
+
+const numberOr = (value: unknown) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : 0
+
+const optionalStringList = (value: unknown) =>
+  Array.isArray(value)
+    ? value
+        .map((item) => (typeof item === 'string' ? item.trim() : ''))
+        .filter(Boolean)
+    : undefined

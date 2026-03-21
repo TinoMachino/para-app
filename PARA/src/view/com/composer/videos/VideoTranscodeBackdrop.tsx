@@ -1,19 +1,19 @@
-import { clearCache, createVideoThumbnail } from 'react-native-compressor'
-import Animated, { FadeIn } from 'react-native-reanimated'
-import { Image } from 'expo-image'
-import { type QueryClient, useQuery } from '@tanstack/react-query'
+import {clearCache, createVideoThumbnail} from 'react-native-compressor'
+import Animated, {FadeIn} from 'react-native-reanimated'
+import {Image} from 'expo-image'
+import {type QueryClient, useQuery} from '@tanstack/react-query'
 
-import { atoms as a } from '#/alf'
+import {atoms as a} from '#/alf'
 
 export const RQKEY = 'video-thumbnail'
 
 export function clearThumbnailCache(queryClient: QueryClient) {
-  clearCache().catch(() => { })
-  void queryClient.resetQueries({ queryKey: [RQKEY] })
+  clearCache().catch(() => {})
+  void queryClient.resetQueries({queryKey: [RQKEY]})
 }
 
-export function VideoTranscodeBackdrop({ uri }: { uri: string }) {
-  const { data: thumbnail } = useQuery({
+export function VideoTranscodeBackdrop({uri}: {uri: string}) {
+  const {data: thumbnail} = useQuery({
     queryKey: [RQKEY, uri],
     queryFn: async () => {
       return await createVideoThumbnail(uri)

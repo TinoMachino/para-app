@@ -1,3 +1,4 @@
+import {type ReactNode} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import Animated, {
   Easing,
@@ -6,7 +7,6 @@ import Animated, {
   SlideInLeft,
   SlideInRight,
 } from 'react-native-reanimated'
-import type React from 'react'
 
 import {IS_WEB} from '#/env'
 
@@ -18,7 +18,7 @@ export function ScreenTransition({
 }: {
   direction: 'Backward' | 'Forward'
   style?: StyleProp<ViewStyle>
-  children: React.ReactNode
+  children: ReactNode
   enabledWeb?: boolean
 }) {
   const entering =

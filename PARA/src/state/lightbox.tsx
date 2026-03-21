@@ -1,4 +1,10 @@
-import React from 'react'
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import {nanoid} from 'nanoid/non-secure'
 
 import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
@@ -10,14 +16,14 @@ export type Lightbox = {
   index: number
 }
 
-const LightboxContext = React.createContext<{
+const LightboxContext = createContext<{
   activeLightbox: Lightbox | null
 }>({
   activeLightbox: null,
 })
 LightboxContext.displayName = 'LightboxContext'
 
-const LightboxControlContext = React.createContext<{
+const LightboxControlContext = createContext<{
   openLightbox: (lightbox: Omit<Lightbox, 'id'>) => void
   closeLightbox: () => boolean
 }>({
@@ -26,10 +32,8 @@ const LightboxControlContext = React.createContext<{
 })
 LightboxControlContext.displayName = 'LightboxControlContext'
 
-export function Provider({children}: React.PropsWithChildren<{}>) {
-  const [activeLightbox, setActiveLightbox] = React.useState<Lightbox | null>(
-    null,
-  )
+export function Provider({children}: PropsWithChildren<{}>) {
+  const [activeLightbox, setActiveLightbox] = useState<Lightbox | null>(null)
 
   const openLightbox = useNonReactiveCallback(
     (lightbox: Omit<Lightbox, 'id'>) => {
@@ -51,14 +55,14 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
     return wasActive
   })
 
-  const state = React.useMemo(
+  const state = useMemo(
     () => ({
       activeLightbox,
     }),
     [activeLightbox],
   )
 
-  const methods = React.useMemo(
+  const methods = useMemo(
     () => ({
       openLightbox,
       closeLightbox,
@@ -76,9 +80,9 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
 }
 
 export function useLightbox() {
-  return React.useContext(LightboxContext)
+  return useContext(LightboxContext)
 }
 
 export function useLightboxControls() {
-  return React.useContext(LightboxControlContext)
+  return useContext(LightboxControlContext)
 }

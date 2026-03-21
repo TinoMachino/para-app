@@ -26,6 +26,7 @@ import * as ChatDeclaration from './plugins/chat-declaration'
 import * as FeedGenerator from './plugins/feed-generator'
 import * as Follow from './plugins/follow'
 import * as GermDeclaration from './plugins/germ-declaration'
+import * as Highlight from './plugins/highlight'
 import * as Labeler from './plugins/labeler'
 import * as Like from './plugins/like'
 import * as List from './plugins/list'
@@ -73,6 +74,7 @@ export class IndexingService {
     cabildeoPosition: CabildeoPosition.PluginType
     cabildeoDelegation: CabildeoDelegation.PluginType
     cabildeoVote: CabildeoVote.PluginType
+    highlight: Highlight.PluginType
   }
 
   constructor(
@@ -110,6 +112,7 @@ export class IndexingService {
         this.background,
       ),
       cabildeoVote: CabildeoVote.makePlugin(this.db, this.background),
+      highlight: Highlight.makePlugin(this.db, this.background),
     }
   }
 
@@ -415,6 +418,10 @@ export class IndexingService {
       .execute()
     await this.db.db
       .deleteFrom('cabildeo_vote')
+      .where('creator', '=', did)
+      .execute()
+    await this.db.db
+      .deleteFrom('highlight_annotation')
       .where('creator', '=', did)
       .execute()
     // notifications

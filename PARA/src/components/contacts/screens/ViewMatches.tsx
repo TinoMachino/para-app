@@ -4,8 +4,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import * as SMS from 'expo-sms'
 import {type ModerationOpts} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Plural, Trans} from '@lingui/react/macro'
 import {useMutation, useQueryClient} from '@tanstack/react-query'
 
 import {wait} from '#/lib/async/wait'
@@ -572,7 +572,7 @@ function ContactItem({
                 await SMS.sendSMSAsync(
                   [phoneNumber],
                   _(
-                    msg`I'm on PARA as ${currentAccount.handle} - come find me! https://bsky.app/download`,
+                    msg`I'm on PARA as ${currentAccount.handle} - come find me!`,
                   ),
                 )
               } catch (err) {

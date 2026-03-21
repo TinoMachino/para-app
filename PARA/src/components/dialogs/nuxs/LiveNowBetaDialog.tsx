@@ -3,8 +3,8 @@ import {View} from 'react-native'
 import {Image} from 'expo-image'
 import {LinearGradient} from 'expo-linear-gradient'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {atoms as a, select, useTheme, utils, web} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
@@ -179,9 +179,8 @@ export function LiveNowBetaDialog() {
                 },
               ]}>
               <Trans>
-                Streaming on Twitch? Set your live status on PARA to add a
-                badge to your avatar. Tapping it takes people straight to your
-                stream.
+                Streaming on Twitch? Set your live status on PARA to add a badge
+                to your avatar. Tapping it takes people straight to your stream.
               </Trans>
             </Text>
           </View>

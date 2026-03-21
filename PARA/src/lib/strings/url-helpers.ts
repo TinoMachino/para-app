@@ -1,11 +1,11 @@
-import { AtUri } from '@atproto/api'
+import {AtUri} from '@atproto/api'
 import psl from 'psl'
 import TLDs from 'tlds'
 
-import { BSKY_SERVICE } from '#/lib/constants'
-import { isInvalidHandle } from '#/lib/strings/handles'
-import { startUriToStarterPackUri } from '#/lib/strings/starter-pack'
-import { logger } from '#/logger'
+import {BSKY_SERVICE} from '#/lib/constants'
+import {isInvalidHandle} from '#/lib/strings/handles'
+import {startUriToStarterPackUri} from '#/lib/strings/starter-pack'
+import {logger} from '#/logger'
 
 export const BSKY_APP_HOST = 'https://bsky.app'
 const BSKY_TRUSTED_HOSTS = [
@@ -123,7 +123,7 @@ export function isBskyPostUrl(url: string): boolean {
       return /profile\/(?<name>[^/]+)\/post\/(?<rkey>[^/]+)/i.test(
         urlp.pathname,
       )
-    } catch { }
+    } catch {}
   }
   return false
 }
@@ -135,7 +135,7 @@ export function isBskyCustomFeedUrl(url: string): boolean {
       return /profile\/(?<name>[^/]+)\/feed\/(?<rkey>[^/]+)/i.test(
         urlp.pathname,
       )
-    } catch { }
+    } catch {}
   }
   return false
 }
@@ -194,12 +194,7 @@ export function convertBskyAppUrlIfNeeded(url: string): string {
         return startUriToStarterPackUri(urlp.pathname)
       }
 
-      // special-case search links
-      if (urlp.pathname === '/search') {
-        return `/search?q=${urlp.searchParams.get('q')}`
-      }
-
-      return urlp.pathname
+      return urlp.pathname + urlp.search
     } catch (e) {
       console.error('Unexpected error in convertBskyAppUrlIfNeeded()', e)
     }
@@ -212,7 +207,7 @@ export function convertBskyAppUrlIfNeeded(url: string): string {
 
 export function listUriToHref(url: string): string {
   try {
-    const { hostname, rkey } = new AtUri(url)
+    const {hostname, rkey} = new AtUri(url)
     return `/profile/${hostname}/lists/${rkey}`
   } catch {
     return ''
@@ -221,7 +216,7 @@ export function listUriToHref(url: string): string {
 
 export function feedUriToHref(url: string): string {
   try {
-    const { hostname, rkey } = new AtUri(url)
+    const {hostname, rkey} = new AtUri(url)
     return `/profile/${hostname}/feed/${rkey}`
   } catch {
     return ''
@@ -230,10 +225,10 @@ export function feedUriToHref(url: string): string {
 
 export function postUriToRelativePath(
   uri: string,
-  options?: { handle?: string },
+  options?: {handle?: string},
 ): string | undefined {
   try {
-    const { hostname, rkey } = new AtUri(uri)
+    const {hostname, rkey} = new AtUri(uri)
     const handleOrDid =
       options?.handle && !isInvalidHandle(options.handle)
         ? options.handle
@@ -291,10 +286,10 @@ export function labelToDomain(label: string): string | undefined {
   }
   try {
     return new URL(label).hostname.toLowerCase()
-  } catch { }
+  } catch {}
   try {
     return new URL('https://' + label).hostname.toLowerCase()
-  } catch { }
+  } catch {}
   return undefined
 }
 
@@ -356,7 +351,7 @@ export function shortLinkToHref(url: string): string {
     }
     return url
   } catch (e) {
-    logger.error('Failed to parse possible short link', { safeMessage: e })
+    logger.error('Failed to parse possible short link', {safeMessage: e})
     return url
   }
 }

@@ -1,8 +1,8 @@
-import React from 'react'
+import {useCallback, useState} from 'react'
 import {ActivityIndicator, Alert, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useFocusEffect} from '@react-navigation/native'
 
@@ -24,17 +24,17 @@ type Props = NativeStackScreenProps<CommonNavigatorParams, 'ProfileVisibility'>
 export function ProfileVisibilityScreen({}: Props) {
   const t = useTheme()
   const {_} = useLingui()
-  const [loading, setLoading] = React.useState(true)
+  const [loading, setLoading] = useState(true)
 
   // Visibility States
-  const [votesPublic, setVotesPublic] = React.useState(false)
-  const [raqPublic, setRaqPublic] = React.useState(false)
-  const [highlightsPublic, setHighlightsPublic] = React.useState(false)
+  const [votesPublic, setVotesPublic] = useState(false)
+  const [raqPublic, setRaqPublic] = useState(false)
+  const [highlightsPublic, setHighlightsPublic] = useState(false)
 
   // Master Toggle State
-  const [isPublicFigure, setIsPublicFigure] = React.useState(false)
+  const [isPublicFigure, setIsPublicFigure] = useState(false)
 
-  const loadSettings = React.useCallback(async () => {
+  const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
       const [votes, raq, highlights, publicFigure] = await Promise.all([
@@ -56,7 +56,7 @@ export function ProfileVisibilityScreen({}: Props) {
   }, [])
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       loadSettings()
     }, [loadSettings]),
   )

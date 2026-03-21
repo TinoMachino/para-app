@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import {type PropsWithChildren, useCallback, useEffect, useState} from 'react'
 import {
   AccessibilityInfo,
   Image as RNImage,
@@ -13,7 +13,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import { Image } from 'expo-image'
+import {Image} from 'expo-image'
 import * as SplashScreen from 'expo-splash-screen'
 
 // @ts-ignore
@@ -29,16 +29,14 @@ type Props = {
   isReady: boolean
 }
 
-export function Splash(props: React.PropsWithChildren<Props>) {
+export function Splash(props: PropsWithChildren<Props>) {
   'use no memo'
   const outroAppOpacity = useSharedValue(0)
   const colorScheme = useColorScheme()
-  const [isAnimationComplete, setIsAnimationComplete] = React.useState(false)
-  const [isImageLoaded, setIsImageLoaded] = React.useState(false)
-  const [isLayoutReady, setIsLayoutReady] = React.useState(false)
-  const [reduceMotion, setReduceMotion] = React.useState<boolean | undefined>(
-    false,
-  )
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false)
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [isLayoutReady, setIsLayoutReady] = useState(false)
+  const [reduceMotion, setReduceMotion] = useState<boolean | undefined>(false)
   const isReady =
     props.isReady &&
     isImageLoaded &&
@@ -72,7 +70,7 @@ export function Splash(props: React.PropsWithChildren<Props>) {
             }),
           )
         })
-        .catch(() => { })
+        .catch(() => {})
     }
   }, [onFinish, outroAppOpacity, isReady])
 
@@ -81,13 +79,13 @@ export function Splash(props: React.PropsWithChildren<Props>) {
   }, [])
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayout}>
+    <View style={{flex: 1}} onLayout={onLayout}>
       {!isAnimationComplete && (
         <View style={StyleSheet.absoluteFillObject}>
           <Image
             accessibilityIgnoresInvertColors
             onLoad={onLoadEnd}
-            source={{ uri: isDarkMode ? darkSplashImageUri : splashImageUri }}
+            source={{uri: isDarkMode ? darkSplashImageUri : splashImageUri}}
             style={StyleSheet.absoluteFillObject}
           />
         </View>
@@ -95,7 +93,7 @@ export function Splash(props: React.PropsWithChildren<Props>) {
 
       {isReady && (
         <>
-          <Animated.View style={[{ flex: 1 }, appAnimation]}>
+          <Animated.View style={[{flex: 1}, appAnimation]}>
             {props.children}
           </Animated.View>
         </>

@@ -1,5 +1,5 @@
+import {type ReactNode} from 'react'
 import {StyleSheet} from 'react-native'
-import type React from 'react'
 
 import {atoms as a, platform, useTheme, type ViewStyleProp} from '#/alf'
 import {Fill} from '#/components/Fill'
@@ -14,7 +14,7 @@ export function MediaInsetBorder({
   style,
   opaque,
 }: {
-  children?: React.ReactNode
+  children?: ReactNode
   /**
    * Used where this border needs to match adjacent borders, such as in
    * external link previews

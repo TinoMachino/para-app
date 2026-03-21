@@ -9,6 +9,7 @@ import {
   type CommunityGovernancePerson,
   type CommunityGovernanceRecord,
 } from '#/lib/api/para-lexicons'
+import {normalizeCommunitySlug as normalizeCommunitySlugString} from '#/lib/strings/community-names'
 
 export const DEFAULT_MODERATOR_CAPABILITIES: CommunityGovernanceCapability[] = [
   'appoint_deputies',
@@ -22,15 +23,19 @@ export type CommunityGovernanceView = CommunityGovernanceRecord & {
   source: 'network' | 'repo' | 'mock'
   uri?: string
   repoDid?: string
+  counters?: CommunityGovernanceCounters
+}
+
+export type CommunityGovernanceCounters = {
+  members: number
+  visiblePosters: number
+  policyPosts: number
+  matterPosts: number
+  badgeHolders: number
 }
 
 export function normalizeCommunitySlug(community: string) {
-  return community
-    .trim()
-    .replace(/^p\//i, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeCommunitySlugString(community)
 }
 
 export function communityGovernanceRkey(community: string) {
@@ -191,11 +196,37 @@ export function buildMockCommunityGovernance(
   }
 }
 
+export function createEmptyCommunityGovernanceView(
+  communityName: string,
+  communityId?: string,
+): CommunityGovernanceView {
+  const now = new Date().toISOString()
+  return {
+    source: 'network',
+    community: communityName,
+    communityId,
+    slug: normalizeCommunitySlug(communityName),
+    createdAt: now,
+    updatedAt: now,
+    moderators: [],
+    officials: [],
+    deputies: [],
+    metadata: undefined,
+    editHistory: [],
+    counters: {
+      members: 0,
+      visiblePosters: 0,
+      policyPosts: 0,
+      matterPosts: 0,
+      badgeHolders: 0,
+    },
+  }
+}
+
 export function normalizeCommunityGovernance(
   raw: unknown,
   fallbackCommunity: string,
   fallbackCommunityId?: string,
-  source: CommunityGovernanceView['source'] = 'network',
 ): CommunityGovernanceView | null {
   if (!raw || typeof raw !== 'object') {
     return null
@@ -211,6 +242,9 @@ export function normalizeCommunityGovernance(
   const deputies = normalizeDeputies(record.deputies ?? data.deputies)
   const metadata = normalizeMetadata(record.metadata ?? data.metadata)
   const editHistory = normalizeHistory(record.editHistory ?? data.editHistory)
+  const counters = normalizeCounters(
+    record.counters ?? data.counters ?? data.summary,
+  )
 
   if (
     !community &&
@@ -222,7 +256,12 @@ export function normalizeCommunityGovernance(
   }
 
   return {
-    source,
+    source:
+      stringOr(record.source ?? data.source) === 'repo'
+        ? 'repo'
+        : stringOr(record.source ?? data.source) === 'mock'
+          ? 'mock'
+          : 'network',
     community,
     communityId,
     slug,
@@ -236,6 +275,7 @@ export function normalizeCommunityGovernance(
     deputies,
     metadata,
     editHistory,
+    counters,
     uri: stringOr(data.uri),
     repoDid:
       stringOr(data.repoDid) ||
@@ -317,12 +357,20 @@ function normalizeModerators(raw: unknown): CommunityGovernanceModerator[] {
     .map(item => {
       if (!item || typeof item !== 'object') return null
       const value = item as Record<string, unknown>
+      const member =
+        value.member && typeof value.member === 'object'
+          ? (value.member as Record<string, unknown>)
+          : undefined
       return {
-        did: stringOr(value.did),
-        handle: stringOr(value.handle),
+        did: stringOr(value.did) || stringOr(member?.did),
+        handle: stringOr(value.handle) || stringOr(member?.handle),
         displayName:
-          stringOr(value.displayName) || stringOr(value.name) || undefined,
-        avatar: stringOr(value.avatar),
+          stringOr(value.displayName) ||
+          stringOr(value.name) ||
+          stringOr(member?.displayName) ||
+          stringOr(member?.name) ||
+          undefined,
+        avatar: stringOr(value.avatar) || stringOr(member?.avatar),
         role: stringOr(value.role) || 'Moderator',
         badge: stringOr(value.badge) || 'Moderator',
         capabilities: normalizeCapabilityList(value.capabilities),
@@ -339,12 +387,20 @@ function normalizeOfficials(
     .map(item => {
       if (!item || typeof item !== 'object') return null
       const value = item as Record<string, unknown>
+      const member =
+        value.member && typeof value.member === 'object'
+          ? (value.member as Record<string, unknown>)
+          : undefined
       return {
-        did: stringOr(value.did),
-        handle: stringOr(value.handle),
+        did: stringOr(value.did) || stringOr(member?.did),
+        handle: stringOr(value.handle) || stringOr(member?.handle),
         displayName:
-          stringOr(value.displayName) || stringOr(value.name) || undefined,
-        avatar: stringOr(value.avatar),
+          stringOr(value.displayName) ||
+          stringOr(value.name) ||
+          stringOr(member?.displayName) ||
+          stringOr(member?.name) ||
+          undefined,
+        avatar: stringOr(value.avatar) || stringOr(member?.avatar),
         office: stringOr(value.office) || 'Representative',
         mandate: stringOr(value.mandate) || 'No mandate published yet.',
       }
@@ -368,16 +424,17 @@ function normalizeDeputies(raw: unknown): CommunityGovernanceDeputyRole[] {
           stringOr(value.description) || 'No public role description yet.',
         capabilities: normalizeStringList(value.capabilities),
         activeHolder: normalizePerson(
-          (value.activeHolder as Record<string, unknown> | undefined) ?? {
-            displayName:
-              stringOr(value.activeHolderName) ||
-              stringOr(value.activeHolderHandle),
-            handle: stringOr(value.activeHolderHandle),
-            did: stringOr(value.activeHolderDid),
-          },
+          (value.activeHolder as Record<string, unknown> | undefined) ??
+            (value.member as Record<string, unknown> | undefined) ?? {
+              displayName:
+                stringOr(value.activeHolderName) ||
+                stringOr(value.activeHolderHandle),
+              handle: stringOr(value.activeHolderHandle),
+              did: stringOr(value.activeHolderDid),
+            },
         ),
         activeSince: stringOr(value.activeSince),
-        votes: numberOr(value.votes),
+        votes: numberOr(value.votes) || numberOr(value.votesBackingRole),
         applicants: normalizeApplicants(value.applicants),
       }
     })
@@ -427,6 +484,9 @@ function normalizeMetadata(
     escalationPath: stringOr(value.escalationPath),
     publicContact: stringOr(value.publicContact),
     lastPublishedAt: stringOr(value.lastPublishedAt),
+    state: stringOr(value.state),
+    matterFlairIds: optionalStringList(value.matterFlairIds),
+    policyFlairIds: optionalStringList(value.policyFlairIds),
   }
 }
 
@@ -479,6 +539,24 @@ function normalizeStringList(raw: unknown): string[] {
   return raw
     .map(item => (typeof item === 'string' ? item.trim() : ''))
     .filter(Boolean)
+}
+
+function optionalStringList(raw: unknown): string[] | undefined {
+  return Array.isArray(raw) ? normalizeStringList(raw) : undefined
+}
+
+function normalizeCounters(
+  raw: unknown,
+): CommunityGovernanceCounters | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const value = raw as Record<string, unknown>
+  return {
+    members: numberOr(value.members),
+    visiblePosters: numberOr(value.visiblePosters),
+    policyPosts: numberOr(value.policyPosts),
+    matterPosts: numberOr(value.matterPosts),
+    badgeHolders: numberOr(value.badgeHolders),
+  }
 }
 
 function stringOr(value: unknown) {

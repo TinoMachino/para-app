@@ -1,7 +1,7 @@
 import {type AppBskyNotificationDeclaration} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {type CommonNavigatorParams} from '#/lib/routes/types'
@@ -116,17 +116,15 @@ export function PrivacyAndSecuritySettingsScreen({}: Props) {
                   <Admonition.Text>
                     <Trans>
                       Note: PARA is an open and public network. This setting
-                      only limits the visibility of your content on the PARA
-                      app and website, and other apps may not respect this
-                      setting. Your content may still be shown to logged-out
-                      users by other apps and websites.
+                      only limits the visibility of your content on the PARA app
+                      and website, and other apps may not respect this setting.
+                      Your content may still be shown to logged-out users by
+                      other apps and websites.
                     </Trans>
                   </Admonition.Text>
                   <Admonition.Text>
                     <InlineLinkText
-                      label={_(
-                        msg`Learn more about what is public on PARA.`,
-                      )}
+                      label={_(msg`Learn more about what is public on PARA.`)}
                       to="https://blueskyweb.zendesk.com/hc/en-us/articles/15835264007693-Data-Privacy">
                       <Trans>Learn more about what is public on PARA.</Trans>
                     </InlineLinkText>

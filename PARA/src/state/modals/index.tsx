@@ -1,4 +1,10 @@
-import React from 'react'
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 
 import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
 
@@ -32,7 +38,7 @@ export type Modal =
   // Lists
   | UserAddRemoveListsModal
 
-const ModalContext = React.createContext<{
+const ModalContext = createContext<{
   isModalActive: boolean
   activeModals: Modal[]
 }>({
@@ -41,7 +47,7 @@ const ModalContext = React.createContext<{
 })
 ModalContext.displayName = 'ModalContext'
 
-const ModalControlContext = React.createContext<{
+const ModalControlContext = createContext<{
   openModal: (modal: Modal) => void
   closeModal: () => boolean
   closeAllModals: () => boolean
@@ -52,8 +58,8 @@ const ModalControlContext = React.createContext<{
 })
 ModalControlContext.displayName = 'ModalControlContext'
 
-export function Provider({children}: React.PropsWithChildren<{}>) {
-  const [activeModals, setActiveModals] = React.useState<Modal[]>([])
+export function Provider({children}: PropsWithChildren<{}>) {
+  const [activeModals, setActiveModals] = useState<Modal[]>([])
 
   const openModal = useNonReactiveCallback((modal: Modal) => {
     setActiveModals(modals => [...modals, modal])
@@ -73,7 +79,7 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
     return wasActive
   })
 
-  const state = React.useMemo(
+  const state = useMemo(
     () => ({
       isModalActive: activeModals.length > 0,
       activeModals,
@@ -81,7 +87,7 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
     [activeModals],
   )
 
-  const methods = React.useMemo(
+  const methods = useMemo(
     () => ({
       openModal,
       closeModal,
@@ -103,12 +109,12 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
  * @deprecated use the dialog system from `#/components/Dialog.tsx`
  */
 export function useModals() {
-  return React.useContext(ModalContext)
+  return useContext(ModalContext)
 }
 
 /**
  * @deprecated use the dialog system from `#/components/Dialog.tsx`
  */
 export function useModalControls() {
-  return React.useContext(ModalControlContext)
+  return useContext(ModalControlContext)
 }

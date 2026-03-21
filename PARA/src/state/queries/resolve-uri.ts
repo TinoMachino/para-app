@@ -1,18 +1,18 @@
-import { AtUri } from '@atproto/api'
+import {AtUri} from '@atproto/api'
 import {
   type QueryClient,
   useQuery,
   type UseQueryResult,
 } from '@tanstack/react-query'
 
-import { STALE } from '#/state/queries'
-import { useAgent } from '#/state/session'
-import { useUnstableProfileViewCache } from './profile'
+import {STALE} from '#/state/queries'
+import {useAgent} from '#/state/session'
+import {useUnstableProfileViewCache} from './profile'
 
 const RQKEY_ROOT = 'resolved-did'
 export const RQKEY = (didOrHandle: string) => [RQKEY_ROOT, didOrHandle]
 
-type UriUseQueryResult = UseQueryResult<{ did: string; uri: string }, Error>
+type UriUseQueryResult = UseQueryResult<{did: string; uri: string}, Error>
 export function useResolveUriQuery(uri: string | undefined): UriUseQueryResult {
   const urip = new AtUri(uri || '')
   const res = useResolveDidQuery(urip.host)
@@ -21,7 +21,7 @@ export function useResolveUriQuery(uri: string | undefined): UriUseQueryResult {
     urip.host = res.data
     return {
       ...res,
-      data: { did: urip.host, uri: urip.toString() },
+      data: {did: urip.host, uri: urip.toString()},
     } as unknown as UriUseQueryResult
   }
   return res as unknown as UriUseQueryResult
@@ -29,7 +29,7 @@ export function useResolveUriQuery(uri: string | undefined): UriUseQueryResult {
 
 export function useResolveDidQuery(didOrHandle: string | undefined) {
   const agent = useAgent()
-  const { getUnstableProfile } = useUnstableProfileViewCache()
+  const {getUnstableProfile} = useUnstableProfileViewCache()
 
   return useQuery<string, Error>({
     staleTime: STALE.HOURS.ONE,
@@ -39,7 +39,7 @@ export function useResolveDidQuery(didOrHandle: string | undefined) {
       // Just return the did if it's already one
       if (didOrHandle.startsWith('did:')) return didOrHandle
 
-      const res = await agent.resolveHandle({ handle: didOrHandle })
+      const res = await agent.resolveHandle({handle: didOrHandle})
       return res.data.did
     },
     initialData: () => {

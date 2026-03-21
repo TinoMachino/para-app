@@ -5,6 +5,7 @@ import { BackgroundQueue } from '../../background'
 import { Database } from '../../db'
 import { DatabaseSchema, DatabaseSchemaType } from '../../db/database-schema'
 import { RecordProcessor } from '../processor'
+import { recomputeCabildeoAggregates } from './recompute-cabildeo-aggregates'
 
 interface CabildeoRecord {
   title: string
@@ -55,6 +56,18 @@ const insertFn = async (
     phase: obj.phase,
     phaseDeadline: obj.phaseDeadline || null,
     createdAt: normalizeDatetimeAlways(obj.createdAt),
+    positionCount: 0,
+    positionForCount: 0,
+    positionAgainstCount: 0,
+    positionAmendmentCount: 0,
+    voteCount: 0,
+    directVoteCount: 0,
+    delegatedVoteCount: 0,
+    delegationCount: 0,
+    optionVoteCounts: sql<number[]>`'[]'::jsonb`,
+    optionPositionCounts: sql<number[]>`'[]'::jsonb`,
+    winningOption: null,
+    isTie: 0 as 0 | 1,
     indexedAt: timestamp,
   }
 
@@ -100,7 +113,12 @@ const notifsForDelete = (
   return { notifs: [], toDelete: [deleted.record.uri] }
 }
 
-const updateAggregates = async () => {}
+const updateAggregates = async (
+  db: DatabaseSchema,
+  indexed: IndexedCabildeo,
+) => {
+  await recomputeCabildeoAggregates(db, indexed.record.uri)
+}
 
 export type PluginType = RecordProcessor<CabildeoRecord, IndexedCabildeo>
 

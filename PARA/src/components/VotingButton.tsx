@@ -1,5 +1,5 @@
-import {useState} from 'react'
-import {StyleSheet, View} from 'react-native'
+import {useMemo, useState} from 'react'
+import {Platform, StyleSheet, View} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
@@ -10,12 +10,18 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import {useTheme} from '#/alf'
-import {ArrowTop_Stroke2_Corner0_Rounded as ArrowUp} from '#/components/icons/Arrow'
-import {ArrowBottom_Stroke2_Corner0_Rounded as ArrowDown} from '#/components/icons/Arrow'
+import {
+  ArrowBottom_Stroke2_Corner0_Rounded as ArrowDown,
+  ArrowTop_Stroke2_Corner0_Rounded as ArrowUp,
+} from '#/components/icons/Arrow'
 
 interface VotingButtonProps {
   initialVote?: number
   onVoteChange?: (vote: number) => void
+}
+
+type WebEventBoundary = {
+  stopPropagation?: () => void
 }
 
 export function VotingButton({
@@ -80,7 +86,7 @@ export function VotingButton({
           ? '#FF4444'
           : t.atoms.text.color
     return {
-      color: withTiming(color as string),
+      color: withTiming(color),
       fontWeight: 'bold',
       fontSize: 16,
     }
@@ -100,8 +106,26 @@ export function VotingButton({
     }
   })
 
+  const webEventBlockers = useMemo(() => {
+    if (Platform.OS !== 'web') return {}
+
+    const stopPropagation = (event: WebEventBoundary) => {
+      event.stopPropagation?.()
+    }
+
+    return {
+      onClickCapture: stopPropagation,
+      onMouseDown: stopPropagation,
+      onMouseUp: stopPropagation,
+      onPointerDown: stopPropagation,
+      onPointerUp: stopPropagation,
+      onStartShouldSetResponder: () => true,
+      onResponderTerminationRequest: () => false,
+    }
+  }, [])
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...webEventBlockers}>
       <GestureDetector gesture={pan}>
         <Animated.View
           style={[

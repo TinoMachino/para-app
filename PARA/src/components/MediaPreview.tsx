@@ -1,13 +1,13 @@
-import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native'
-import { Image } from 'expo-image'
-import { type AppBskyFeedDefs } from '@atproto/api'
+import {type StyleProp, StyleSheet, View, type ViewStyle} from 'react-native'
+import {Image} from 'expo-image'
+import {type AppBskyFeedDefs} from '@atproto/api'
 import {Trans} from '@lingui/react/macro'
 
-import { isTenorGifUri } from '#/lib/strings/embed-player'
-import { atoms as a, useTheme } from '#/alf'
-import { MediaInsetBorder } from '#/components/MediaInsetBorder'
-import { Text } from '#/components/Typography'
-import { PlayButtonIcon } from '#/components/video/PlayButtonIcon'
+import {isTenorGifUri} from '#/lib/strings/embed-player'
+import {atoms as a, useTheme} from '#/alf'
+import {MediaInsetBorder} from '#/components/MediaInsetBorder'
+import {Text} from '#/components/Typography'
+import {PlayButtonIcon} from '#/components/video/PlayButtonIcon'
 import * as bsky from '#/types/bsky'
 
 /**
@@ -95,10 +95,10 @@ export function ImageItem({
 }) {
   const t = useTheme()
   return (
-    <View style={[a.relative, a.flex_1, a.aspect_square, { maxWidth: 100 }]}>
+    <View style={[a.relative, a.flex_1, a.aspect_square, {maxWidth: 100}]}>
       <Image
         key={thumbnail}
-        source={{ uri: thumbnail }}
+        source={{uri: thumbnail}}
         alt={alt}
         style={[a.flex_1, a.rounded_xs, t.atoms.bg_contrast_25]}
         contentFit="cover"
@@ -111,7 +111,7 @@ export function ImageItem({
   )
 }
 
-export function GifItem({ thumbnail, alt }: { thumbnail: string; alt?: string }) {
+export function GifItem({thumbnail, alt}: {thumbnail: string; alt?: string}) {
   return (
     <ImageItem thumbnail={thumbnail} alt={alt}>
       <View style={[a.absolute, a.inset_0, a.justify_center, a.align_center]}>
@@ -137,10 +137,10 @@ export function VideoItem({
     return (
       <View
         style={[
-          { backgroundColor: 'black' },
+          {backgroundColor: 'black'},
           a.flex_1,
           a.aspect_square,
-          { maxWidth: 100 },
+          {maxWidth: 100},
           a.justify_center,
           a.align_center,
           a.rounded_xs,

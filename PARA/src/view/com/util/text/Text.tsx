@@ -1,4 +1,4 @@
-import React from 'react'
+import {type PropsWithChildren, useMemo} from 'react'
 import {StyleSheet, type TextProps} from 'react-native'
 import {UITextView} from 'react-native-uitextview'
 
@@ -44,7 +44,7 @@ function Text_DEPRECATED({
   dataSet,
   selectable,
   ...props
-}: React.PropsWithChildren<CustomTextProps>) {
+}: PropsWithChildren<CustomTextProps>) {
   const theme = useTheme()
   const {fonts} = useAlf()
 
@@ -57,7 +57,7 @@ function Text_DEPRECATED({
     }
   }
 
-  const textProps = React.useMemo(() => {
+  const textProps = useMemo(() => {
     const typography = theme.typography[type]
     const lineHeightStyle = lineHeight ? lh(theme, type, lineHeight) : undefined
 

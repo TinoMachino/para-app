@@ -1,16 +1,16 @@
-import { useMemo } from 'react'
-import { type StyleProp, type TextStyle } from 'react-native'
-import { AppBskyRichtextFacet, RichText as RichTextAPI } from '@atproto/api'
+import {useMemo} from 'react'
+import {type StyleProp, type TextStyle} from 'react-native'
+import {AppBskyRichtextFacet, RichText as RichTextAPI} from '@atproto/api'
 
-import { toShortUrl } from '#/lib/strings/url-helpers'
-import { atoms as a, flatten, type TextStyleProp } from '#/alf'
-import { isOnlyEmoji } from '#/alf/typography'
-import { InlineLinkText, type LinkProps } from '#/components/Link'
-import { ProfileHoverCard } from '#/components/ProfileHoverCard'
-import { RichTextTag } from '#/components/RichTextTag'
-import { Text, type TextProps } from '#/components/Typography'
+import {toShortUrl} from '#/lib/strings/url-helpers'
+import {atoms as a, flatten, type TextStyleProp} from '#/alf'
+import {isOnlyEmoji} from '#/alf/typography'
+import {InlineLinkText, type LinkProps} from '#/components/Link'
+import {ProfileHoverCard} from '#/components/ProfileHoverCard'
+import {RichTextTag} from '#/components/RichTextTag'
+import {Text, type TextProps} from '#/components/Typography'
 
-const WORD_WRAP = { wordWrap: 1 }
+const WORD_WRAP = {wordWrap: 1}
 // lifted from facet detection in `RichText` impl, _without_ `gm` flags
 const URL_REGEX =
   /(^|\s|\()((https?:\/\/[\S]+)|((?<domain>[a-z][a-z0-9]*(\.[a-z0-9]+)+)[\S]*))/i
@@ -60,7 +60,7 @@ export function RichText({
     if (value instanceof RichTextAPI) {
       return value
     } else {
-      const rt = new RichTextAPI({ text: value })
+      const rt = new RichTextAPI({text: value})
       rt.detectFacetsWithoutResolution()
       return rt
     }
@@ -69,7 +69,7 @@ export function RichText({
   const plainStyles = [a.leading_snug, style]
   const interactiveStyles = [plainStyles, interactiveStyle]
 
-  const { text, facets } = richText
+  const {text, facets} = richText
 
   if (!facets?.length) {
     if (isOnlyEmoji(text)) {
@@ -81,7 +81,7 @@ export function RichText({
           emoji
           selectable={selectable}
           testID={testID}
-          style={[plainStyles, { fontSize }]}
+          style={[plainStyles, {fontSize}]}
           onLayout={onLayout}
           onTextLayout={onTextLayout}
           // @ts-ignore web only -prf

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react'
+import {type ReactNode, useCallback, useEffect} from 'react'
 import {type NativeScrollEvent} from 'react-native'
 import {
   clamp,
@@ -16,7 +16,7 @@ import {IS_LIQUID_GLASS, IS_NATIVE, IS_WEB} from '#/env'
 
 const WEB_HIDE_SHELL_THRESHOLD = 200
 
-export function MainScrollProvider({children}: {children: React.ReactNode}) {
+export function MainScrollProvider({children}: {children: ReactNode}) {
   const {headerHeight} = useShellLayout()
   const {headerMode} = useMinimalShellMode()
   const {top: topInset} = useSafeAreaInsets()
@@ -25,7 +25,7 @@ export function MainScrollProvider({children}: {children: React.ReactNode}) {
   const startMode = useSharedValue<number | null>(null)
   const didJustRestoreScroll = useSharedValue<boolean>(false)
 
-  const setMode = React.useCallback(
+  const setMode = useCallback(
     (v: boolean) => {
       'worklet'
       headerMode.set(() =>

@@ -1,17 +1,21 @@
-import {useMemo, useState} from 'react'
+import {useEffect, useMemo, useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
-import {type CabildeoPhase, type CabildeoRecord} from '#/lib/api/para-lexicons'
-import {MOCK_CABILDEO_POSITIONS, MOCK_CABILDEOS} from '#/lib/constants/mockData'
+import {type CabildeoPhase} from '#/lib/api/para-lexicons'
 import {
   type CommonNavigatorParams,
   type NativeStackScreenProps,
   type NavigationProp,
 } from '#/lib/routes/types'
+import {
+  useCabildeoPositionsQuery,
+  useCabildeoQuery,
+} from '#/state/queries/cabildeo'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
+import {ListMaybePlaceholder} from '#/components/Lists'
 import {Text} from '#/components/Typography'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'CabildeoDetail'>
@@ -44,21 +48,45 @@ const STANCE_COLORS: Record<string, {bg: string; fg: string; label: string}> = {
 export function CabildeoDetailScreen({route}: Props) {
   const t = useTheme()
   const navigation = useNavigation<NavigationProp>()
-  const {index} = route.params
-  const cabildeo: CabildeoRecord = MOCK_CABILDEOS[index] ?? MOCK_CABILDEOS[0]
-  const phase = PHASE_META[cabildeo.phase]
-  const delegateEvent = cabildeo.userContext?.delegateVoteEvent
-  const isMultiCommunity =
-    Boolean(cabildeo.communities?.length) && cabildeo.communities!.length > 0
+  const {cabildeoUri} = route.params
+  const {
+    data: cabildeo = null,
+    isFetched: isCabildeoFetched,
+    isLoading: isCabildeoLoading,
+    isError: isCabildeoError,
+    refetch: refetchCabildeo,
+  } = useCabildeoQuery(cabildeoUri)
+  const {
+    data: allPositions = [],
+    isFetched: isPositionsFetched,
+    isLoading: isPositionsLoading,
+    isError: isPositionsError,
+    refetch: refetchPositions,
+  } = useCabildeoPositionsQuery(cabildeo?.uri)
 
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [hasVoted, setHasVoted] = useState(false)
-  const [localOptions, setLocalOptions] = useState(cabildeo.options)
+  const [localOptions, setLocalOptions] = useState(
+    () => cabildeo?.options || [],
+  )
   const [isGeneratingConsensus, setIsGeneratingConsensus] = useState<
     false | 'filtering' | 'synthesizing'
   >(false)
   const [hasDismissedGracePeriod, setHasDismissedGracePeriod] = useState(false)
   const [mountedAt] = useState(() => Date.now())
+  const [positionFilter, setPositionFilter] = useState<
+    'all' | 'for' | 'against' | 'amendment'
+  >('all')
+  const delegateEvent = cabildeo?.userContext?.delegateVoteEvent
+
+  useEffect(() => {
+    if (!cabildeo) return
+    setLocalOptions(cabildeo.options)
+    setSelectedOption(null)
+    setHasVoted(false)
+    setHasDismissedGracePeriod(false)
+    setPositionFilter('all')
+  }, [cabildeo])
 
   // Calculate 24h grace period remaining time
   const gracePeriodRemainingMs = useMemo(() => {
@@ -76,15 +104,62 @@ export function CabildeoDetailScreen({route}: Props) {
   const isGracePeriodActive =
     gracePeriodRemainingMs > 0 && !hasVoted && !hasDismissedGracePeriod
 
-  const [positionFilter, setPositionFilter] = useState<
-    'all' | 'for' | 'against' | 'amendment'
-  >('all')
-
   const positions = useMemo(() => {
-    const all = MOCK_CABILDEO_POSITIONS
+    const all = allPositions
     if (positionFilter === 'all') return all
     return all.filter(p => p.stance === positionFilter)
-  }, [positionFilter])
+  }, [allPositions, positionFilter])
+
+  if (
+    !cabildeo &&
+    (isCabildeoLoading || !isCabildeoFetched || isCabildeoError)
+  ) {
+    return (
+      <Layout.Screen testID="cabildeoDetailScreen">
+        <Layout.Header.Outer noBottomBorder>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              <Trans>Cabildeo</Trans>
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={isCabildeoLoading || !isCabildeoFetched}
+          isError={isCabildeoError}
+          onRetry={refetchCabildeo}
+          emptyType="page"
+          emptyMessage="Estamos cargando el cabildeo seleccionado."
+        />
+      </Layout.Screen>
+    )
+  }
+
+  if (!cabildeo) {
+    return (
+      <Layout.Screen testID="cabildeoDetailScreen">
+        <Layout.Header.Outer noBottomBorder>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              <Trans>Cabildeo</Trans>
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={false}
+          isError={false}
+          emptyType="page"
+          emptyTitle="Cabildeo no disponible"
+          emptyMessage="Este cabildeo ya no está disponible o fue eliminado."
+        />
+      </Layout.Screen>
+    )
+  }
+
+  const phase = PHASE_META[cabildeo.phase]
+  const isMultiCommunity =
+    Boolean(cabildeo.communities?.length) && cabildeo.communities!.length > 0
 
   const phaseIndex = PHASE_ORDER.indexOf(cabildeo.phase)
 
@@ -575,9 +650,7 @@ export function CabildeoDetailScreen({route}: Props) {
           {cabildeo.phase === 'voting' && !hasVoted && (
             <TouchableOpacity
               accessibilityRole="button"
-              onPress={() =>
-                navigation.navigate('DelegateVote', {cabildeoIndex: index})
-              }
+              onPress={() => navigation.navigate('DelegateVote', {cabildeoUri})}
               style={[styles.delegateButton, t.atoms.bg_contrast_25]}>
               <Text style={[styles.delegateText, t.atoms.text]}>
                 🤝 Delegar mi voto
@@ -690,7 +763,7 @@ export function CabildeoDetailScreen({route}: Props) {
                 accessibilityRole="button"
                 onPress={() =>
                   navigation.navigate('CreatePosition', {
-                    cabildeoUri: `at://mock/${index}`,
+                    cabildeoUri: cabildeo.uri,
                   })
                 }
                 style={[
@@ -743,125 +816,136 @@ export function CabildeoDetailScreen({route}: Props) {
 
           {/* Position Cards */}
           <View style={styles.positionList}>
-            {positions.map((pos, i) => {
-              const stanceStyle = STANCE_COLORS[pos.stance]
-              const score = pos.constructivenessScore ?? 1.0
-              const isLowQuality = score <= 0.3
-              const isHighQuality = score >= 0.8
+            {!positions.length ? (
+              <ListMaybePlaceholder
+                isLoading={isPositionsLoading || !isPositionsFetched}
+                isError={isPositionsError}
+                onRetry={refetchPositions}
+                emptyType="results"
+                emptyMessage="No hay posiciones publicadas todavía."
+              />
+            ) : (
+              positions.map((pos, i) => {
+                const stanceStyle = STANCE_COLORS[pos.stance]
+                const score = pos.constructivenessScore ?? 1.0
+                const isLowQuality = score <= 0.3
+                const isHighQuality = score >= 0.8
 
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.positionCard,
-                    t.atoms.bg_contrast_25,
-                    isLowQuality && {opacity: 0.5},
-                  ]}>
-                  <View style={styles.positionHeader}>
-                    <View
-                      style={[
-                        styles.stanceBadge,
-                        {backgroundColor: stanceStyle.bg},
-                      ]}>
-                      <Text
-                        style={[
-                          styles.stanceBadgeText,
-                          {color: stanceStyle.fg},
-                        ]}>
-                        {stanceStyle.label}
-                      </Text>
-                    </View>
-                    {pos.optionIndex !== undefined && (
-                      <Text
-                        style={[
-                          styles.posOptionRef,
-                          t.atoms.text_contrast_medium,
-                        ]}>
-                        → {cabildeo.options[pos.optionIndex]?.label}
-                      </Text>
-                    )}
-
-                    <View style={{flex: 1}} />
-
-                    {/* Constructiveness Badge */}
-                    <View
-                      style={[
-                        styles.constructivenessBadge,
-                        isHighQuality
-                          ? {
-                              backgroundColor: '#34C759' + '20',
-                              borderColor: '#34C759' + '40',
-                            }
-                          : isLowQuality
-                            ? {
-                                backgroundColor: '#FF3B30' + '20',
-                                borderColor: '#FF3B30' + '40',
-                              }
-                            : {
-                                backgroundColor: t.palette.contrast_50,
-                                borderColor: t.palette.contrast_200,
-                              },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.constructivenessBadgeText,
-                          isHighQuality
-                            ? {color: '#34C759'}
-                            : isLowQuality
-                              ? {color: '#FF3B30'}
-                              : t.atoms.text_contrast_medium,
-                        ]}>
-                        {isHighQuality ? '✨' : isLowQuality ? '⚠️' : '📊'}{' '}
-                        {Math.round(score * 100)}%
-                      </Text>
-                    </View>
-                  </View>
-
-                  <Text style={[styles.positionText, t.atoms.text]}>
-                    {isLowQuality
-                      ? 'Este comentario ha sido marcado como poco constructivo por la comunidad.'
-                      : pos.text}
-                  </Text>
-
-                  {isLowQuality && (
-                    <Text style={[styles.lowQualityReason, {color: '#FF3B30'}]}>
-                      Score de constructividad demasiado bajo para ser incluido
-                      en la síntesis IA.
-                    </Text>
-                  )}
-
-                  <View style={styles.positionFooter}>
-                    {pos.compassQuadrant && (
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.positionCard,
+                      t.atoms.bg_contrast_25,
+                      isLowQuality && {opacity: 0.5},
+                    ]}>
+                    <View style={styles.positionHeader}>
                       <View
                         style={[
-                          styles.compassTag,
-                          {backgroundColor: t.palette.contrast_50},
+                          styles.stanceBadge,
+                          {backgroundColor: stanceStyle.bg},
                         ]}>
                         <Text
                           style={[
-                            styles.compassTagText,
-                            t.atoms.text_contrast_medium,
+                            styles.stanceBadgeText,
+                            {color: stanceStyle.fg},
                           ]}>
-                          🧭 {pos.compassQuadrant}
+                          {stanceStyle.label}
                         </Text>
                       </View>
-                    )}
-                    <Text
-                      style={[
-                        styles.positionTime,
-                        t.atoms.text_contrast_medium,
-                      ]}>
-                      {new Date(pos.createdAt).toLocaleString('es-MX', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {pos.optionIndex !== undefined && (
+                        <Text
+                          style={[
+                            styles.posOptionRef,
+                            t.atoms.text_contrast_medium,
+                          ]}>
+                          → {cabildeo.options[pos.optionIndex]?.label}
+                        </Text>
+                      )}
+
+                      <View style={{flex: 1}} />
+
+                      {/* Constructiveness Badge */}
+                      <View
+                        style={[
+                          styles.constructivenessBadge,
+                          isHighQuality
+                            ? {
+                                backgroundColor: '#34C759' + '20',
+                                borderColor: '#34C759' + '40',
+                              }
+                            : isLowQuality
+                              ? {
+                                  backgroundColor: '#FF3B30' + '20',
+                                  borderColor: '#FF3B30' + '40',
+                                }
+                              : {
+                                  backgroundColor: t.palette.contrast_50,
+                                  borderColor: t.palette.contrast_200,
+                                },
+                        ]}>
+                        <Text
+                          style={[
+                            styles.constructivenessBadgeText,
+                            isHighQuality
+                              ? {color: '#34C759'}
+                              : isLowQuality
+                                ? {color: '#FF3B30'}
+                                : t.atoms.text_contrast_medium,
+                          ]}>
+                          {isHighQuality ? '✨' : isLowQuality ? '⚠️' : '📊'}{' '}
+                          {Math.round(score * 100)}%
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.positionText, t.atoms.text]}>
+                      {isLowQuality
+                        ? 'Este comentario ha sido marcado como poco constructivo por la comunidad.'
+                        : pos.text}
                     </Text>
+
+                    {isLowQuality && (
+                      <Text
+                        style={[styles.lowQualityReason, {color: '#FF3B30'}]}>
+                        Score de constructividad demasiado bajo para ser
+                        incluido en la síntesis IA.
+                      </Text>
+                    )}
+
+                    <View style={styles.positionFooter}>
+                      {pos.compassQuadrant && (
+                        <View
+                          style={[
+                            styles.compassTag,
+                            {backgroundColor: t.palette.contrast_50},
+                          ]}>
+                          <Text
+                            style={[
+                              styles.compassTagText,
+                              t.atoms.text_contrast_medium,
+                            ]}>
+                            🧭 {pos.compassQuadrant}
+                          </Text>
+                        </View>
+                      )}
+                      <Text
+                        style={[
+                          styles.positionTime,
+                          t.atoms.text_contrast_medium,
+                        ]}>
+                        {new Date(pos.createdAt).toLocaleString('es-MX', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              )
-            })}
+                )
+              })
+            )}
           </View>
         </Layout.Center>
       </ScrollView>
@@ -1129,9 +1213,28 @@ const styles = StyleSheet.create({
   stanceBadge: {paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6},
   stanceBadgeText: {fontSize: 10, fontWeight: '900'},
   posOptionRef: {fontSize: 11, fontWeight: '600'},
+  constructivenessBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  constructivenessBadgeText: {fontSize: 10, fontWeight: '800'},
   compassTag: {paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4},
   compassTagText: {fontSize: 10, fontWeight: '600'},
   positionText: {fontSize: 14, lineHeight: 20, marginBottom: 6},
+  lowQualityReason: {
+    fontSize: 11,
+    fontWeight: '700',
+    lineHeight: 16,
+    marginBottom: 6,
+  },
+  positionFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
   positionTime: {fontSize: 11},
 
   // Geo restriction

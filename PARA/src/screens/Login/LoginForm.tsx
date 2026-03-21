@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import {useCallback, useRef, useState} from 'react'
 import {
   ActivityIndicator,
   Keyboard,
@@ -11,8 +11,8 @@ import {
   type ComAtprotoServerDescribeServer,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {useRequestNotificationsPermission} from '#/lib/notifications/notifications'
 import {isNetworkError} from '#/lib/strings/errors'
@@ -78,7 +78,7 @@ export const LoginForm = ({
   const {setShowLoggedOut} = useLoggedOutViewControls()
   const setHasCheckedForStarterPack = useSetHasCheckedForStarterPack()
 
-  const onPressSelectService = React.useCallback(() => {
+  const onPressSelectService = useCallback(() => {
     Keyboard.dismiss()
   }, [])
 

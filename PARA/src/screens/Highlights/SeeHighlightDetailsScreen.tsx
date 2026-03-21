@@ -1,10 +1,4 @@
-/**
- * SeeHighlightDetailsScreen - V2 Premium Redesign
- *
- * Shows a full detail view of a single highlight and its source post.
- * Accessed by tapping a highlight card on the HighlightsScreen.
- */
-import React, {useCallback, useMemo, useState} from 'react'
+import {useMemo} from 'react'
 import {Image, StyleSheet, View} from 'react-native'
 import {
   type AppBskyFeedDefs,
@@ -22,6 +16,7 @@ import {type CommonNavigatorParams} from '#/lib/routes/types'
 import {FeedFeedbackProvider, useFeedFeedback} from '#/state/feed-feedback'
 import {useHighlights} from '#/state/highlights/useHighlights'
 import {useHighlightVoteMutation} from '#/state/mutations/highlights'
+import {useHighlightQuery} from '#/state/queries/highlights'
 import {
   PostThreadContextProvider,
   usePostThread,
@@ -29,7 +24,6 @@ import {
 import {useSession} from '#/state/session'
 import {List} from '#/view/com/util/List'
 import {Text} from '#/view/com/util/text/Text'
-import * as Toast from '#/view/com/util/Toast'
 import {ThreadItemPost} from '#/screens/PostThread/components/ThreadItemPost'
 import {useTheme} from '#/alf'
 import {ArrowShareRight_Stroke2_Corner2_Rounded as ShareIcon} from '#/components/icons/ArrowShareRight'
@@ -48,6 +42,7 @@ import {
 } from '#/components/PostControls/PostControlButton'
 import {PostMenuButton} from '#/components/PostControls/PostMenu'
 import {RedditVoteButton} from '#/components/PostControls/VoteButton'
+import * as Toast from '#/components/Toast'
 
 type Props = NativeStackScreenProps<
   CommonNavigatorParams,
@@ -84,16 +79,22 @@ export function SeeHighlightDetailsScreen({route}: Props) {
   // Persistence
   const {highlights, addHighlight, removeHighlight} = useHighlights(highlightId)
   const isSaved = highlights.length > 0
+  const {data: remoteHighlight} = useHighlightQuery(
+    isHighlightRecordUri(highlightId) ? highlightId : undefined,
+  )
 
-  // Fetch full thread if it's a real URI
+  // Fetch full thread for the post behind this highlight.
   const isRealUri = highlightId.startsWith('at://')
+  const sourceUri =
+    remoteHighlight?.sourcePostUri ||
+    (isRealUri && !isHighlightRecordUri(highlightId) ? highlightId : undefined)
   const {data: threadData, context: threadContext} = usePostThread({
-    anchor: isRealUri ? highlightId : undefined,
+    anchor: sourceUri,
   })
 
   const {post, record, richText} = useMemo(() => {
     const anchorItem = threadData?.items.find(
-      item => item.type === 'threadPost' && item.uri === highlightId,
+      item => item.type === 'threadPost' && item.uri === sourceUri,
     )
     if (
       anchorItem &&
@@ -112,14 +113,18 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       }
     }
     return {post: null, record: null, richText: null}
-  }, [threadData, highlightId])
+  }, [threadData, sourceUri])
 
   // Derive highlight data
   const highlight = useMemo(() => {
-    // 1. Try to find in fetched thread
-    if (isRealUri && threadData?.items) {
+    if (remoteHighlight) {
+      return remoteHighlight
+    }
+
+    // 1. Fallback: derive from fetched post when the route points directly to a post URI.
+    if (sourceUri && threadData?.items) {
       const anchorItem = threadData.items.find(
-        item => item.type === 'threadPost' && item.uri === highlightId,
+        item => item.type === 'threadPost' && item.uri === sourceUri,
       )
 
       if (anchorItem && anchorItem.type === 'threadPost') {
@@ -173,7 +178,7 @@ export function SeeHighlightDetailsScreen({route}: Props) {
 
     // 2. Fallback to mock data or passed params
     return MOCK_HIGHLIGHTS.find(h => h.id === highlightId) || null
-  }, [threadData, highlightId, isRealUri])
+  }, [remoteHighlight, sourceUri, threadData, highlightId])
 
   // Highlight text splitting logic
   const {textParts, highlightPart, fullContent} = useMemo(() => {
@@ -616,6 +621,10 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       </Layout.Content>
     </Layout.Screen>
   )
+}
+
+function isHighlightRecordUri(uri: string) {
+  return uri.includes('/com.para.highlight.annotation/')
 }
 
 const styles = StyleSheet.create({

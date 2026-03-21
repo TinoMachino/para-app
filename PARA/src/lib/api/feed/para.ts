@@ -126,7 +126,6 @@ export class ParaFeedAPI implements FeedAPI {
     const paraPostType: string | undefined = val.postType
     const paraTags: string[] = val.tags || []
 
-
     const postView: AppBskyFeedDefs.PostView = {
       uri: record.uri,
       cid: record.cid,

@@ -1,4 +1,3 @@
-
 import {View} from 'react-native'
 import {Image} from 'expo-image'
 import {msg} from '@lingui/core/macro'

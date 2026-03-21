@@ -30,6 +30,8 @@ export interface HighlightData {
   isPublic: boolean
   text: string
   createdAt: number
+  syncedAt?: number
+  creatorDid?: string
 }
 
 /**

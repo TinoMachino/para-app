@@ -1,6 +1,6 @@
-import { useCallback } from 'react'
+import {useCallback} from 'react'
 import {msg} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
+import {useLingui} from '@lingui/react'
 
 type CleanedError = {
   raw: string | undefined
@@ -8,7 +8,7 @@ type CleanedError = {
 }
 
 export function useCleanError() {
-  const { _ } = useLingui()
+  const {_} = useLingui()
 
   return useCallback<(error?: any) => CleanedError>(
     error => {

@@ -1,0 +1,81 @@
+:root {
+  --ps-color-ink: #10243f;
+  --ps-color-ink-soft: #365174;
+  --ps-color-surface: #f7f3ec;
+  --ps-color-surface-strong: #fffdf8;
+  --ps-color-paper: rgba(255, 253, 248, 0.86);
+  --ps-color-line: rgba(16, 36, 63, 0.14);
+  --ps-color-accent: #ff7a59;
+  --ps-color-accent-soft: #ffd5bf;
+  --ps-color-sky: #7fd6ff;
+  --ps-color-mint: #8be0c1;
+  --ps-color-gold: #f3c66b;
+  --ps-shadow-card: 0 18px 50px rgba(16, 36, 63, 0.12);
+  --ps-radius-card: 28px;
+  --ps-radius-pill: 999px;
+  --ps-font-display:
+    "Ivar Display", "Canela", "Recoleta", "Palatino Linotype", "Book Antiqua",
+    serif;
+  --ps-font-body: "Instrument Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --ps-font-mono: "IBM Plex Mono", "SFMono-Regular", monospace;
+  --ps-max-width: 1180px;
+  --ps-max-width-docs: 1320px;
+  --ps-space-1: 0.375rem;
+  --ps-space-2: 0.75rem;
+  --ps-space-3: 1rem;
+  --ps-space-4: 1.5rem;
+  --ps-space-5: 2rem;
+  --ps-space-6: 3rem;
+  --ps-space-7: 4.5rem;
+  --ps-space-8: 6rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--ps-font-body);
+  color: var(--ps-color-ink);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(127, 214, 255, 0.32),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(243, 198, 107, 0.22),
+      transparent 24%
+    ),
+    linear-gradient(
+      180deg,
+      #fffcf6 0%,
+      var(--ps-color-surface) 54%,
+      #f0f7ff 100%
+    );
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}

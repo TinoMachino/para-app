@@ -299,9 +299,7 @@ class MergeFeedSource_Custom extends MergeFeedSource {
         },
         {
           headers: {
-            ...(isPARAOwned
-              ? createBskyTopicsHeader(this.userInterests)
-              : {}),
+            ...(isPARAOwned ? createBskyTopicsHeader(this.userInterests) : {}),
             'Accept-Language': contentLangs,
           },
         },

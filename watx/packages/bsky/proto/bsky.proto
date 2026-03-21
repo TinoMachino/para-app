@@ -1197,6 +1197,26 @@ message ParaCommunityDeputyRole {
   repeated string applicants = 5;
 }
 
+message ParaCommunityGovernanceMetadata {
+  int32 term_length_days = 1;
+  string review_cadence = 2;
+  string escalation_path = 3;
+  string public_contact = 4;
+  string last_published_at = 5;
+  string state = 6;
+  repeated string matter_flair_ids = 7;
+  repeated string policy_flair_ids = 8;
+}
+
+message ParaCommunityGovernanceHistoryEntry {
+  string id = 1;
+  string action = 2;
+  string actor_did = 3;
+  string actor_handle = 4;
+  string created_at = 5;
+  string summary = 6;
+}
+
 message GetParaCommunityGovernanceResponse {
   string community = 1;
   ParaCommunitySummary summary = 2;
@@ -1204,6 +1224,176 @@ message GetParaCommunityGovernanceResponse {
   repeated ParaCommunityOfficial officials = 4;
   repeated ParaCommunityDeputyRole deputies = 5;
   string computed_at = 6;
+  ParaCommunityGovernanceMetadata metadata = 7;
+  repeated ParaCommunityGovernanceHistoryEntry edit_history = 8;
+}
+
+// - Returns indexed Cabildeos and aggregate summaries, paginated
+//     - `com.para.civic.listCabildeos`
+message GetParaCabildeosRequest {
+  string community = 1;
+  string phase = 2;
+  int32 limit = 3;
+  string cursor = 4;
+  string viewer_did = 5;
+}
+
+message ParaCabildeoOption {
+  string label = 1;
+  string description = 2;
+  bool is_consensus = 3;
+}
+
+message ParaCabildeoOptionSummary {
+  int32 option_index = 1;
+  string label = 2;
+  int32 votes = 3;
+  int32 positions = 4;
+}
+
+message ParaCabildeoPositionCounts {
+  int32 total = 1;
+  int32 for_count = 2;
+  int32 against_count = 3;
+  int32 amendment_count = 4;
+  repeated ParaCabildeoOptionSummary by_option = 5;
+}
+
+message ParaCabildeoVoteTotals {
+  int32 total = 1;
+  int32 direct = 2;
+  int32 delegated = 3;
+}
+
+message ParaCabildeoOutcomeSummary {
+  optional int32 winning_option = 1;
+  int32 total_participants = 2;
+  double effective_total_power = 3;
+  bool tie = 4;
+  repeated ParaCabildeoOptionSummary breakdown = 5;
+}
+
+message ParaCabildeoViewerContext {
+  optional int32 current_vote_option = 1;
+  bool current_vote_is_direct = 2;
+  string active_delegation = 3;
+  bool delegate_has_voted = 4;
+  optional int32 delegated_vote_option = 5;
+  string delegated_voted_at = 6;
+  string grace_period_ends_at = 7;
+  bool delegate_vote_dismissed = 8;
+}
+
+message ParaCabildeoView {
+  string uri = 1;
+  string cid = 2;
+  string creator = 3;
+  string indexed_at = 4;
+  string title = 5;
+  string description = 6;
+  string community = 7;
+  repeated string communities = 8;
+  repeated string flairs = 9;
+  string region = 10;
+  bool geo_restricted = 11;
+  repeated ParaCabildeoOption options = 12;
+  optional int32 min_quorum = 13;
+  string phase = 14;
+  string phase_deadline = 15;
+  string created_at = 16;
+  repeated ParaCabildeoOptionSummary option_summary = 17;
+  ParaCabildeoPositionCounts position_counts = 18;
+  ParaCabildeoVoteTotals vote_totals = 19;
+  optional ParaCabildeoOutcomeSummary outcome_summary = 20;
+  optional ParaCabildeoViewerContext viewer_context = 21;
+}
+
+message GetParaCabildeosResponse {
+  repeated ParaCabildeoView items = 1;
+  string cursor = 2;
+}
+
+// - Returns a single indexed Cabildeo and aggregate summaries
+//     - `com.para.civic.getCabildeo`
+message GetParaCabildeoRequest {
+  string cabildeo_uri = 1;
+  string viewer_did = 2;
+}
+
+message GetParaCabildeoResponse {
+  optional ParaCabildeoView cabildeo = 1;
+}
+
+message ParaCabildeoPositionView {
+  string uri = 1;
+  string cid = 2;
+  string creator = 3;
+  string indexed_at = 4;
+  string cabildeo = 5;
+  string stance = 6;
+  optional int32 option_index = 7;
+  string text = 8;
+  string compass_quadrant = 9;
+  string created_at = 10;
+}
+
+// - Returns indexed positions for a Cabildeo, paginated
+//     - `com.para.civic.listCabildeoPositions`
+message GetParaCabildeoPositionsRequest {
+  string cabildeo_uri = 1;
+  string stance = 2;
+  int32 limit = 3;
+  string cursor = 4;
+}
+
+message GetParaCabildeoPositionsResponse {
+  repeated ParaCabildeoPositionView positions = 1;
+  string cursor = 2;
+}
+
+// - Returns indexed public highlights, paginated
+//     - `com.para.highlight.listHighlights`
+message GetParaHighlightsRequest {
+  string community = 1;
+  string state = 2;
+  string subject_uri = 3;
+  string creator = 4;
+  int32 limit = 5;
+  string cursor = 6;
+}
+
+message ParaHighlightView {
+  string uri = 1;
+  string cid = 2;
+  string creator = 3;
+  string indexed_at = 4;
+  string subject_uri = 5;
+  string subject_cid = 6;
+  string text = 7;
+  int32 start = 8;
+  int32 end = 9;
+  string color = 10;
+  string tag = 11;
+  string community = 12;
+  string state = 13;
+  string party = 14;
+  string visibility = 15;
+  string created_at = 16;
+}
+
+message GetParaHighlightsResponse {
+  repeated ParaHighlightView items = 1;
+  string cursor = 2;
+}
+
+// - Returns a single indexed highlight annotation
+//     - `com.para.highlight.getHighlight`
+message GetParaHighlightRequest {
+  string highlight_uri = 1;
+}
+
+message GetParaHighlightResponse {
+  optional ParaHighlightView highlight = 1;
 }
 
 // - Returns recent posts authored by users followed by a given DID, paginated
@@ -1676,6 +1866,11 @@ service Service {
   rpc GetParaPostMeta(GetParaPostMetaRequest) returns (GetParaPostMetaResponse);
   rpc GetParaProfileStats(GetParaProfileStatsRequest) returns (GetParaProfileStatsResponse);
   rpc GetParaCommunityGovernance(GetParaCommunityGovernanceRequest) returns (GetParaCommunityGovernanceResponse);
+  rpc GetParaCabildeos(GetParaCabildeosRequest) returns (GetParaCabildeosResponse);
+  rpc GetParaCabildeo(GetParaCabildeoRequest) returns (GetParaCabildeoResponse);
+  rpc GetParaCabildeoPositions(GetParaCabildeoPositionsRequest) returns (GetParaCabildeoPositionsResponse);
+  rpc GetParaHighlights(GetParaHighlightsRequest) returns (GetParaHighlightsResponse);
+  rpc GetParaHighlight(GetParaHighlightRequest) returns (GetParaHighlightResponse);
   rpc GetTimeline(GetTimelineRequest) returns (GetTimelineResponse);
   rpc GetListFeed(GetListFeedRequest) returns (GetListFeedResponse);
 

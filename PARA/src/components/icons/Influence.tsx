@@ -1,7 +1,7 @@
 import {createSinglePathSVG} from './TEMPLATE'
 
 export const Influence_Stroke_Icon = createSinglePathSVG({
-// Improved Newton's Cradle
+  // Improved Newton's Cradle
   // - Top Bar & Left Ball: Unchanged
   // - Static Balls: Separation increased further.
   // - Centers moved to x=10.5, x=15.1, x=19.7

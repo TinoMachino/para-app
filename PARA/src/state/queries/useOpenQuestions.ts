@@ -24,11 +24,10 @@ export function useOpenQuestions() {
           sort: 'latest',
         })
 
-        return result.data.posts
+        return result.data.posts || []
       } catch (error) {
-        // If search fails (e.g., not supported), return empty array
         console.warn('Failed to search for Open Questions:', error)
-        return []
+        throw error
       }
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

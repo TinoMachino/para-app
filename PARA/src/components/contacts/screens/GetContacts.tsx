@@ -9,8 +9,8 @@ import {
   type Un$Typed,
 } from '@atproto/api'
 import {msg, t} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useMutation, useQueryClient} from '@tanstack/react-query'
 
 import {uploadBlob} from '#/lib/api'
@@ -263,8 +263,8 @@ export function GetContacts({
         ]}>
         <Text style={[a.text_sm, a.pb_xs]}>
           <Trans>
-            I consent to PARA using my contacts for mutual friend discovery
-            and to retain hashed data for matching until I opt out.
+            I consent to PARA using my contacts for mutual friend discovery and
+            to retain hashed data for matching until I opt out.
           </Trans>
         </Text>
         <Button

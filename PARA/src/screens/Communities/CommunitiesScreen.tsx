@@ -1,98 +1,133 @@
-import React, {useCallback, useRef, useState} from 'react'
-import {Modal, ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
+import {useMemo, useState} from 'react'
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
-import {usePalette} from '#/lib/hooks/usePalette'
+import {COMMUNITY_DATA, type CommunityData} from '#/lib/constants/mockData'
 import {type NavigationProp} from '#/lib/routes/types'
-import {POST_FLAIRS} from '#/lib/tags'
+import {POST_FLAIRS, type PostFlair} from '#/lib/tags'
 import {useSession} from '#/state/session'
 import {Text} from '#/view/com/util/text/Text'
-import {atoms as a, useTheme} from '#/alf'
+import {useTheme} from '#/alf'
 import {FlairSelectionList} from '#/components/FlairSelectionList'
 import {IconCircle} from '#/components/IconCircle'
-import {Clock_Stroke2_Corner0_Rounded as ClockIcon} from '#/components/icons/Clock'
 import {Filter_Stroke2_Corner0_Rounded as FilterIcon} from '#/components/icons/Filter'
 import {ListMagnifyingGlass_Stroke2_Corner0_Rounded as ListMagnifyingGlass} from '#/components/icons/ListMagnifyingGlass'
 import {TimesLarge_Stroke2_Corner0_Rounded as XIcon} from '#/components/icons/Times'
 import * as Layout from '#/components/Layout'
 import {WebScrollControls} from '#/components/WebScrollControls'
+import {IS_WEB} from '#/env'
+
+type ThemeShape = ReturnType<typeof useTheme>
+
+type SelectedParticipationFilter = {
+  kind: 'matter' | 'policy'
+  flairId: string
+  label: string
+}
+
+const STATES = [
+  'Cualquiera',
+  'Aguascalientes',
+  'Baja California',
+  'CDMX',
+  'Chiapas',
+  'Chihuahua',
+  'Jalisco',
+  'Nuevo León',
+  'Oaxaca',
+  'Puebla',
+  'Querétaro',
+  'Quintana Roo',
+  'Yucatán',
+]
+
+const FEATURED_STATE_NAMES = ['CDMX', 'Jalisco', 'Nuevo León']
 
 export function CommunitiesScreen() {
-  const pal = usePalette('default')
   const t = useTheme()
-  // Custom darker background logic (matching BaseScreen)
-  const cardBgColor = {
-    backgroundColor: t.palette.contrast_25 + '30',
-    borderColor: t.palette.contrast_50 + '40',
-  }
   useSession()
   const navigation = useNavigation<NavigationProp>()
 
-  // State for Modal (Shared for Participation and State)
   const [showModal, setShowModal] = useState(false)
   const [modalType, setModalType] = useState<'Participation' | 'State'>(
     'Participation',
   )
-
-  // State for Find by Participation
   const [participationType, setParticipationType] = useState<
     'Matter' | 'Policy'
   >('Matter')
-  const [selectedParticipationItem, setSelectedParticipationItem] =
-    useState<string>('')
-
-  // State for Find by State
+  const [selectedParticipationFilter, setSelectedParticipationFilter] =
+    useState<SelectedParticipationFilter | null>(null)
   const [selectedStateItem, setSelectedStateItem] = useState<string>('')
+  const [recentlyVisited, setRecentlyVisited] = useState<string[]>([
+    'mx-jalisco',
+    'pan',
+    'mx-cdmx',
+  ])
 
-  // State for Filter Buttons
-  const [selectedFilter, setSelectedFilter] = useState<string>('')
+  const civicScrollRef = useRef<ScrollView>(null)
+  const politicalScrollRef = useRef<ScrollView>(null)
 
-  // Scroll Refs
-  const filterScrollRef = useRef<ScrollView>(null)
-  const communitiesScrollRef = useRef<ScrollView>(null)
+  const communityById = useMemo(
+    () =>
+      new Map(
+        COMMUNITY_DATA.map(community => [community.communityId, community]),
+      ),
+    [],
+  )
+  const recentCommunities = useMemo(
+    () =>
+      recentlyVisited
+        .map(id => communityById.get(id))
+        .filter(Boolean) as CommunityData[],
+    [communityById, recentlyVisited],
+  )
+  const civicCommunities = useMemo(
+    () =>
+      COMMUNITY_DATA.filter(community => community.directoryGroup === 'civic'),
+    [],
+  )
+  const politicalCommunities = useMemo(
+    () =>
+      COMMUNITY_DATA.filter(
+        community => community.directoryGroup === 'political',
+      ),
+    [],
+  )
+  const matterFlairs = useMemo(
+    () =>
+      Object.values(POST_FLAIRS)
+        .filter(flair => flair.id.startsWith('matter_'))
+        .slice(0, 8),
+    [],
+  )
+  const policyFlairs = useMemo(
+    () =>
+      Object.values(POST_FLAIRS)
+        .filter(flair => flair.id.startsWith('policy_'))
+        .slice(0, 8),
+    [],
+  )
 
-  const resultsScrollRef = useRef<ScrollView>(null)
-  const stateResultsScrollRef = useRef<ScrollView>(null)
-  const featuredScrollRef = useRef<ScrollView>(null)
+  const navigateToCommunityProfile = useCallback(
+    (community: CommunityData) => {
+      navigation.navigate('CommunityProfile', {
+        communityId: community.communityId,
+        communityName: community.communityName,
+      })
+    },
+    [navigation],
+  )
 
-  // State for Recently Visited
-  const [recentlyVisited, setRecentlyVisited] = useState<number[]>([1, 4, 7])
-
-  const removeRecentlyVisited = useCallback((id: number) => {
-    setRecentlyVisited(prev => prev.filter(item => item !== id))
+  const removeRecentlyVisited = useCallback((communityId: string) => {
+    setRecentlyVisited(prev => prev.filter(item => item !== communityId))
   }, [])
-
-  // Mock data
-  const matters = ['Any', 'Matter 1', 'Matter 2', 'Matter 3']
-  const policies = ['Any', 'Policy A', 'Policy B', 'Policy C']
-  const states = [
-    'Cualquiera',
-    'Aguascalientes',
-    'Baja California',
-    'CDMX',
-    'Chiapas',
-    'Chihuahua',
-    'Jalisco',
-    'Nuevo León',
-    'Oaxaca',
-    'Puebla',
-    'Querétaro',
-    'Quintana Roo',
-    'Yucatán',
-  ]
-
-  const currentPickerItems =
-    modalType === 'Participation'
-      ? participationType === 'Matter'
-        ? matters
-        : policies
-      : states
-
-  const currentSelectedValue =
-    modalType === 'Participation'
-      ? selectedParticipationItem
-      : selectedStateItem
 
   const openParticipationModal = () => {
     setModalType('Participation')
@@ -105,16 +140,14 @@ export function CommunitiesScreen() {
   }
 
   const onSelectPickerItem = (value: string) => {
-    if (modalType === 'Participation') {
-      setSelectedParticipationItem(value)
-    } else {
-      setSelectedStateItem(value)
-    }
+    setSelectedStateItem(value === 'Cualquiera' ? '' : value)
   }
 
   const handleDone = () => {
     setShowModal(false)
   }
+
+  const isStateModal = modalType === 'State'
 
   return (
     <Layout.Screen testID="communitiesScreen">
@@ -128,456 +161,350 @@ export function CommunitiesScreen() {
         <Layout.Header.Slot />
       </Layout.Header.Outer>
 
-      <Layout.Center style={{flex: 1}}>
+      <Layout.Center style={styles.screenCenter}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}>
-          <View style={styles.section}>
-            <ScrollView
-              ref={filterScrollRef}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.filterScroll}
-              contentContainerStyle={{paddingRight: 20}}>
-              {['Officials', 'Affiliates', "9th's", "25th's"].map(filter => {
-                const isSelected = selectedFilter === filter
-                return (
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    key={filter}
-                    style={[
-                      styles.filterButton,
-                      isSelected
-                        ? {
-                            backgroundColor: t.palette.primary_500,
-                            shadowColor: t.palette.primary_500,
-                            shadowOpacity: 0.3,
-                            shadowRadius: 4,
-                            shadowOffset: {width: 0, height: 2},
-                          }
-                        : {
-                            backgroundColor: t.palette.contrast_50,
-                            borderWidth: 1,
-                            borderColor: t.palette.contrast_100,
-                          },
-                    ]}
-                    onPress={() => setSelectedFilter(isSelected ? '' : filter)}>
-                    <Text
-                      style={[
-                        styles.filterButtonText,
-                        {
-                          color: isSelected
-                            ? '#FFFFFF'
-                            : t.palette.contrast_800,
-                        },
-                      ]}>
-                      {filter}
-                    </Text>
-                  </TouchableOpacity>
-                )
-              })}
-            </ScrollView>
+          <View style={[styles.contentShell, IS_WEB && styles.contentShellWeb]}>
+            <View style={styles.section}>
+              <Text
+                style={[styles.sectionEyebrow, {color: t.palette.primary_500}]}>
+                <Trans>Continue exploring</Trans>
+              </Text>
+              <Text style={[styles.heroTitle, t.atoms.text]}>
+                <Trans>Your community directory</Trans>
+              </Text>
+              <Text style={[styles.sectionLead, t.atoms.text_contrast_medium]}>
+                <Trans>
+                  Pick up where you left off, browse civic territories, and move
+                  into political communities without the dashboard clutter.
+                </Trans>
+              </Text>
 
-            <View
-              style={[
-                a.p_md,
-                a.rounded_md,
-                a.border,
-                t.atoms.border_contrast_low,
-                a.mb_sm,
-              ]}>
-              <View style={[a.flex_row, a.align_center, a.gap_xs, a.pb_sm]}>
-                <ClockIcon width={16} height={16} fill={t.atoms.text.color} />
-                <Text
-                  style={[a.flex_1, a.text_md, a.font_semi_bold, t.atoms.text]}>
-                  <Trans>Recently visited communities</Trans>
-                </Text>
-              </View>
-              <View style={[a.gap_xs, a.px_md]}>
-                {recentlyVisited.map(id => (
-                  <RecentlyVisitedItem
-                    key={id}
-                    id={id}
-                    navigation={navigation}
+              <View style={[styles.resumeGrid, IS_WEB && styles.resumeGridWeb]}>
+                {recentCommunities.map(community => (
+                  <ContinueExploringCard
+                    key={community.communityId}
+                    community={community}
+                    onPress={() => navigateToCommunityProfile(community)}
                     onRemove={removeRecentlyVisited}
+                    theme={t}
                   />
                 ))}
               </View>
             </View>
 
-            <View style={{position: 'relative'}}>
-              <WebScrollControls scrollViewRef={communitiesScrollRef} />
-              <ScrollView
-                ref={communitiesScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.cardsScroll}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9]
-                  .map(i => {
-                    const data = COMMUNITY_DATA[(i - 1) % COMMUNITY_DATA.length]
-                    if (selectedFilter && data.category !== selectedFilter) {
-                      return null
-                    }
-                    return (
-                      <CommunityCard
-                        key={i}
-                        index={i}
-                        t={t}
-                        pal={pal}
-                        style={{width: 300}}
-                        onPress={() =>
-                          navigation.navigate('CommunityProfile', {
-                            communityId: String(i),
-                            communityName: `Community ${i}`,
-                          })
-                        }
-                      />
-                    )
-                  })
-                  .filter(Boolean)}
-              </ScrollView>
-            </View>
-          </View>
+            <View style={styles.section}>
+              <Text
+                style={[styles.sectionEyebrow, {color: t.palette.primary_500}]}>
+                <Trans>Discover communities</Trans>
+              </Text>
+              <Text style={[styles.sectionHeading, t.atoms.text]}>
+                <Trans>Browse the directory by context</Trans>
+              </Text>
+              <Text style={[styles.sectionLead, t.atoms.text_contrast_medium]}>
+                <Trans>
+                  Start with civic territories, then move into political
+                  communities and coalition spaces.
+                </Trans>
+              </Text>
 
-          {/* ─── Cabildeo Entry Point ─── */}
-          <View style={[styles.section, {marginTop: 0}]}>
+              <View style={styles.directoryStack}>
+                <DirectoryModule
+                  title="Civic Territories"
+                  description="State and territorial hubs grounded in the seeded civic network."
+                  theme={t}>
+                  <View style={{position: 'relative'}}>
+                    <WebScrollControls scrollViewRef={civicScrollRef} />
+                    <ScrollView
+                      ref={civicScrollRef}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.cardsScroll}
+                      contentContainerStyle={styles.directoryRail}>
+                      {civicCommunities.map(community => (
+                        <CivicCommunityCard
+                          key={community.communityId}
+                          community={community}
+                          theme={t}
+                          onPress={() => navigateToCommunityProfile(community)}
+                        />
+                      ))}
+                    </ScrollView>
+                  </View>
+                </DirectoryModule>
+
+                <DirectoryModule
+                  title="Political Communities"
+                  description="National parties, movement communities, and coalition spaces."
+                  theme={t}>
+                  {IS_WEB ? (
+                    <View style={styles.politicalGrid}>
+                      {politicalCommunities.map(community => (
+                        <PoliticalCommunityCard
+                          key={community.communityId}
+                          community={community}
+                          theme={t}
+                          style={styles.politicalCardWeb}
+                          onPress={() => navigateToCommunityProfile(community)}
+                        />
+                      ))}
+                    </View>
+                  ) : (
+                    <ScrollView
+                      ref={politicalScrollRef}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.cardsScroll}
+                      contentContainerStyle={styles.directoryRail}>
+                      {politicalCommunities.map(community => (
+                        <PoliticalCommunityCard
+                          key={community.communityId}
+                          community={community}
+                          theme={t}
+                          onPress={() => navigateToCommunityProfile(community)}
+                        />
+                      ))}
+                    </ScrollView>
+                  )}
+                </DirectoryModule>
+              </View>
+            </View>
+
             <TouchableOpacity
               accessibilityRole="button"
-              activeOpacity={0.85}
+              activeOpacity={0.86}
               onPress={() => navigation.navigate('CabildeoList')}
-              style={{
-                borderRadius: 16,
-                padding: 18,
-                marginHorizontal: 16,
-                backgroundColor: t.palette.primary_500 + '12',
-                borderWidth: 1,
-                borderColor: t.palette.primary_500 + '30',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-              }}>
-              <Text style={{fontSize: 28}}>🗳️</Text>
-              <View style={{flex: 1}}>
+              style={[
+                styles.cabildeoCard,
+                {
+                  backgroundColor: t.palette.primary_500 + '0E',
+                  borderColor: t.palette.primary_500 + '24',
+                },
+              ]}>
+              <View style={styles.cabildeoMeta}>
                 <Text
                   style={[
-                    {fontSize: 16, fontWeight: '900'},
-                    t.atoms.text,
+                    styles.cabildeoEyebrow,
+                    {color: t.palette.primary_500},
                   ]}>
-                  Cabildeo
+                  <Trans>Action lane</Trans>
+                </Text>
+                <Text style={[styles.cabildeoTitle, t.atoms.text]}>
+                  <Trans>Cabildeo</Trans>
                 </Text>
                 <Text
-                  style={[
-                    {fontSize: 12, marginTop: 2},
-                    t.atoms.text_contrast_medium,
-                  ]}>
-                  Deliberación cívica · Propuestas y votación cuadrática
+                  style={[styles.cabildeoBody, t.atoms.text_contrast_medium]}>
+                  <Trans>
+                    Move from community browsing into proposals, deliberation,
+                    and quadratic voting when you want an active civic path.
+                  </Trans>
                 </Text>
               </View>
-              <Text style={[{fontSize: 18}, t.atoms.text_contrast_medium]}>
-                ›
-              </Text>
+
+              <View
+                style={[
+                  styles.cabildeoPill,
+                  {backgroundColor: t.palette.primary_500},
+                ]}>
+                <Text style={styles.cabildeoPillText}>
+                  <Trans>Open Cabildeo</Trans>
+                </Text>
+              </View>
             </TouchableOpacity>
-          </View>
 
-          <View style={[styles.section, {marginTop: 0}]}>
-            <View style={[styles.sectionHeader, {marginBottom: 8}]}>
-              <Text style={[styles.sectionTitle, pal.text]}>
-                <Trans>Find by participation</Trans>
+            <View style={styles.section}>
+              <Text
+                style={[styles.sectionEyebrow, {color: t.palette.primary_500}]}>
+                <Trans>Refine discovery</Trans>
               </Text>
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={openParticipationModal}>
-                <IconCircle
+              <Text style={[styles.sectionHeading, t.atoms.text]}>
+                <Trans>Explore by participation or geography</Trans>
+              </Text>
+              <Text style={[styles.sectionLead, t.atoms.text_contrast_medium]}>
+                <Trans>
+                  Use the existing discovery tools without pretending that
+                  ranking is ready yet.
+                </Trans>
+              </Text>
+
+              <View
+                style={[styles.refineLayout, IS_WEB && styles.refineLayoutWeb]}>
+                <RefinementPanel
+                  title="Find by participation"
+                  description="Browse live matter and policy themes, then refine once matching is ready."
                   icon={ListMagnifyingGlass}
-                  size="lg"
-                  style={{backgroundColor: '#F2F2F2'}}
-                />
-              </TouchableOpacity>
-            </View>
+                  onPress={openParticipationModal}
+                  theme={t}>
+                  {selectedParticipationFilter ? (
+                    <FilterComingSoonCard
+                      theme={t}
+                      compact
+                      pillLabel={`${participationType}: ${selectedParticipationFilter.label}`}
+                      title={`Community matches for ${participationType}: ${selectedParticipationFilter.label} are coming soon`}
+                      body="We’re not showing placeholder communities here until participation-based matching is ready."
+                      ctaLabel="Choose another filter"
+                      onPress={openParticipationModal}
+                    />
+                  ) : (
+                    <View style={styles.discoveryPanelBody}>
+                      <View>
+                        <Text style={[styles.miniRailTitle, t.atoms.text]}>
+                          <Trans>Trending Matters</Trans>
+                        </Text>
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={styles.topicRail}>
+                          {matterFlairs.map(flair => (
+                            <TopicDiscoveryCard
+                              key={flair.id}
+                              label={flair.tag}
+                              helper={flair.label}
+                              accent={flair.color}
+                              theme={t}
+                              onPress={() => {
+                                setParticipationType('Matter')
+                                setSelectedParticipationFilter(
+                                  buildParticipationFilter(flair),
+                                )
+                              }}
+                            />
+                          ))}
+                        </ScrollView>
+                      </View>
 
-            {selectedParticipationItem &&
-            selectedParticipationItem !== 'Any' ? (
-              <View style={styles.resultsContainer}>
-                <Text style={[styles.resultsText, pal.text]}>
-                  Results for {participationType}: {selectedParticipationItem}
-                </Text>
-                <View style={{position: 'relative'}}>
-                  <WebScrollControls scrollViewRef={resultsScrollRef} />
-                  <ScrollView
-                    ref={resultsScrollRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.cardsScroll}>
-                    {[10, 11].map(i => (
-                      <CommunityCard
-                        key={i}
-                        index={i}
-                        t={t}
-                        pal={pal}
-                        onPress={() =>
-                          navigation.navigate('CommunityProfile', {
-                            communityId: String(i),
-                            communityName: `Community ${i}`,
-                          })
-                        }
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.resultsContainer}>
-                <View style={{marginBottom: 12}}>
-                  <Text
-                    style={[styles.resultsText, pal.text, {marginBottom: 6}]}>
-                    <Trans>Trending Matters</Trans>
-                  </Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.cardsScroll}
-                    contentContainerStyle={{gap: 8}}>
-                    {Object.values(POST_FLAIRS)
-                      .filter(f => f.id.startsWith('matter_'))
-                      .slice(0, 15) // Limit for performance/demo
-                      .map((item, i) => (
-                        <TouchableOpacity
-                          key={i}
-                          accessibilityRole="button"
-                          style={[
-                            styles.communityCard,
-                            {
-                              width: 200,
-                              height: 120,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              backgroundColor: cardBgColor.backgroundColor,
-                              borderColor: cardBgColor.borderColor,
-                              borderWidth: 1,
-                            },
-                          ]}
-                          onPress={() => {
-                            setParticipationType('Matter')
-                            setSelectedParticipationItem(item.label)
-                          }}>
-                          <Text
-                            style={[
-                              styles.cardTitle,
-                              t.atoms.text,
-                              {fontSize: 14, textAlign: 'center'},
-                            ]}
-                            numberOfLines={2}>
-                            {item.tag}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.cardMembers,
-                              t.atoms.text_contrast_medium,
-                            ]}>
-                            Tap to view
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                  </ScrollView>
-                </View>
+                      <View>
+                        <Text style={[styles.miniRailTitle, t.atoms.text]}>
+                          <Trans>Popular Policies</Trans>
+                        </Text>
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          contentContainerStyle={styles.topicRail}>
+                          {policyFlairs.map(flair => (
+                            <TopicDiscoveryCard
+                              key={flair.id}
+                              label={flair.tag}
+                              helper={flair.label}
+                              accent={flair.color}
+                              theme={t}
+                              onPress={() => {
+                                setParticipationType('Policy')
+                                setSelectedParticipationFilter(
+                                  buildParticipationFilter(flair),
+                                )
+                              }}
+                            />
+                          ))}
+                        </ScrollView>
+                      </View>
+                    </View>
+                  )}
+                </RefinementPanel>
 
-                <View>
-                  <Text
-                    style={[styles.resultsText, pal.text, {marginBottom: 6}]}>
-                    <Trans>Popular Policies</Trans>
-                  </Text>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.cardsScroll}
-                    contentContainerStyle={{gap: 8}}>
-                    {Object.values(POST_FLAIRS)
-                      .filter(f => f.id.startsWith('policy_'))
-                      .slice(0, 15) // Limit for performance/demo
-                      .map((item, i) => (
-                        <TouchableOpacity
-                          key={i}
-                          accessibilityRole="button"
-                          style={[
-                            styles.communityCard,
-                            {
-                              width: 200,
-                              height: 120,
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              backgroundColor: cardBgColor.backgroundColor,
-                              borderColor: cardBgColor.borderColor,
-                              borderWidth: 1,
-                            },
-                          ]}
-                          onPress={() => {
-                            setParticipationType('Policy')
-                            setSelectedParticipationItem(item.label)
-                          }}>
-                          <Text
-                            style={[
-                              styles.cardTitle,
-                              t.atoms.text,
-                              {fontSize: 14, textAlign: 'center'},
-                            ]}
-                            numberOfLines={2}>
-                            {item.tag}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.cardMembers,
-                              t.atoms.text_contrast_medium,
-                            ]}>
-                            Tap to view
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                  </ScrollView>
-                </View>
-              </View>
-            )}
-          </View>
-
-          <View style={[styles.section, {marginTop: 0}]}>
-            <View style={[styles.sectionHeader, {marginBottom: 8}]}>
-              <Text style={[styles.sectionTitle, pal.text]}>
-                <Trans>Find by state</Trans>
-              </Text>
-              <TouchableOpacity
-                accessibilityRole="button"
-                onPress={openStateModal}>
-                <IconCircle
+                <RefinementPanel
+                  title="Find by state"
+                  description="Use geographic discovery once you know the territory you want to explore."
                   icon={FilterIcon}
-                  size="lg"
-                  style={{backgroundColor: '#F2F2F2'}}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {selectedStateItem && selectedStateItem !== 'Cualquiera' ? (
-              <View style={styles.resultsContainer}>
-                <Text style={[styles.resultsText, pal.text]}>
-                  <Trans>Results for State: {selectedStateItem}</Trans>
-                </Text>
-                <View style={{position: 'relative'}}>
-                  <WebScrollControls scrollViewRef={stateResultsScrollRef} />
-                  <ScrollView
-                    ref={stateResultsScrollRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    style={styles.cardsScroll}>
-                    {[12, 13].map(i => (
-                      <CommunityCard
-                        key={i}
-                        index={i}
-                        t={t}
-                        pal={pal}
-                        onPress={() =>
-                          navigation.navigate('CommunityProfile', {
-                            communityId: String(i),
-                            communityName: `Community ${i}`,
-                          })
-                        }
-                      />
-                    ))}
-                  </ScrollView>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.resultsContainer}>
-                <Text style={[styles.resultsText, pal.text, {marginBottom: 8}]}>
-                  <Trans>Featured States</Trans>
-                </Text>
-                <View style={{position: 'relative'}}>
-                  <WebScrollControls scrollViewRef={featuredScrollRef} />
-                  <ScrollView
-                    ref={featuredScrollRef}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{paddingRight: 16}}>
-                    {['CDMX', 'Jalisco', 'Nuevo León'].map(state => (
-                      <TouchableOpacity
-                        accessibilityRole="button"
-                        key={state}
+                  onPress={openStateModal}
+                  theme={t}>
+                  {selectedStateItem ? (
+                    <FilterComingSoonCard
+                      theme={t}
+                      compact
+                      pillLabel={selectedStateItem}
+                      title={`Community matches for ${selectedStateItem} are coming soon`}
+                      body="We’ll show real state-based community matches once public ranking is available."
+                      ctaLabel="Choose another state"
+                      onPress={openStateModal}
+                    />
+                  ) : (
+                    <View style={styles.discoveryPanelBody}>
+                      <Text style={[styles.miniRailTitle, t.atoms.text]}>
+                        <Trans>Featured States</Trans>
+                      </Text>
+                      <View
                         style={[
-                          styles.communityCard,
-                          t.atoms.bg_contrast_25,
-                          {
-                            width: 200,
-                            height: 120,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: undefined, // Override manual bg
-                          },
-                        ]}
-                        onPress={() => setSelectedStateItem(state)}>
-                        <Text
-                          style={[
-                            styles.cardTitle,
-                            t.atoms.text,
-                            {fontSize: 18},
-                          ]}>
-                          {state}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.cardMembers,
-                            t.atoms.text_contrast_medium,
-                          ]}>
-                          <Trans>Tap to view</Trans>
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
+                          styles.featuredStates,
+                          IS_WEB && styles.featuredStatesWeb,
+                        ]}>
+                        {FEATURED_STATE_NAMES.map(state => (
+                          <FeaturedStateCard
+                            key={state}
+                            state={state}
+                            theme={t}
+                            onPress={() => setSelectedStateItem(state)}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                  )}
+                </RefinementPanel>
               </View>
-            )}
+            </View>
           </View>
         </ScrollView>
       </Layout.Center>
 
       <Modal
         visible={showModal}
-        transparent={true}
+        transparent
         animationType="slide"
         onRequestClose={() => setShowModal(false)}>
-        <View style={styles.modalOverlay}>
+        <View
+          style={[
+            styles.modalOverlay,
+            IS_WEB && isStateModal && styles.modalOverlayWeb,
+          ]}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            activeOpacity={1}
+            style={StyleSheet.absoluteFill}
+            onPress={() => setShowModal(false)}
+          />
           <View
             style={[
               styles.modalContent,
               t.atoms.bg,
-              {height: '80%', padding: 0},
+              modalType === 'Participation'
+                ? {height: '80%', padding: 0}
+                : styles.stateModalContent,
+              IS_WEB && isStateModal && styles.stateModalContentWeb,
             ]}>
-            {/* Height increased and padding removed to let list fill space */}
-
             {modalType === 'Participation' ? (
               <View style={{flex: 1, padding: 16}}>
-                {/* Close handle/header visual */}
                 <View
                   style={[
                     styles.modalHandle,
-                    {alignSelf: 'center', marginBottom: 10},
+                    {
+                      alignSelf: 'center',
+                      marginBottom: 10,
+                      backgroundColor: t.palette.contrast_300,
+                    },
                   ]}
                 />
 
                 <FlairSelectionList
                   selectedFlairs={
-                    selectedParticipationItem &&
-                    selectedParticipationItem !== 'Any'
+                    selectedParticipationFilter
                       ? Object.values(POST_FLAIRS).filter(
-                          f => f.label === selectedParticipationItem,
+                          flair =>
+                            flair.id === selectedParticipationFilter.flairId,
                         )
                       : []
                   }
                   setSelectedFlairs={(flairs: any[]) => {
                     if (flairs.length > 0) {
-                      const f = flairs[0]
+                      const flair = flairs[0] as PostFlair
                       setParticipationType(
-                        f.id.startsWith('policy_') ? 'Policy' : 'Matter',
+                        flair.id.startsWith('policy_') ? 'Policy' : 'Matter',
                       )
-                      setSelectedParticipationItem(f.label)
+                      setSelectedParticipationFilter(
+                        buildParticipationFilter(flair),
+                      )
                     } else {
-                      setSelectedParticipationItem('Any')
+                      setSelectedParticipationFilter(null)
                     }
                     setShowModal(false)
                   }}
@@ -586,16 +513,20 @@ export function CommunitiesScreen() {
                 />
               </View>
             ) : (
-              /* Keep existing State picker logic if modalType is State */
               <>
-                <View style={styles.modalHandle} />
+                <View
+                  style={[
+                    styles.modalHandle,
+                    {backgroundColor: t.palette.contrast_300},
+                  ]}
+                />
                 <Text style={[styles.modalSubtitle, t.atoms.text]}>
-                  select a state
+                  <Trans>Select a state</Trans>
                 </Text>
 
                 <WheelPicker
-                  items={currentPickerItems}
-                  selectedValue={currentSelectedValue}
+                  items={STATES}
+                  selectedValue={selectedStateItem || STATES[0]}
                   onValueChange={onSelectPickerItem}
                   theme={t}
                 />
@@ -620,73 +551,418 @@ export function CommunitiesScreen() {
   )
 }
 
-import {COMMUNITY_DATA} from '#/lib/constants/mockData'
-
-function CommunityCard({
-  index,
-  t,
-  pal,
-  style,
-  onPress,
-}: {
-  index: number
-  t: any
-  pal: any
-  style?: any
-  onPress?: () => void
-}) {
-  const data = COMMUNITY_DATA[(index - 1) % COMMUNITY_DATA.length]
-
-  const cardBgColor = {
-    backgroundColor: t.palette.contrast_25 + '30',
-    borderColor: t.palette.contrast_50 + '40',
+function buildParticipationFilter(
+  flair: PostFlair,
+): SelectedParticipationFilter {
+  return {
+    kind: flair.id.startsWith('policy_') ? 'policy' : 'matter',
+    flairId: flair.id,
+    label: flair.label,
   }
+}
+
+function ContinueExploringCard({
+  community,
+  onPress,
+  onRemove,
+  theme,
+}: {
+  community: CommunityData
+  onPress: () => void
+  onRemove: (communityId: string) => void
+  theme: ThemeShape
+}) {
+  const accent = community.accent || community.color
 
   return (
     <TouchableOpacity
       accessibilityRole="button"
+      activeOpacity={0.82}
       style={[
-        styles.communityCard,
+        styles.resumeCard,
         {
-          backgroundColor: cardBgColor.backgroundColor,
-          borderColor: cardBgColor.borderColor,
-          borderWidth: 1,
+          backgroundColor: theme.palette.contrast_25 + '1A',
+          borderColor: theme.palette.contrast_100,
+        },
+        IS_WEB && styles.resumeCardWeb,
+      ]}
+      onPress={onPress}>
+      <View style={styles.resumeHeader}>
+        <View style={[styles.resumeAvatar, {backgroundColor: community.color}]}>
+          <Text style={styles.resumeAvatarText}>
+            {community.name.charAt(0)}
+          </Text>
+        </View>
+
+        <View style={styles.resumeMeta}>
+          <Text
+            style={[styles.resumeTitle, theme.atoms.text]}
+            numberOfLines={1}>
+            {community.communityName}
+          </Text>
+          <Text
+            style={[styles.resumeSubtitle, {color: accent}]}
+            numberOfLines={1}>
+            {community.subtitle || community.eyebrow || community.desc}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.resumeDismiss}
+          onPress={() => onRemove(community.communityId)}>
+          <XIcon
+            width={12}
+            height={12}
+            fill={theme.atoms.text_contrast_medium.color}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <Text
+        style={[styles.resumeDescription, theme.atoms.text_contrast_medium]}
+        numberOfLines={2}>
+        {community.desc}
+      </Text>
+
+      <View style={styles.resumeFooter}>
+        <View style={[styles.metaBadge, {backgroundColor: accent + '1F'}]}>
+          <Text style={[styles.metaBadgeText, {color: accent}]}>
+            {community.region || community.eyebrow || 'Community'}
+          </Text>
+        </View>
+        <Text style={[styles.resumeMembers, theme.atoms.text_contrast_medium]}>
+          {community.members} miembros
+        </Text>
+      </View>
+    </TouchableOpacity>
+  )
+}
+
+function DirectoryModule({
+  title,
+  description,
+  theme,
+  children,
+}: {
+  title: string
+  description: string
+  theme: ThemeShape
+  children: React.ReactNode
+}) {
+  return (
+    <View
+      style={[
+        styles.directoryModule,
+        {
+          backgroundColor: theme.palette.contrast_25 + '18',
+          borderColor: theme.palette.contrast_100,
+        },
+      ]}>
+      <Text style={[styles.moduleTitle, theme.atoms.text]}>{title}</Text>
+      <Text
+        style={[styles.moduleDescription, theme.atoms.text_contrast_medium]}>
+        {description}
+      </Text>
+      {children}
+    </View>
+  )
+}
+
+function CivicCommunityCard({
+  community,
+  theme,
+  onPress,
+}: {
+  community: CommunityData
+  theme: ThemeShape
+  onPress: () => void
+}) {
+  const accent = community.accent || community.color
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.82}
+      style={[
+        styles.civicCard,
+        {
+          backgroundColor: accent + '12',
+          borderColor: accent + '35',
+        },
+      ]}
+      onPress={onPress}>
+      <Text style={[styles.cardEyebrow, {color: accent}]}>
+        {community.eyebrow || 'Civic Territory'}
+      </Text>
+      <Text style={[styles.civicTitle, theme.atoms.text]}>
+        {community.name}
+      </Text>
+      <Text style={[styles.civicSubtitle, theme.atoms.text]}>
+        {community.subtitle || community.region}
+      </Text>
+      <Text
+        style={[styles.civicDescription, theme.atoms.text_contrast_medium]}
+        numberOfLines={2}>
+        {community.desc}
+      </Text>
+      <View style={styles.civicFooter}>
+        <View style={[styles.metaBadge, {backgroundColor: accent + '18'}]}>
+          <Text style={[styles.metaBadgeText, {color: accent}]}>
+            {community.region || community.communityName}
+          </Text>
+        </View>
+        <Text style={[styles.civicMembers, theme.atoms.text_contrast_medium]}>
+          {community.members}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  )
+}
+
+function PoliticalCommunityCard({
+  community,
+  theme,
+  style,
+  onPress,
+}: {
+  community: CommunityData
+  theme: ThemeShape
+  style?: any
+  onPress: () => void
+}) {
+  const accent = community.accent || community.color
+
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.82}
+      style={[
+        styles.politicalCard,
+        {
+          backgroundColor: theme.palette.contrast_25 + '18',
+          borderColor: theme.palette.contrast_100,
         },
         style,
       ]}
-      onPress={onPress}
-      activeOpacity={0.7}>
-      <View style={styles.cardHeader}>
-        <View style={[styles.avatarPlaceholder, {backgroundColor: data.color}]}>
-          <Text style={styles.avatarText}>{data.name.charAt(0)}</Text>
+      onPress={onPress}>
+      <View style={styles.politicalHeader}>
+        <View
+          style={[styles.politicalAvatar, {backgroundColor: community.color}]}>
+          <Text style={styles.politicalAvatarText}>
+            {community.name.charAt(0)}
+          </Text>
         </View>
-        <View style={styles.cardInfo}>
-          <Text style={[styles.cardTitle, pal.text]} numberOfLines={1}>
-            p/{data.name}
+        <View style={styles.politicalMeta}>
+          <Text style={[styles.cardEyebrow, {color: accent}]}>
+            {community.eyebrow || 'Political Community'}
           </Text>
           <Text
-            style={[
-              styles.cardMembers,
-              {color: t.atoms.text_contrast_medium.color},
-            ]}>
-            {data.members} miembros
+            style={[styles.politicalTitle, theme.atoms.text]}
+            numberOfLines={1}>
+            {community.name}
           </Text>
         </View>
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={[styles.joinButton, {backgroundColor: data.color}]}>
-          <Text style={styles.joinButtonText}>Unirse</Text>
+      </View>
+
+      <Text
+        style={[styles.politicalSubtitle, theme.atoms.text]}
+        numberOfLines={2}>
+        {community.subtitle || community.communityName}
+      </Text>
+      <Text
+        style={[styles.politicalDescription, theme.atoms.text_contrast_medium]}
+        numberOfLines={2}>
+        {community.desc}
+      </Text>
+
+      <View style={styles.politicalFooter}>
+        <Text style={[styles.politicalHandle, {color: accent}]}>
+          {community.communityName}
+        </Text>
+        <Text
+          style={[styles.politicalMembers, theme.atoms.text_contrast_medium]}>
+          {community.members}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  )
+}
+
+function RefinementPanel({
+  title,
+  description,
+  icon,
+  onPress,
+  theme,
+  children,
+}: {
+  title: string
+  description: string
+  icon: React.ComponentType<any>
+  onPress: () => void
+  theme: ThemeShape
+  children: React.ReactNode
+}) {
+  return (
+    <View
+      style={[
+        styles.refinementPanel,
+        {
+          backgroundColor: theme.palette.contrast_25 + '18',
+          borderColor: theme.palette.contrast_100,
+        },
+      ]}>
+      <View style={styles.refinementHeader}>
+        <View style={styles.refinementHeaderCopy}>
+          <Text style={[styles.moduleTitle, theme.atoms.text]}>{title}</Text>
+          <Text
+            style={[
+              styles.moduleDescription,
+              theme.atoms.text_contrast_medium,
+            ]}>
+            {description}
+          </Text>
+        </View>
+
+        <TouchableOpacity accessibilityRole="button" onPress={onPress}>
+          <IconCircle
+            icon={icon}
+            size="lg"
+            style={{
+              backgroundColor: theme.palette.primary_500 + '14',
+            }}
+          />
         </TouchableOpacity>
       </View>
-      <Text
-        style={[
-          styles.cardDescription,
-          {color: t.atoms.text_contrast_medium.color},
-        ]}
-        numberOfLines={2}>
-        {data.desc}
+      {children}
+    </View>
+  )
+}
+
+function TopicDiscoveryCard({
+  label,
+  helper,
+  accent,
+  theme,
+  onPress,
+}: {
+  label: string
+  helper: string
+  accent: string
+  theme: ThemeShape
+  onPress: () => void
+}) {
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.82}
+      style={[
+        styles.topicCard,
+        {
+          backgroundColor: accent + '12',
+          borderColor: accent + '28',
+        },
+      ]}
+      onPress={onPress}>
+      <Text style={[styles.topicLabel, theme.atoms.text]} numberOfLines={2}>
+        {label}
+      </Text>
+      <Text style={[styles.topicHelper, {color: accent}]} numberOfLines={2}>
+        {helper}
       </Text>
     </TouchableOpacity>
+  )
+}
+
+function FeaturedStateCard({
+  state,
+  theme,
+  onPress,
+}: {
+  state: string
+  theme: ThemeShape
+  onPress: () => void
+}) {
+  return (
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.82}
+      style={[
+        styles.stateCard,
+        {
+          backgroundColor: theme.palette.contrast_50,
+          borderColor: theme.palette.contrast_100,
+        },
+      ]}
+      onPress={onPress}>
+      <Text style={[styles.stateCardTitle, theme.atoms.text]}>{state}</Text>
+      <Text style={[styles.stateCardBody, theme.atoms.text_contrast_medium]}>
+        <Trans>Explore territorial context</Trans>
+      </Text>
+    </TouchableOpacity>
+  )
+}
+
+function FilterComingSoonCard({
+  theme,
+  pillLabel,
+  title,
+  body,
+  ctaLabel,
+  onPress,
+  compact = false,
+}: {
+  theme: ThemeShape
+  pillLabel: string
+  title: string
+  body: string
+  ctaLabel: string
+  onPress: () => void
+  compact?: boolean
+}) {
+  return (
+    <View
+      style={[
+        styles.comingSoonCard,
+        compact && styles.comingSoonCardCompact,
+        {
+          backgroundColor: theme.palette.contrast_25 + '20',
+          borderColor: theme.palette.contrast_100,
+        },
+      ]}>
+      <View
+        style={[
+          styles.comingSoonPill,
+          {backgroundColor: theme.palette.primary_500 + '18'},
+        ]}>
+        <Text
+          style={[
+            styles.comingSoonPillText,
+            {color: theme.palette.primary_500},
+          ]}>
+          {pillLabel}
+        </Text>
+      </View>
+      <Text style={[styles.comingSoonTitle, theme.atoms.text]}>{title}</Text>
+      <Text style={[styles.comingSoonBody, theme.atoms.text_contrast_medium]}>
+        {body}
+      </Text>
+      <TouchableOpacity
+        accessibilityRole="button"
+        style={[
+          styles.comingSoonButton,
+          {
+            backgroundColor: theme.palette.contrast_50,
+            borderColor: theme.palette.contrast_100,
+          },
+        ]}
+        onPress={onPress}>
+        <Text style={[styles.comingSoonButtonText, theme.atoms.text]}>
+          {ctaLabel}
+        </Text>
+      </TouchableOpacity>
+    </View>
   )
 }
 
@@ -702,7 +978,7 @@ function WheelPicker({
   items: string[]
   selectedValue: string
   onValueChange: (value: string) => void
-  theme: any
+  theme: ThemeShape
 }) {
   const scrollViewRef = useRef<ScrollView>(null)
   const initialIndex = items.findIndex(item => item === selectedValue)
@@ -711,7 +987,6 @@ function WheelPicker({
   )
   const isProgrammaticScroll = useRef(false)
 
-  // Memoized helpers for calculation
   const getOffsetForIndex = useCallback(
     (index: number) => (index + 1) * ITEM_HEIGHT,
     [],
@@ -721,18 +996,17 @@ function WheelPicker({
     [],
   )
 
-  // Sync scroll on mount/change
-  React.useEffect(() => {
+  useEffect(() => {
     const index = items.findIndex(item => item === selectedValue)
     const targetIndex = index >= 0 ? index : 0
-    setSelectedIndex(targetIndex)
     requestAnimationFrame(() => {
+      setSelectedIndex(targetIndex)
       scrollViewRef.current?.scrollTo({
         y: getOffsetForIndex(targetIndex),
         animated: false,
       })
     })
-  }, [items, selectedValue, getOffsetForIndex])
+  }, [getOffsetForIndex, items, selectedValue])
 
   const handleScroll = (event: any) => {
     const y = event.nativeEvent.contentOffset.y
@@ -761,7 +1035,7 @@ function WheelPicker({
         onValueChange(items[clampedIndex])
       }
     },
-    [items, onValueChange, selectedIndex, getOffsetForIndex],
+    [getOffsetForIndex, items, onValueChange, selectedIndex],
   )
 
   const handleScrollEndDrag = (event: any) => {
@@ -775,6 +1049,7 @@ function WheelPicker({
       isProgrammaticScroll.current = false
       return
     }
+
     const y = event.nativeEvent.contentOffset.y
     const index = getIndexFromOffset(y)
     settleToIndex(index)
@@ -831,168 +1106,447 @@ function WheelPicker({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  headerCenter: {
+  screenCenter: {
     flex: 1,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 100, // Fix occlusion by bottom tab bar
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 100,
+  },
+  contentShell: {
+    width: '100%',
+    alignSelf: 'center',
+  },
+  contentShellWeb: {
+    maxWidth: 1100,
   },
   section: {
     marginBottom: 32,
   },
-  sectionHeader: {
+  sectionEyebrow: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    letterSpacing: -0.9,
+    marginBottom: 10,
+  },
+  sectionHeading: {
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.6,
+    marginBottom: 8,
+  },
+  sectionLead: {
+    fontSize: 15,
+    lineHeight: 22,
+    maxWidth: 720,
+    marginBottom: 18,
+  },
+  resumeGrid: {
+    gap: 12,
+  },
+  resumeGridWeb: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  resumeCard: {
+    width: '100%',
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+  },
+  resumeCardWeb: {
+    width: '31.9%',
+  },
+  resumeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginBottom: 12,
   },
-  sectionTitle: {
-    fontSize: 24, // Main Title Size
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    color: '#1A1A1A',
-  },
-  recommendedSection: {
-    marginTop: 8,
-  },
-  recommendedTitle: {
-    fontSize: 18, // Subtitle Size
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#000',
-  },
-  subSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-    marginTop: 8,
-  },
-  subSectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  filterScroll: {
-    marginBottom: 16,
-  },
-  filterButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  filterButtonText: {
-    fontWeight: '600',
-  },
-  cardsScroll: {
-    marginBottom: 16,
-  },
-  communityCard: {
-    width: 280,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginRight: 12,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatarPlaceholder: {
+  resumeAvatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  avatarText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+  resumeAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
   },
-  cardInfo: {
+  resumeMeta: {
     flex: 1,
   },
-  cardTitle: {
+  resumeTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
-  cardMembers: {
-    fontSize: 12,
-  },
-  joinButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  joinButtonText: {
-    color: '#fff',
+  resumeSubtitle: {
     fontSize: 12,
     fontWeight: '600',
+    marginTop: 2,
   },
-  cardDescription: {
+  resumeDismiss: {
+    padding: 6,
+  },
+  resumeDescription: {
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 12,
+  },
+  resumeFooter: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  resumeMembers: {
+    fontSize: 12,
+  },
+  metaBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  metaBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  directoryStack: {
+    gap: 16,
+  },
+  directoryModule: {
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 20,
+  },
+  moduleTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  moduleDescription: {
     fontSize: 14,
     lineHeight: 20,
+    marginBottom: 16,
   },
-  seeMoreCard: {
-    width: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
+  cardsScroll: {
+    marginBottom: 0,
+  },
+  directoryRail: {
+    gap: 12,
+    paddingRight: 16,
+  },
+  civicCard: {
+    width: 286,
+    minHeight: 214,
+    borderRadius: 22,
     borderWidth: 1,
-    marginRight: 12,
+    padding: 18,
+    justifyContent: 'space-between',
   },
-  seeMoreText: {
-    fontSize: 14,
-    fontWeight: '600',
+  cardEyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  civicTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: -0.6,
     marginBottom: 4,
   },
-  resultsContainer: {
-    marginTop: 16,
+  civicSubtitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 10,
   },
-  resultsText: {
-    fontSize: 16,
+  civicDescription: {
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 18,
+  },
+  civicFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  civicMembers: {
+    fontSize: 12,
     fontWeight: '600',
-    marginBottom: 12,
+  },
+  politicalGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  politicalCard: {
+    width: 250,
+    minHeight: 186,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  politicalCardWeb: {
+    flexBasis: '31%',
+    minWidth: 240,
+    flexGrow: 1,
+  },
+  politicalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  politicalAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  politicalAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  politicalMeta: {
+    flex: 1,
+  },
+  politicalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  politicalSubtitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    lineHeight: 21,
+    marginBottom: 8,
+  },
+  politicalDescription: {
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  politicalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  politicalHandle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  politicalMembers: {
+    fontSize: 12,
+  },
+  cabildeoCard: {
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  cabildeoMeta: {
+    flex: 1,
+  },
+  cabildeoEyebrow: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  cabildeoTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  cabildeoBody: {
+    fontSize: 14,
+    lineHeight: 21,
+    maxWidth: 620,
+  },
+  cabildeoPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  cabildeoPillText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  refineLayout: {
+    gap: 16,
+  },
+  refineLayoutWeb: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  refinementPanel: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 20,
+  },
+  refinementHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 16,
+    marginBottom: 16,
+  },
+  refinementHeaderCopy: {
+    flex: 1,
+  },
+  discoveryPanelBody: {
+    gap: 16,
+  },
+  miniRailTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  topicRail: {
+    gap: 10,
+    paddingRight: 8,
+  },
+  topicCard: {
+    width: 180,
+    minHeight: 116,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 14,
+    justifyContent: 'space-between',
+  },
+  topicLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
+  },
+  topicHelper: {
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 18,
+  },
+  featuredStates: {
+    gap: 10,
+  },
+  featuredStatesWeb: {
+    flexDirection: 'row',
+  },
+  stateCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 16,
+    minHeight: 104,
+    justifyContent: 'space-between',
+    flex: 1,
+  },
+  stateCardTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  stateCardBody: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  comingSoonCard: {
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    alignItems: 'center',
+    gap: 12,
+    width: '100%',
+    maxWidth: 540,
+    alignSelf: 'center',
+  },
+  comingSoonCardCompact: {
+    maxWidth: '100%',
+    minHeight: 272,
+  },
+  comingSoonPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  comingSoonPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  comingSoonTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  comingSoonBody: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+    maxWidth: 420,
+  },
+  comingSoonButton: {
+    marginTop: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  comingSoonButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  modalOverlayWeb: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
   modalContent: {
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 40,
+  },
+  stateModalContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
+  },
+  stateModalContentWeb: {
+    width: '100%',
+    maxWidth: 420,
+    maxHeight: 360,
+    alignSelf: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   modalHandle: {
     width: 40,
@@ -1000,24 +1554,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
-  },
-  modalToggles: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 20,
-  },
-  toggleButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  toggleButtonActive: {},
-  toggleText: {
-    fontWeight: '600',
-  },
-  toggleTextActive: {
-    color: '#fff',
   },
   modalSubtitle: {
     fontSize: 16,
@@ -1069,9 +1605,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  wheelPickerItemSelected: {
-    // Selected item styling
-  },
   wheelPickerItemText: {
     fontSize: 16,
     fontWeight: '400',
@@ -1082,68 +1615,3 @@ const styles = StyleSheet.create({
     opacity: 1,
   },
 })
-
-function RecentlyVisitedItem({
-  id,
-  navigation,
-  onRemove,
-}: {
-  id: number
-  navigation: NavigationProp
-  onRemove: (id: number) => void
-}) {
-  const t = useTheme()
-  const item = COMMUNITY_DATA[(id - 1) % COMMUNITY_DATA.length]
-
-  return (
-    <View style={[a.flex_row, a.align_center, a.gap_sm, a.py_2xs, t.atoms.bg]}>
-      <TouchableOpacity
-        accessibilityRole="button"
-        style={[a.flex_row, a.align_center, a.gap_sm, a.flex_1]}
-        onPress={() =>
-          navigation.navigate('CommunityProfile', {
-            communityId: String(id),
-            communityName: `Community ${id}`,
-          })
-        }>
-        <View
-          style={[
-            {
-              width: 28,
-              height: 28,
-              borderRadius: 14,
-              backgroundColor: item.color,
-              alignItems: 'center',
-              justifyContent: 'center',
-            },
-          ]}>
-          <Text
-            style={{
-              color: t.palette.white,
-              fontWeight: 'bold',
-              fontSize: 12,
-            }}>
-            {item.name.charAt(0)}
-          </Text>
-        </View>
-        <View style={{flex: 1}}>
-          <Text
-            style={[a.text_md, a.font_bold, t.atoms.text]}
-            numberOfLines={1}>
-            p/{item.name}
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity
-        accessibilityRole="button"
-        style={[a.p_xs]}
-        onPress={() => onRemove(id)}>
-        <XIcon
-          width={12}
-          height={12}
-          fill={t.atoms.text_contrast_medium.color}
-        />
-      </TouchableOpacity>
-    </View>
-  )
-}

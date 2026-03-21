@@ -1,22 +1,22 @@
-import { useCallback, useState } from 'react'
-import { View } from 'react-native'
+import {useCallback, useState} from 'react'
+import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { logger } from '#/logger'
-import { useModerationOpts } from '#/state/preferences/moderation-opts'
-import { useVerificationCreateMutation } from '#/state/queries/verification/useVerificationCreateMutation'
-import * as Toast from '#/view/com/util/Toast'
-import { atoms as a, useBreakpoints } from '#/alf'
-import { Admonition } from '#/components/Admonition'
-import { Button, ButtonIcon, ButtonText } from '#/components/Button'
-import { type DialogControlProps } from '#/components/Dialog'
+import {logger} from '#/logger'
+import {useModerationOpts} from '#/state/preferences/moderation-opts'
+import {useVerificationCreateMutation} from '#/state/queries/verification/useVerificationCreateMutation'
+import {atoms as a, useBreakpoints} from '#/alf'
+import {Admonition} from '#/components/Admonition'
+import {Button, ButtonIcon, ButtonText} from '#/components/Button'
+import {type DialogControlProps} from '#/components/Dialog'
 import * as Dialog from '#/components/Dialog'
-import { VerifiedCheck } from '#/components/icons/VerifiedCheck'
-import { Loader } from '#/components/Loader'
+import {VerifiedCheck} from '#/components/icons/VerifiedCheck'
+import {Loader} from '#/components/Loader'
 import * as ProfileCard from '#/components/ProfileCard'
 import * as Prompt from '#/components/Prompt'
+import * as Toast from '#/components/Toast'
 import type * as bsky from '#/types/bsky'
 
 export function VerificationCreatePrompt({
@@ -26,14 +26,14 @@ export function VerificationCreatePrompt({
   control: DialogControlProps
   profile: bsky.profile.AnyProfileView
 }) {
-  const { _ } = useLingui()
-  const { gtMobile } = useBreakpoints()
+  const {_} = useLingui()
+  const {gtMobile} = useBreakpoints()
   const moderationOpts = useModerationOpts()
-  const { mutateAsync: create, isPending } = useVerificationCreateMutation()
+  const {mutateAsync: create, isPending} = useVerificationCreateMutation()
   const [error, setError] = useState(``)
   const onConfirm = useCallback(async () => {
     try {
-      await create({ profile })
+      await create({profile})
       Toast.show(_(msg`Successfully verified`))
       control.close()
     } catch (e) {

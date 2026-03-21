@@ -1,15 +1,15 @@
-import {type JSX} from 'react'
+import {type ReactNode} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
-import type React from 'react'
 
 import {HITSLOP_10} from '#/lib/constants'
-import {useKawaiiMode} from '#/state/preferences/kawaii'
+import {useCinzelFont} from '#/lib/hooks/useCinzelFont'
 import {useSession} from '#/state/session'
 import {useShellLayout} from '#/state/shell/shell-layout'
 import {HomeHeaderLayoutMobile} from '#/view/com/home/HomeHeaderLayoutMobile'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
+import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useBreakpoints, useGutters, useTheme} from '#/alf'
 import {ButtonIcon} from '#/components/Button'
 import {Hashtag_Stroke2_Corner0_Rounded as FeedsIcon} from '#/components/icons/Hashtag'
@@ -17,8 +17,8 @@ import * as Layout from '#/components/Layout'
 import {Link} from '#/components/Link'
 
 export function HomeHeaderLayout(props: {
-  children: React.ReactNode
-  tabBarAnchor: JSX.Element | null | undefined
+  children: ReactNode
+  tabBarAnchor: ReactNode
 }) {
   const {gtMobile} = useBreakpoints()
   if (!gtMobile) {
@@ -32,14 +32,14 @@ function HomeHeaderLayoutDesktopAndTablet({
   children,
   tabBarAnchor,
 }: {
-  children: React.ReactNode
-  tabBarAnchor: JSX.Element | null | undefined
+  children: ReactNode
+  tabBarAnchor: ReactNode
 }) {
+  useCinzelFont()
   const t = useTheme()
   const {headerHeight} = useShellLayout()
   const {hasSession} = useSession()
   const {_} = useLingui()
-  const kawaii = useKawaiiMode()
   const gutters = useGutters([0, 'base'])
 
   return (
@@ -49,8 +49,80 @@ function HomeHeaderLayoutDesktopAndTablet({
           <View
             style={[a.flex_row, a.align_center, gutters, a.pt_md, t.atoms.bg]}>
             <View style={{width: 34}} />
-            <View style={[a.flex_1, a.align_center, a.justify_center]}>
-              <Logo width={kawaii ? 60 : 28} />
+            <View
+              style={[
+                a.relative,
+                a.flex_1,
+                a.align_center,
+                a.justify_center,
+                {
+                  height: 52,
+                  zIndex: 1, 
+                },
+              ]}>
+              <View
+                style={[
+                  a.absolute,
+                  a.align_center,
+                  a.justify_center,
+                  {
+                    top: 0, bottom: 0, left: 0, right: 0, 
+                    zIndex: 1,
+                    // @ts-ignore Web-only drop shadow to correctly trace SVG paths
+                    filter: 'drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.05))',
+                  },
+                ]}>
+                <Logomark width={69} fill="#474652" />
+              </View>
+
+              {/* Ultra-Tight Text-Adjusted Diamond (Rombo) */}
+              <View
+                style={[
+                  a.align_center,
+                  a.justify_center,
+                  {
+                    zIndex: 2,
+                    // No artificial widths. The wrapper natively hugs the 106px Logotype.
+                    paddingHorizontal: 6, 
+                    paddingVertical: 4,
+                  },
+                ]}>
+                {/* Rhombus Geometry Wrapper (stretching strictly to text width) */}
+                <View
+                  style={[
+                    a.absolute,
+                    a.align_center,
+                    a.justify_center,
+                    {
+                      top: 0, bottom: 0, left: 0, right: 0,
+                      // Squashed vertically to forcefully widen the angle aperture at the North/South corners, minimizing its vertical footprint
+                      transform: [{ scaleX: 3.15 }, { scaleY: 0.65 }],
+                    }
+                  ]}>
+                  <View
+                    style={[
+                      t.atoms.bg, // Natively adapts to light (white tint) and dark modes
+                      {
+                        width: 24,
+                        height: 24,
+                        opacity: 0.90, // Classic frosted glass transparency
+                        transform: [{ rotate: '45deg' }],
+                        // Zero border radius to mathematically match the sharp maze geometry
+                      }
+                    ]}
+                  />
+                </View>
+                <View
+                  pointerEvents="none"
+                  style={{
+                    // @ts-ignore Web-only property
+                    userSelect: 'none',
+                    // @ts-ignore Web-only drop shadow to correctly trace SVG paths
+                    filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                  }}>
+                  <Logotype width={106} fill={t.atoms.text.color} />
+                </View>
+              </View>
             </View>
             <Link
               to="/feeds"

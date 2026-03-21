@@ -1,6 +1,6 @@
-import { jwtDecode } from 'jwt-decode'
+import {jwtDecode} from 'jwt-decode'
 
-import { logger } from '#/logger'
+import {logger} from '#/logger'
 
 /**
  * Simple check if a JWT token has expired. Does *not* validate the token or check for revocation status,

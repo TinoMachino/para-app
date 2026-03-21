@@ -5,6 +5,24 @@ TypeScript implementation of the `app.bsky` Lexicons backing the https://bsky.ap
 [![NPM](https://img.shields.io/npm/v/@atproto/bsky)](https://www.npmjs.com/package/@atproto/bsky)
 [![Github CI Status](https://github.com/bluesky-social/atproto/actions/workflows/repo.yaml/badge.svg)](https://github.com/bluesky-social/atproto/actions/workflows/repo.yaml)
 
+## PARA public-figure notes
+
+PARA currently uses the existing profile verification view returned by AppView to decide whether a profile should render with the `f/` public-figure prefix.
+
+That means seeded or manually created `app.bsky.graph.verification` records are only surfaced as valid when the issuer account is marked as a trusted verifier in AppView data.
+
+Current operational model:
+
+- manual approval happens outside this package
+- PARA stores product-level approval in `com.para.identity`
+- AppView exposes the user as verified when a trusted verifier has issued `app.bsky.graph.verification`
+
+Future plan:
+
+- keep AppView as the renderer of trusted verification state
+- let PARA's identity workflow move from manual review to Instituto Nacional Electoral-backed, zero-knowledge proof verification in Mexico
+- preserve privacy by validating eligibility without requiring full public identity disclosure
+
 ## License
 
 This project is dual-licensed under MIT and Apache 2.0 terms:

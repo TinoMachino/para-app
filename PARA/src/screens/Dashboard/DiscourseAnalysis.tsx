@@ -1,9 +1,16 @@
 import {useMemo, useState} from 'react'
-import {Dimensions, ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
+import {getCabildeoUri} from '#/lib/cabildeo-client'
 import {
   DISCOURSE_COMMUNITIES,
   DISCOURSE_FLUX_TAGS,
@@ -90,8 +97,14 @@ const ActiveCabildeosSection = () => {
           <Text style={[styles.chartTitle, t.atoms.text]}>
             Propuestas en Discusión
           </Text>
-          <Text style={[styles.dataDescription, t.atoms.text_contrast_medium, {marginTop: 4}]}>
-            Temas cívicos que están generando más actividad en este momento en tu comunidad.
+          <Text
+            style={[
+              styles.dataDescription,
+              t.atoms.text_contrast_medium,
+              {marginTop: 4},
+            ]}>
+            Temas cívicos que están generando más actividad en este momento en
+            tu comunidad.
           </Text>
         </View>
         <AtomIcon size="md" style={{color: t.palette.primary_500}} />
@@ -99,22 +112,25 @@ const ActiveCabildeosSection = () => {
 
       <View style={{gap: 12}}>
         {activeCabildeos.map((cab, index) => {
-          // Find original index to pass to navigation
           const originalIndex = MOCK_CABILDEOS.indexOf(cab)
+          const cabildeoUri = getCabildeoUri(cab, originalIndex)
           const isDeliberating = cab.phase === 'deliberating'
-          
+
           return (
             <TouchableOpacity
               accessibilityRole="button"
               key={index}
-              onPress={() => navigation.navigate('CabildeoDetail', {index: originalIndex})}
+              onPress={() =>
+                navigation.navigate('CabildeoDetail', {cabildeoUri})
+              }
               style={[
                 styles.cabildeoCard,
                 t.atoms.bg_contrast_25,
-                {backgroundColor: t.palette.contrast_50}
+                {backgroundColor: t.palette.contrast_50},
               ]}>
               <View style={styles.cabPhaseBadge}>
-                <Text style={[styles.cabPhaseText, {color: t.palette.primary_500}]}>
+                <Text
+                  style={[styles.cabPhaseText, {color: t.palette.primary_500}]}>
                   {isDeliberating ? '🗣️ Deliberación' : '🗳️ Votación'}
                 </Text>
               </View>
@@ -122,7 +138,8 @@ const ActiveCabildeosSection = () => {
                 {cab.title}
               </Text>
               <View style={styles.cabStats}>
-                <Text style={[styles.cabStatText, t.atoms.text_contrast_medium]}>
+                <Text
+                  style={[styles.cabStatText, t.atoms.text_contrast_medium]}>
                   🔥 +{15 * (index + 1) + 8}% volumen de debate
                 </Text>
               </View>
@@ -163,7 +180,12 @@ const StatisticalChart = ({
         ))}
       </View>
       {description && (
-        <Text style={[styles.dataDescription, t.atoms.text_contrast_medium, {marginTop: 12}]}>
+        <Text
+          style={[
+            styles.dataDescription,
+            t.atoms.text_contrast_medium,
+            {marginTop: 12},
+          ]}>
           {description}
         </Text>
       )}
@@ -180,8 +202,14 @@ const SentimentMatrix = () => {
           <Text style={[styles.chartTitle, t.atoms.text]}>
             Espectro Emocional
           </Text>
-          <Text style={[styles.dataDescription, t.atoms.text_contrast_medium, {marginTop: 4}]}>
-            Las emociones predominantes detectadas en el tono general de los mensajes recientes.
+          <Text
+            style={[
+              styles.dataDescription,
+              t.atoms.text_contrast_medium,
+              {marginTop: 4},
+            ]}>
+            Las emociones predominantes detectadas en el tono general de los
+            mensajes recientes.
           </Text>
         </View>
         <LabIcon size="sm" style={t.atoms.text_contrast_medium} />
@@ -263,7 +291,12 @@ export function DiscourseAnalysisScreen() {
         if (i === 3) value = (ind.baseValue * (isMorena ? 1.2 : 1)).toFixed(2)
         if (i === 0) value += 'σ'
 
-        const labelsEs = ['Volumen de Convers. ', 'Densidad de Nodos', 'Nuevos Participantes', 'Velocidad Angular']
+        const labelsEs = [
+          'Volumen de Convers. ',
+          'Densidad de Nodos',
+          'Nuevos Participantes',
+          'Velocidad Angular',
+        ]
         const descriptionsEs = [
           'Cantidad de mensajes y actividad generada.',
           'Qué tan unidas están las conversaciones centrales.',
@@ -357,7 +390,8 @@ export function DiscourseAnalysisScreen() {
                 Nivel de Acuerdo
               </Text>
               <Text style={[styles.summarySub, t.atoms.text_contrast_medium]}>
-                {dynamicData.heuristic.description} Mide qué tan unida o dividida está la comunidad en sus opiniones generales.
+                {dynamicData.heuristic.description} Mide qué tan unida o
+                dividida está la comunidad en sus opiniones generales.
               </Text>
               <Text style={[styles.summaryValue, t.atoms.text]}>
                 {dynamicData.heuristic.value}
@@ -482,7 +516,9 @@ export function DiscourseAnalysisScreen() {
               Análisis: "Reforma de Transporte"
             </Text>
             <Text style={[styles.insightText, t.atoms.text_contrast_medium]}>
-              La discusión se está centrando entre "Eficiencia" vs "Equidad". Los nodos pro-Metro muestran alta densidad pero poca conectividad con otras comunidades de la periféria.
+              La discusión se está centrando entre "Eficiencia" vs "Equidad".
+              Los nodos pro-Metro muestran alta densidad pero poca conectividad
+              con otras comunidades de la periféria.
               {'\n'}
               <Text style={{fontWeight: '700', color: t.palette.primary_500}}>
                 Predicción: Consenso cívico posible en 48 horas.

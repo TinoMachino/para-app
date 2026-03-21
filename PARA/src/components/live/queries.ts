@@ -16,9 +16,9 @@ import {logger} from '#/logger'
 import {updateProfileShadow} from '#/state/cache/profile-shadow'
 import {useLiveNowConfig} from '#/state/service-config'
 import {useAgent, useSession} from '#/state/session'
-import * as Toast from '#/view/com/util/Toast'
 import {useDialogContext} from '#/components/Dialog'
 import {getLiveServiceNames} from '#/components/live/utils'
+import * as Toast from '#/components/Toast'
 
 export function useLiveLinkMetaQuery(url: string | null) {
   const liveNowConfig = useLiveNowConfig()

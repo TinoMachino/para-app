@@ -1,20 +1,20 @@
-import { type ReactNode,useMemo } from 'react'
-import { type StyleProp, View, type ViewStyle } from 'react-native'
+import {type ReactNode, useMemo} from 'react'
+import {type StyleProp, View, type ViewStyle} from 'react-native'
 
-import { cleanError } from '#/lib/strings/errors'
+import {cleanError} from '#/lib/strings/errors'
 import {
   useResolveGifQuery,
   useResolveLinkQuery,
 } from '#/state/queries/resolve-link'
-import { type Gif } from '#/state/queries/tenor'
-import { ExternalEmbedRemoveBtn } from '#/view/com/composer/ExternalEmbedRemoveBtn'
-import { atoms as a, useTheme } from '#/alf'
-import { Loader } from '#/components/Loader'
-import { ExternalEmbed } from '#/components/Post/Embed/ExternalEmbed'
-import { ModeratedFeedEmbed } from '#/components/Post/Embed/FeedEmbed'
-import { ModeratedListEmbed } from '#/components/Post/Embed/ListEmbed'
-import { Embed as StarterPackEmbed } from '#/components/StarterPack/StarterPackCard'
-import { Text } from '#/components/Typography'
+import {type Gif} from '#/state/queries/tenor'
+import {ExternalEmbedRemoveBtn} from '#/view/com/composer/ExternalEmbedRemoveBtn'
+import {atoms as a, useTheme} from '#/alf'
+import {Loader} from '#/components/Loader'
+import {ExternalEmbed} from '#/components/Post/Embed/ExternalEmbed'
+import {ModeratedFeedEmbed} from '#/components/Post/Embed/FeedEmbed'
+import {ModeratedListEmbed} from '#/components/Post/Embed/ListEmbed'
+import {Embed as StarterPackEmbed} from '#/components/StarterPack/StarterPackCard'
+import {Text} from '#/components/Typography'
 
 export const ExternalEmbedGif = ({
   onRemove,
@@ -24,7 +24,7 @@ export const ExternalEmbedGif = ({
   gif: Gif
 }) => {
   const t = useTheme()
-  const { data, error } = useResolveGifQuery(gif)
+  const {data, error} = useResolveGifQuery(gif)
   const linkInfo = useMemo(
     () =>
       data && {
@@ -50,7 +50,7 @@ export const ExternalEmbedGif = ({
   return (
     <View style={[a.overflow_hidden, t.atoms.border_contrast_medium]}>
       {linkInfo ? (
-        <View style={{ pointerEvents: 'auto' }}>
+        <View style={{pointerEvents: 'auto'}}>
           <ExternalEmbed link={linkInfo} hideAlt />
         </View>
       ) : error ? (
@@ -58,7 +58,7 @@ export const ExternalEmbedGif = ({
           <Text numberOfLines={1} style={t.atoms.text_contrast_high}>
             {gif.url}
           </Text>
-          <Text numberOfLines={2} style={[{ color: t.palette.negative_400 }]}>
+          <Text numberOfLines={2} style={[{color: t.palette.negative_400}]}>
             {cleanError(error)}
           </Text>
         </Container>
@@ -82,7 +82,7 @@ export const ExternalEmbedLink = ({
   onRemove: () => void
 }) => {
   const t = useTheme()
-  const { data, error } = useResolveLinkQuery(uri)
+  const {data, error} = useResolveLinkQuery(uri)
   const linkComponent = useMemo(() => {
     if (data) {
       if (data.type === 'external') {
@@ -135,13 +135,13 @@ export const ExternalEmbedLink = ({
   return (
     <View style={[a.mb_xl, a.overflow_hidden, t.atoms.border_contrast_medium]}>
       {linkComponent ? (
-        <View style={{ pointerEvents: 'none' }}>{linkComponent}</View>
+        <View style={{pointerEvents: 'none'}}>{linkComponent}</View>
       ) : error ? (
         <Container style={[a.align_start, a.p_md, a.gap_xs]}>
           <Text numberOfLines={1} style={t.atoms.text_contrast_high}>
             {uri}
           </Text>
-          <Text numberOfLines={2} style={[{ color: t.palette.negative_400 }]}>
+          <Text numberOfLines={2} style={[{color: t.palette.negative_400}]}>
             {cleanError(error)}
           </Text>
         </Container>

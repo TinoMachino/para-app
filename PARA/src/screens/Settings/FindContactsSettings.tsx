@@ -7,8 +7,8 @@ import {
   type ModerationOpts,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Plural, Trans} from '@lingui/react/macro'
 import {useIsFocused} from '@react-navigation/native'
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
@@ -122,9 +122,9 @@ function Intro() {
       <ContactsHeroImage />
       <Text style={[a.text_md, a.leading_snug, t.atoms.text_contrast_medium]}>
         <Trans>
-          Find your friends on PARA by verifying your phone number and
-          matching with your contacts. We protect your information and you
-          control what happens next.{' '}
+          Find your friends on PARA by verifying your phone number and matching
+          with your contacts. We protect your information and you control what
+          happens next.{' '}
           <InlineLinkText
             to={urls.website.blog.findFriendsAnnouncement}
             label={_(

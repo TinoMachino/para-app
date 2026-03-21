@@ -1,0 +1,28 @@
+<svelte:head>
+	<title>Roadmap • PARA Docs</title>
+</svelte:head>
+
+<section class="docs-hero-card">
+	<p class="docs-hero-kicker">Roadmap</p>
+	# Roadmap
+
+	This page tracks ongoing documentation work and reference coverage. It is secondary to the main
+	docs experience and exists for readers who want the current direction of the site.
+</section>
+
+## V2 priorities
+
+- unify the public site at `/` and `/docs`
+- remove the external docs placeholder and broken two-app mental model
+- replace made-up schema content with curated `com.para.*` docs
+- make the docs navigation reflect real sections rather than side experiments
+
+## Manual by design
+
+The site is still manually authored in V2. That is intentional. The goal is to make the content true first, not to automate it before the language and information architecture are stable.
+
+## What comes later
+
+- deeper schema coverage for more `com.para.*` lexicons
+- examples tied more closely to real client and service flows
+- stronger synchronization between the website and the source repos once the docs vocabulary stabilizes

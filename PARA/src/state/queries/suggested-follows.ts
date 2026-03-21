@@ -81,7 +81,6 @@ export function useSuggestedFollowsByActorWithDismiss({
   }
 }
 
-
 export function* findAllProfilesInQueryData(
   queryClient: QueryClient,
   did: string,

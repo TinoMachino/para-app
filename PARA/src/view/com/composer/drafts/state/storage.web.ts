@@ -2,9 +2,9 @@
  * Web IndexedDB storage for draft media.
  * Media is stored by localRefPath key (unique identifier stored in server draft).
  */
-import { createStore, del, get, keys, set } from 'idb-keyval'
+import {createStore, del, get, keys, set} from 'idb-keyval'
 
-import { logger } from './logger'
+import {logger} from './logger'
 
 const DB_NAME = 'bsky-draft-media'
 const STORE_NAME = 'media'
@@ -79,7 +79,7 @@ export async function saveMediaToLocal(
     // Update cache
     mediaExistsCache.set(localRefPath, true)
   } catch (error) {
-    logger.error('Failed to save media to IndexedDB', { error, localRefPath })
+    logger.error('Failed to save media to IndexedDB', {error, localRefPath})
     throw error
   }
 }
@@ -103,7 +103,7 @@ export async function loadMediaFromLocal(
   }
 
   const url = URL.createObjectURL(record.blob)
-  logger.debug('Created blob URL', { url })
+  logger.debug('Created blob URL', {url})
   createdBlobUrls.add(url)
   return url
 }
@@ -144,7 +144,7 @@ async function populateCacheInternal(): Promise<void> {
     }
     cachePopulated = true
   } catch (e) {
-    logger.warn('Failed to populate media cache', { error: e })
+    logger.warn('Failed to populate media cache', {error: e})
   }
 }
 
@@ -173,7 +173,7 @@ export function clearMediaCache(): void {
  */
 export function revokeMediaUrl(url: string): void {
   if (url.startsWith('blob:')) {
-    logger.debug('Revoking blob URL', { url })
+    logger.debug('Revoking blob URL', {url})
     URL.revokeObjectURL(url)
     createdBlobUrls.delete(url)
   }

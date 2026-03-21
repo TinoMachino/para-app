@@ -1,31 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import {useCallback, useEffect, useMemo, useState} from 'react'
+import {Pressable, View} from 'react-native'
 import * as VideoThumbnails from 'expo-video-thumbnails'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import {
-  FALLBACK_ANDROID,
-  FALLBACK_IOS,
-  FALLBACK_WEB,
-} from '#/lib/deviceName'
-import { createSanitizedDisplayName } from '#/lib/moderation/create-sanitized-display-name'
-import { sanitizeHandle } from '#/lib/strings/handles'
-import { useCurrentAccountProfile } from '#/state/queries/useCurrentAccountProfile'
-import { logger } from '#/view/com/composer/drafts/state/logger'
-import { TimeElapsed } from '#/view/com/util/TimeElapsed'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { atoms as a, useTheme } from '#/alf'
-import { Button, ButtonIcon } from '#/components/Button'
-import { DotGrid_Stroke2_Corner0_Rounded as DotsIcon } from '#/components/icons/DotGrid'
-import { Reply as ReplyIcon } from '#/components/icons/Reply'
+import {FALLBACK_ANDROID, FALLBACK_IOS, FALLBACK_WEB} from '#/lib/deviceName'
+import {createSanitizedDisplayName} from '#/lib/moderation/create-sanitized-display-name'
+import {sanitizeHandle} from '#/lib/strings/handles'
+import {useCurrentAccountProfile} from '#/state/queries/useCurrentAccountProfile'
+import {logger} from '#/view/com/composer/drafts/state/logger'
+import {TimeElapsed} from '#/view/com/util/TimeElapsed'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {atoms as a, useTheme} from '#/alf'
+import {Button, ButtonIcon} from '#/components/Button'
+import {DotGrid_Stroke2_Corner0_Rounded as DotsIcon} from '#/components/icons/DotGrid'
+import {Reply as ReplyIcon} from '#/components/icons/Reply'
 import * as MediaPreview from '#/components/MediaPreview'
 import * as Prompt from '#/components/Prompt'
-import { RichText } from '#/components/RichText'
-import { Text } from '#/components/Typography'
-import { IS_WEB } from '#/env'
-import { type DraftPostDisplay, type DraftSummary } from './state/schema'
+import {RichText} from '#/components/RichText'
+import {Text} from '#/components/Typography'
+import {IS_WEB} from '#/env'
+import {type DraftPostDisplay, type DraftSummary} from './state/schema'
 import * as storage from './state/storage'
 
 export function DraftItem({
@@ -37,7 +33,7 @@ export function DraftItem({
   onSelect: (draft: DraftSummary) => void
   onDelete: (draft: DraftSummary) => void
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
   const discardPromptControl = Prompt.usePromptControl()
 
@@ -64,7 +60,7 @@ export function DraftItem({
         accessibilityLabel={_(msg`Open draft`)}
         accessibilityHint={_(msg`Opens this draft in the composer`)}
         onPress={() => onSelect(draft)}
-        style={({ pressed, hovered }) => [
+        style={({pressed, hovered}) => [
           a.rounded_md,
           a.overflow_hidden,
           a.border,
@@ -148,9 +144,9 @@ export function DraftItem({
   )
 }
 
-function DraftMeta({ draft }: { draft: DraftSummary }) {
+function DraftMeta({draft}: {draft: DraftSummary}) {
   const t = useTheme()
-  const { meta } = draft
+  const {meta} = draft
 
   if (
     meta.threadSize === 1 &&
@@ -279,7 +275,7 @@ function DraftPostRow({
               </>
             )}
             <TimeElapsed timestamp={timestamp}>
-              {({ timeElapsed }) => (
+              {({timeElapsed}) => (
                 <Text
                   style={[
                     a.text_md,
@@ -298,11 +294,7 @@ function DraftPostRow({
           <View style={[a.flex_row, a.align_center, a.gap_xs, a.mb_xs]}>
             <ReplyIcon size="xs" fill={t.palette.contrast_500} />
             <Text
-              style={[
-                a.text_sm,
-                t.atoms.text_contrast_medium,
-                a.leading_snug,
-              ]}
+              style={[a.text_sm, t.atoms.text_contrast_medium, a.leading_snug]}
               numberOfLines={1}>
               Replying to{' '}
               <Text style={[a.font_medium, t.atoms.text]}>
@@ -343,7 +335,7 @@ type LoadedImage = {
   alt: string
 }
 
-function DraftMediaPreview({ post }: { post: DraftPostDisplay }) {
+function DraftMediaPreview({post}: {post: DraftPostDisplay}) {
   const [loadedImages, setLoadedImages] = useState<LoadedImage[]>([])
   const [videoThumbnail, setVideoThumbnail] = useState<string | undefined>()
 
@@ -354,7 +346,7 @@ function DraftMediaPreview({ post }: { post: DraftPostDisplay }) {
         for (const image of post.images) {
           try {
             const url = await storage.loadMediaFromLocal(image.localPath)
-            loaded.push({ url, alt: image.altText || '' })
+            loaded.push({url, alt: image.altText || ''})
           } catch (e) {
             // Image doesn't exist locally, skip it
           }
@@ -369,12 +361,12 @@ function DraftMediaPreview({ post }: { post: DraftPostDisplay }) {
             // can't generate thumbnails on web
             setVideoThumbnail("yep, there's a video")
           } else {
-            logger.debug('generating thumbnail of ', { url })
+            logger.debug('generating thumbnail of ', {url})
             const thumbnail = await VideoThumbnails.getThumbnailAsync(url, {
               time: 0,
               quality: 0.2,
             })
-            logger.debug('thumbnail generated', { thumbnail })
+            logger.debug('thumbnail generated', {thumbnail})
             setVideoThumbnail(thumbnail.uri)
           }
         } catch (e) {

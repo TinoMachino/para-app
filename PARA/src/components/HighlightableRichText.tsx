@@ -2,7 +2,7 @@
  * HighlightableRichText - Native implementation
  * Uses TextInput's onSelectionChange to capture partial text selection
  */
-import React, {memo, useCallback, useRef, useState} from 'react'
+import {memo, useCallback, useEffect, useRef, useState} from 'react'
 import {Pressable, StyleSheet, Text, TextInput, View} from 'react-native'
 import {type RichText as RichTextAPI} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
@@ -18,6 +18,7 @@ import {
   type HighlightColor,
   type HighlightData,
 } from '#/state/highlights/highlightTypes'
+import {useSession} from '#/state/session'
 import {useTheme} from '#/alf'
 import {HighlightOptionsModal} from '#/components/HighlightOptionsModal'
 import {RichText} from '#/components/RichText'
@@ -45,9 +46,11 @@ let HighlightableRichText = ({
 }: HighlightableRichTextProps): React.ReactNode => {
   const t = useTheme()
   const {_} = useLingui()
+  const {currentAccount} = useSession()
   const isHighlightMode = useIsHighlightModeActive(postUri)
   const {enterHighlightMode, exitHighlightMode} = useHighlightMode()
-  const {highlights, addHighlight, removeHighlight} = useHighlights(postUri)
+  const {highlights, addHighlight, removeHighlight, updateHighlightData} =
+    useHighlights(postUri)
   const inputRef = useRef<TextInput>(null)
 
   // Selection state
@@ -67,7 +70,7 @@ let HighlightableRichText = ({
     useState<HighlightData | null>(null)
 
   // Cleanup: exit highlight mode when component unmounts
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (isHighlightMode) {
         exitHighlightMode()
@@ -104,13 +107,15 @@ let HighlightableRichText = ({
 
   // Save new highlight
   const handleSave = useCallback(
-    (color: HighlightColor, isPublic: boolean, tag?: string) => {
-      if (pendingSelection) {
+    async (color: HighlightColor, isPublic: boolean, tag?: string) => {
+      if (editingHighlight) {
+        await updateHighlightData(editingHighlight.id, {color, isPublic, tag})
+      } else if (pendingSelection) {
         const highlightText = text.slice(
           pendingSelection.start,
           pendingSelection.end,
         )
-        addHighlight(
+        await addHighlight(
           pendingSelection.start,
           pendingSelection.end,
           color,
@@ -126,17 +131,24 @@ let HighlightableRichText = ({
       setModalVisible(false)
       exitHighlightMode()
     },
-    [addHighlight, pendingSelection, exitHighlightMode, text],
+    [
+      addHighlight,
+      editingHighlight,
+      pendingSelection,
+      exitHighlightMode,
+      text,
+      updateHighlightData,
+    ],
   )
 
   // Highlight more text
-  const handleHighlightMore = useCallback(() => {
+  const handleHighlightMore = useCallback(async () => {
     if (pendingSelection) {
       const highlightText = text.slice(
         pendingSelection.start,
         pendingSelection.end,
       )
-      addHighlight(
+      await addHighlight(
         pendingSelection.start,
         pendingSelection.end,
         HIGHLIGHT_COLORS.yellow,
@@ -159,9 +171,9 @@ let HighlightableRichText = ({
   }, [addHighlight, pendingSelection, enterHighlightMode, postUri, text])
 
   // Delete existing highlight
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (editingHighlight) {
-      removeHighlight(editingHighlight.id)
+      await removeHighlight(editingHighlight.id)
     }
     setEditingHighlight(null)
     setModalVisible(false)
@@ -299,11 +311,24 @@ let HighlightableRichText = ({
         <HighlightOptionsModal
           visible={modalVisible}
           onClose={handleClose}
-          onSave={handleSave}
-          onHighlightMore={handleHighlightMore}
-          onDelete={editingHighlight ? handleDelete : undefined}
+          onSave={(color, isPublic, tag) => {
+            void handleSave(color, isPublic, tag)
+          }}
+          onHighlightMore={() => {
+            void handleHighlightMore()
+          }}
+          onDelete={
+            editingHighlight &&
+            (!editingHighlight.creatorDid ||
+              editingHighlight.creatorDid === currentAccount?.did)
+              ? () => {
+                  void handleDelete()
+                }
+              : undefined
+          }
           existingTag={editingHighlight?.tag}
           existingColor={editingHighlight?.color}
+          existingIsPublic={editingHighlight?.isPublic}
         />
       </View>
     )
@@ -323,11 +348,24 @@ let HighlightableRichText = ({
       <HighlightOptionsModal
         visible={modalVisible}
         onClose={handleClose}
-        onSave={handleSave}
-        onHighlightMore={handleHighlightMore}
-        onDelete={editingHighlight ? handleDelete : undefined}
+        onSave={(color, isPublic, tag) => {
+          void handleSave(color, isPublic, tag)
+        }}
+        onHighlightMore={() => {
+          void handleHighlightMore()
+        }}
+        onDelete={
+          editingHighlight &&
+          (!editingHighlight.creatorDid ||
+            editingHighlight.creatorDid === currentAccount?.did)
+            ? () => {
+                void handleDelete()
+              }
+            : undefined
+        }
         existingTag={editingHighlight?.tag}
         existingColor={editingHighlight?.color}
+        existingIsPublic={editingHighlight?.isPublic}
       />
     </View>
   )

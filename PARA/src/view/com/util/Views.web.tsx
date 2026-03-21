@@ -12,7 +12,7 @@
  * need to match layout but which aren't scrolled.
  */
 
-import React from 'react'
+import {forwardRef, type PropsWithChildren, type Ref} from 'react'
 import {
   type FlatList,
   type FlatListProps,
@@ -37,15 +37,15 @@ interface AddedProps {
 /**
  * @deprecated use `Layout` components
  */
-export const CenteredView = React.forwardRef(function CenteredView(
+export const CenteredView = forwardRef(function CenteredView(
   {
     style,
     topBorder,
     ...props
-  }: React.PropsWithChildren<
+  }: PropsWithChildren<
     ViewProps & {sideBorders?: boolean; topBorder?: boolean}
   >,
-  ref: React.Ref<View>,
+  ref: Ref<View>,
 ) {
   const pal = usePalette('default')
   const {isMobile} = useWebMediaQueries()
@@ -66,17 +66,17 @@ export const CenteredView = React.forwardRef(function CenteredView(
   return <View ref={ref} style={style} {...props} />
 })
 
-export const FlatList_INTERNAL = React.forwardRef(function FlatListImpl<ItemT>(
+export const FlatList_INTERNAL = forwardRef(function FlatListImpl<ItemT>(
   {
     contentContainerStyle,
     style,
     contentOffset,
     desktopFixedHeight,
     ...props
-  }: React.PropsWithChildren<
+  }: PropsWithChildren<
     Omit<FlatListProps<ItemT>, 'CellRendererComponent'> & AddedProps
   >,
-  ref: React.Ref<FlatList<ItemT>>,
+  ref: Ref<FlatList<ItemT>>,
 ) {
   const {isMobile} = useWebMediaQueries()
   const {centerColumnOffset} = useLayoutBreakpoints()
@@ -141,9 +141,9 @@ export const FlatList_INTERNAL = React.forwardRef(function FlatListImpl<ItemT>(
 /**
  * @deprecated use `Layout` components
  */
-export const ScrollView = React.forwardRef(function ScrollViewImpl(
-  {contentContainerStyle, ...props}: React.PropsWithChildren<ScrollViewProps>,
-  ref: React.Ref<Animated.ScrollView>,
+export const ScrollView = forwardRef(function ScrollViewImpl(
+  {contentContainerStyle, ...props}: PropsWithChildren<ScrollViewProps>,
+  ref: Ref<Animated.ScrollView>,
 ) {
   const {isMobile} = useWebMediaQueries()
   const {centerColumnOffset} = useLayoutBreakpoints()

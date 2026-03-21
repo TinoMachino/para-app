@@ -4,21 +4,21 @@ import {
   AtUri,
   type BskyAgent,
 } from '@atproto/api'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
-import { networkRetry, retry } from '#/lib/async/retry'
-import { STALE } from '#/state/queries'
-import { useGetPost } from '#/state/queries/post'
-import { type ThreadgateAllowUISetting } from '#/state/queries/threadgate/types'
+import {networkRetry, retry} from '#/lib/async/retry'
+import {STALE} from '#/state/queries'
+import {useGetPost} from '#/state/queries/post'
+import {type ThreadgateAllowUISetting} from '#/state/queries/threadgate/types'
 import {
   createThreadgateRecord,
   mergeThreadgateRecords,
   threadgateAllowUISettingToAllowRecordValue,
   threadgateViewToAllowUISetting,
 } from '#/state/queries/threadgate/util'
-import { useUpdatePostThreadThreadgateQueryCache } from '#/state/queries/usePostThread'
-import { useAgent } from '#/state/session'
-import { useThreadgateHiddenReplyUrisAPI } from '#/state/threadgate-hidden-replies'
+import {useUpdatePostThreadThreadgateQueryCache} from '#/state/queries/usePostThread'
+import {useAgent} from '#/state/session'
+import {useThreadgateHiddenReplyUrisAPI} from '#/state/threadgate-hidden-replies'
 import * as bsky from '#/types/bsky'
 
 export * from '#/state/queries/threadgate/types'
@@ -78,7 +78,7 @@ export function useThreadgateViewQuery({
     placeholderData: initialData,
     staleTime: STALE.MINUTES.ONE,
     async queryFn() {
-      const post = await getPost({ uri: postUri! })
+      const post = await getPost({uri: postUri!})
       return post.threadgate ?? null
     },
   })
@@ -102,7 +102,7 @@ export async function getThreadgateRecord({
   }
 
   try {
-    const { data } = await retry(
+    const {data} = await retry(
       2,
       e => {
         /*
@@ -209,7 +209,7 @@ export async function updateThreadgateAllow({
   postUri: string
   allow: ThreadgateAllowUISetting[]
 }) {
-  return upsertThreadgate({ agent, postUri }, async prev => {
+  return upsertThreadgate({agent, postUri}, async prev => {
     if (prev) {
       return {
         ...prev,
@@ -238,7 +238,7 @@ export function useSetThreadgateAllowMutation() {
       postUri: string
       allow: ThreadgateAllowUISetting[]
     }) => {
-      return upsertThreadgate({ agent, postUri }, async prev => {
+      return upsertThreadgate({agent, postUri}, async prev => {
         if (prev) {
           return {
             ...prev,
@@ -252,12 +252,12 @@ export function useSetThreadgateAllowMutation() {
         }
       })
     },
-    async onSuccess(_, { postUri, allow }) {
+    async onSuccess(_, {postUri, allow}) {
       const data = await retry<AppBskyFeedDefs.ThreadgateView | undefined>(
         5, // 5 tries
         _e => true,
         async () => {
-          const post = await getPost({ uri: postUri })
+          const post = await getPost({uri: postUri})
           const threadgate = post.threadgate
           if (!threadgate) {
             throw new Error(
@@ -275,7 +275,7 @@ export function useSetThreadgateAllowMutation() {
           return threadgate
         },
         1e3, // 1s delay between tries
-      ).catch(() => { })
+      ).catch(() => {})
 
       if (data) updatePostThreadThreadgate(data)
 
@@ -310,7 +310,7 @@ export function useToggleReplyVisibilityMutation() {
         hiddenReplies.removeHiddenReplyUri(replyUri)
       }
 
-      await upsertThreadgate({ agent, postUri }, async prev => {
+      await upsertThreadgate({agent, postUri}, async prev => {
         if (prev) {
           if (action === 'hide') {
             return mergeThreadgateRecords(prev, {
@@ -338,7 +338,7 @@ export function useToggleReplyVisibilityMutation() {
         queryKey: [threadgateRecordQueryKeyRoot],
       })
     },
-    onError(_, { replyUri, action }) {
+    onError(_, {replyUri, action}) {
       if (action === 'hide') {
         hiddenReplies.removeHiddenReplyUri(replyUri)
       } else if (action === 'show') {

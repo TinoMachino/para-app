@@ -1,6 +1,6 @@
+import { request } from 'undici'
 import { AtpAgent } from '@atproto/api'
 import { SeedClient, TestNetwork, usersSeed } from '@atproto/dev-env'
-import { request } from 'undici'
 import { ids } from '../../src/lexicon/lexicons'
 
 type ParaStrongRef = {
@@ -70,45 +70,138 @@ type ParaProfileStatsOutput = {
 }
 
 type ParaCommunityGovernanceOutput = {
+  source?: string
   community: string
-  summary: {
+  communityId?: string
+  slug: string
+  createdAt: string
+  updatedAt: string
+  moderators: Array<{
+    did?: string
+    handle?: string
+    displayName?: string
+    avatar?: string
+    role: string
+    badge: string
+    capabilities: string[]
+  }>
+  officials: Array<{
+    did?: string
+    handle?: string
+    displayName?: string
+    avatar?: string
+    office: string
+    mandate: string
+  }>
+  deputies: Array<{
+    key: string
+    tier: string
+    role: string
+    description: string
+    capabilities: string[]
+    activeHolder?: {
+      did?: string
+      handle?: string
+      displayName?: string
+      avatar?: string
+    }
+    activeSince?: string
+    votes: number
+    applicants: Array<{
+      did?: string
+      handle?: string
+      displayName?: string
+      avatar?: string
+      appliedAt: string
+      status: 'applied' | 'approved' | 'rejected'
+      note?: string
+    }>
+  }>
+  metadata?: {
+    termLengthDays?: number
+    reviewCadence?: string
+    escalationPath?: string
+    publicContact?: string
+    lastPublishedAt?: string
+    state?: string
+    matterFlairIds?: string[]
+    policyFlairIds?: string[]
+  }
+  editHistory: Array<{
+    id: string
+    action: string
+    actorDid?: string
+    actorHandle?: string
+    createdAt: string
+    summary: string
+  }>
+  counters: {
     members: number
     visiblePosters: number
     policyPosts: number
     matterPosts: number
     badgeHolders: number
   }
-  moderators: Array<{
-    member: {
-      did: string
-      handle?: string
-      displayName?: string
-      party?: string
-      influence: number
-      policyPosts: number
-      matterPosts: number
-    }
-    role: string
-    badge: string
+}
+
+type ParaCabildeoOptionSummary = {
+  optionIndex: number
+  label: string
+  votes: number
+  positions: number
+}
+
+type ParaCabildeoOutput = {
+  uri: string
+  creator: string
+  title: string
+  description: string
+  community: string
+  phase: string
+  optionSummary: ParaCabildeoOptionSummary[]
+  positionCounts: {
+    total: number
+    for: number
+    against: number
+    amendment: number
+  }
+  voteTotals: {
+    total: number
+    direct: number
+    delegated: number
+  }
+  outcomeSummary?: {
+    winningOption?: number
+    totalParticipants: number
+    effectiveTotalPower: number
+    tie: boolean
+    breakdown: ParaCabildeoOptionSummary[]
+  }
+  viewerContext?: {
+    activeDelegation?: string
+    delegateHasVoted?: boolean
+    delegatedVoteOption?: number
+  }
+}
+
+type ParaListCabildeosOutput = {
+  cursor?: string
+  cabildeos: ParaCabildeoOutput[]
+}
+
+type ParaGetCabildeoOutput = {
+  cabildeo: ParaCabildeoOutput
+}
+
+type ParaListCabildeoPositionsOutput = {
+  cursor?: string
+  positions: Array<{
+    uri: string
+    cabildeo: string
+    stance: 'for' | 'against' | 'amendment' | string
+    optionIndex?: number
+    text: string
   }>
-  officials: Array<{
-    member: {
-      did: string
-      party?: string
-    }
-    office: string
-    mandate: string
-  }>
-  deputies: Array<{
-    tier: string
-    role: string
-    activeHolder: {
-      did: string
-    }
-    votesBackingRole: number
-    applicants: string[]
-  }>
-  computedAt: string
 }
 
 describe('para feed views', () => {
@@ -141,9 +234,17 @@ describe('para feed views', () => {
   it('returns self+follow timeline and excludes muted authors', async () => {
     await sc.follow(alice, bob)
 
-    const alicePost = await createParaPost(sc, alice, 'alice timeline para post')
+    const alicePost = await createParaPost(
+      sc,
+      alice,
+      'alice timeline para post',
+    )
     const bobPost = await createParaPost(sc, bob, 'bob timeline para post')
-    const carolPost = await createParaPost(sc, carol, 'carol timeline para post')
+    const carolPost = await createParaPost(
+      sc,
+      carol,
+      'carol timeline para post',
+    )
     await network.processAll()
 
     const beforeMute = await callPara<ParaTimelineOutput>(
@@ -373,9 +474,14 @@ describe('para feed views', () => {
       party: 'Independent',
       community: 'mx-federal',
     })
-    const post = await createParaPost(sc, alice, 'profile stats endpoint post', {
-      postType: 'policy',
-    })
+    const post = await createParaPost(
+      sc,
+      alice,
+      'profile stats endpoint post',
+      {
+        postType: 'policy',
+      },
+    )
     await createParaPostMeta(sc, alice, post.uri, {
       postType: 'policy',
       voteScore: 11,
@@ -414,7 +520,7 @@ describe('para feed views', () => {
     expect((res.body as { error?: string }).error).toBe('NotFound')
   })
 
-  it('returns para community governance roster for a community', async () => {
+  it('returns published para community governance merged with computed counters', async () => {
     await createParaStatus(sc, alice, {
       status: 'Alice status',
       party: 'Independent',
@@ -442,6 +548,64 @@ describe('para feed views', () => {
       voteScore: 2,
       community: 'mx-federal',
     })
+    await createCommunityGovernanceRecord(sc, alice, 'mx-federal', {
+      moderators: [
+        {
+          did: alice,
+          handle: 'alice.test',
+          displayName: 'Alice Moderator',
+          role: 'Lead moderator',
+          badge: 'Moderation Lead',
+          capabilities: ['publish_governance_updates'],
+        },
+      ],
+      officials: [
+        {
+          did: bob,
+          handle: 'bob.test',
+          displayName: 'Bob Official',
+          office: 'Official representative',
+          mandate: 'Represents policy consensus.',
+        },
+      ],
+      deputies: [
+        {
+          key: 'policy-deputy',
+          tier: 'Tier II',
+          role: 'Policy Deputy',
+          description: 'Maintains policy queues.',
+          capabilities: ['Triage policy proposals'],
+          activeHolder: {
+            did: bob,
+            handle: 'bob.test',
+            displayName: 'Bob Official',
+          },
+          votes: 12,
+          applicants: [
+            {
+              did: carol,
+              displayName: 'Carol Applicant',
+              appliedAt: new Date().toISOString(),
+              status: 'applied',
+            },
+          ],
+        },
+      ],
+      metadata: {
+        state: 'Federal District',
+        reviewCadence: 'Monthly governance review',
+        matterFlairIds: ['matter_democracia'],
+        policyFlairIds: ['policy_limite_mandatos'],
+      },
+      editHistory: [
+        {
+          id: 'seed-governance',
+          action: 'publish_governance_updates',
+          createdAt: new Date().toISOString(),
+          summary: 'Initial governance seeded.',
+        },
+      ],
+    })
     await likeParaRecord(sc, bob, alicePost)
     await network.processAll()
 
@@ -453,13 +617,188 @@ describe('para feed views', () => {
     )
 
     expect(governance.community).toEqual('mx-federal')
-    expect(governance.summary.members).toBeGreaterThanOrEqual(2)
-    expect(governance.summary.policyPosts).toBeGreaterThanOrEqual(1)
-    expect(governance.summary.matterPosts).toBeGreaterThanOrEqual(1)
-    expect(governance.moderators.length).toBeGreaterThan(0)
-    expect(governance.officials.length).toBeGreaterThan(0)
-    expect(governance.deputies.length).toBeGreaterThan(0)
-    expect(governance.computedAt).toBeTruthy()
+    expect(governance.slug).toEqual('mx-federal')
+    expect(governance.counters.members).toBeGreaterThanOrEqual(2)
+    expect(governance.counters.policyPosts).toBeGreaterThanOrEqual(1)
+    expect(governance.counters.matterPosts).toBeGreaterThanOrEqual(1)
+    expect(governance.moderators).toHaveLength(1)
+    expect(governance.moderators[0]?.did).toEqual(alice)
+    expect(governance.officials).toHaveLength(1)
+    expect(governance.officials[0]?.did).toEqual(bob)
+    expect(governance.deputies).toHaveLength(1)
+    expect(governance.deputies[0]?.key).toEqual('policy-deputy')
+    expect(governance.deputies[0]?.votes).toEqual(12)
+    expect(governance.metadata?.reviewCadence).toEqual(
+      'Monthly governance review',
+    )
+    expect(governance.metadata?.state).toEqual('Federal District')
+    expect(governance.metadata?.matterFlairIds).toEqual(['matter_democracia'])
+    expect(governance.metadata?.policyFlairIds).toEqual([
+      'policy_limite_mandatos',
+    ])
+    expect(governance.editHistory[0]?.id).toEqual('seed-governance')
+  })
+
+  it('returns empty governance rosters when no governance record exists', async () => {
+    await createParaStatus(sc, dan, {
+      status: 'Dan status',
+      party: 'Independent',
+      community: 'mx-no-governance',
+    })
+    await network.processAll()
+
+    const governance = await callPara<ParaCommunityGovernanceOutput>(
+      network,
+      'com.para.community.getGovernance',
+      { community: 'mx-no-governance', limit: 25 },
+      dan,
+    )
+
+    expect(governance.community).toEqual('mx-no-governance')
+    expect(governance.moderators).toHaveLength(0)
+    expect(governance.officials).toHaveLength(0)
+    expect(governance.deputies).toHaveLength(0)
+    expect(governance.counters.members).toBeGreaterThanOrEqual(1)
+  })
+
+  it('returns live cabildeo views with aggregates and viewer delegation context', async () => {
+    const cabildeo = await createCabildeoRecord(sc, alice, {
+      title: 'Cabildeo de agua',
+      description: 'Debate sobre abastecimiento regional.',
+      community: 'mx-federal',
+      phase: 'resolved',
+      options: [{ label: 'Invertir' }, { label: 'Mantener' }],
+    })
+    await createCabildeoPositionRecord(sc, bob, {
+      cabildeo: cabildeo.uri,
+      stance: 'for',
+      optionIndex: 0,
+      text: 'La inversion mejora la infraestructura.',
+    })
+    await createCabildeoPositionRecord(sc, carol, {
+      cabildeo: cabildeo.uri,
+      stance: 'against',
+      optionIndex: 1,
+      text: 'No hay presupuesto suficiente.',
+    })
+    await createCabildeoPositionRecord(sc, dan, {
+      cabildeo: cabildeo.uri,
+      stance: 'amendment',
+      optionIndex: 0,
+      text: 'Hagamos un plan escalonado.',
+    })
+    await createCabildeoVoteRecord(sc, bob, {
+      cabildeo: cabildeo.uri,
+      selectedOption: 0,
+      isDirect: true,
+    })
+    await createCabildeoVoteRecord(sc, carol, {
+      cabildeo: cabildeo.uri,
+      selectedOption: 1,
+      isDirect: true,
+    })
+    await createCabildeoDelegationRecord(sc, dan, {
+      cabildeo: cabildeo.uri,
+      delegateTo: bob,
+    })
+    await network.processAll()
+
+    const list = await callPara<ParaListCabildeosOutput>(
+      network,
+      'com.para.civic.listCabildeos',
+      { community: 'mx-federal', limit: 25 },
+      dan,
+    )
+    const listed = list.cabildeos.find((item) => item.uri === cabildeo.uri)
+    expect(listed).toBeDefined()
+    expect(listed?.positionCounts.total).toBe(3)
+    expect(listed?.positionCounts.for).toBe(1)
+    expect(listed?.positionCounts.against).toBe(1)
+    expect(listed?.positionCounts.amendment).toBe(1)
+    expect(listed?.voteTotals.total).toBe(2)
+    expect(listed?.voteTotals.direct).toBe(2)
+    expect(listed?.voteTotals.delegated).toBe(0)
+    expect(listed?.optionSummary[0]?.votes).toBe(1)
+    expect(listed?.optionSummary[1]?.votes).toBe(1)
+    expect(listed?.viewerContext?.activeDelegation).toBe(bob)
+    expect(listed?.viewerContext?.delegateHasVoted).toBe(true)
+    expect(listed?.viewerContext?.delegatedVoteOption).toBe(0)
+    expect(listed?.outcomeSummary?.totalParticipants).toBe(2)
+
+    const detail = await callPara<ParaGetCabildeoOutput>(
+      network,
+      'com.para.civic.getCabildeo',
+      { cabildeo: cabildeo.uri },
+      dan,
+    )
+    expect(detail.cabildeo.uri).toBe(cabildeo.uri)
+    expect(detail.cabildeo.positionCounts.total).toBe(3)
+
+    const positions = await callPara<ParaListCabildeoPositionsOutput>(
+      network,
+      'com.para.civic.listCabildeoPositions',
+      { cabildeo: cabildeo.uri, limit: 50 },
+      dan,
+    )
+    expect(positions.positions).toHaveLength(3)
+    expect(positions.positions.map((item) => item.stance)).toEqual(
+      expect.arrayContaining(['for', 'against', 'amendment']),
+    )
+  })
+
+  it('supports cabildeo cursor pagination with stable URIs', async () => {
+    const first = await createCabildeoRecord(sc, bob, {
+      title: 'Cabildeo 1',
+      description: 'Paginated record one',
+      community: 'mx-pagination',
+      phase: 'open',
+      options: [{ label: 'A' }, { label: 'B' }],
+    })
+    const second = await createCabildeoRecord(sc, bob, {
+      title: 'Cabildeo 2',
+      description: 'Paginated record two',
+      community: 'mx-pagination',
+      phase: 'open',
+      options: [{ label: 'A' }, { label: 'B' }],
+    })
+    await network.processAll()
+
+    const pageOne = await callPara<ParaListCabildeosOutput>(
+      network,
+      'com.para.civic.listCabildeos',
+      { community: 'mx-pagination', limit: 1 },
+      bob,
+    )
+    expect(pageOne.cabildeos).toHaveLength(1)
+    expect(pageOne.cabildeos[0]?.uri).toMatch(/^at:\/\//)
+    expect(pageOne.cursor).toBeTruthy()
+
+    const pageTwo = await callPara<ParaListCabildeosOutput>(
+      network,
+      'com.para.civic.listCabildeos',
+      { community: 'mx-pagination', limit: 1, cursor: pageOne.cursor },
+      bob,
+    )
+    expect(pageTwo.cabildeos).toHaveLength(1)
+    expect(pageTwo.cabildeos[0]?.uri).toMatch(/^at:\/\//)
+    expect(pageTwo.cabildeos[0]?.uri).not.toEqual(pageOne.cabildeos[0]?.uri)
+    expect(
+      [first.uri, second.uri].includes(pageOne.cabildeos[0]?.uri || ''),
+    ).toBe(true)
+    expect(
+      [first.uri, second.uri].includes(pageTwo.cabildeos[0]?.uri || ''),
+    ).toBe(true)
+  })
+
+  it('returns not found for missing cabildeo detail', async () => {
+    const res = await callParaRaw(
+      network,
+      'com.para.civic.getCabildeo',
+      { cabildeo: 'at://did:example:missing/com.para.civic.cabildeo/self' },
+      alice,
+    )
+    expect(res.status).toBe(400)
+    expect((res.body as { error?: string }).error).toBe('NotFound')
   })
 })
 
@@ -602,6 +941,216 @@ const createParaStatus = async (
     uri: data.uri,
     cid: data.cid,
   }
+}
+
+const createCommunityGovernanceRecord = async (
+  sc: SeedClient,
+  by: string,
+  community: string,
+  record: {
+    moderators: Array<{
+      did?: string
+      handle?: string
+      displayName?: string
+      role: string
+      badge: string
+      capabilities: string[]
+    }>
+    officials: Array<{
+      did?: string
+      handle?: string
+      displayName?: string
+      office: string
+      mandate: string
+    }>
+    deputies: Array<{
+      key: string
+      tier: string
+      role: string
+      description: string
+      capabilities: string[]
+      activeHolder?: {
+        did?: string
+        handle?: string
+        displayName?: string
+      }
+      votes: number
+      applicants: Array<{
+        did?: string
+        handle?: string
+        displayName?: string
+        appliedAt: string
+        status: 'applied' | 'approved' | 'rejected'
+      }>
+    }>
+    metadata?: {
+      reviewCadence?: string
+      state?: string
+      matterFlairIds?: string[]
+      policyFlairIds?: string[]
+    }
+    editHistory?: Array<{
+      id: string
+      action: string
+      createdAt: string
+      summary: string
+    }>
+  },
+): Promise<ParaStrongRef> => {
+  const now = new Date().toISOString()
+  const slug = community.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  const { data } = await sc.agent.com.atproto.repo.putRecord(
+    {
+      repo: by,
+      collection: 'com.para.community.governance',
+      rkey: slug,
+      record: {
+        $type: 'com.para.community.governance',
+        community,
+        slug,
+        createdAt: now,
+        updatedAt: now,
+        moderators: record.moderators,
+        officials: record.officials,
+        deputies: record.deputies,
+        metadata: record.metadata,
+        editHistory: record.editHistory,
+      },
+    },
+    {
+      encoding: 'application/json',
+      headers: sc.getHeaders(by),
+    },
+  )
+
+  return {
+    uri: data.uri,
+    cid: data.cid,
+  }
+}
+
+const createCabildeoRecord = async (
+  sc: SeedClient,
+  by: string,
+  opts: {
+    title: string
+    description: string
+    community: string
+    phase: 'draft' | 'open' | 'deliberating' | 'voting' | 'resolved'
+    options: Array<{ label: string; description?: string }>
+  },
+): Promise<ParaStrongRef> => {
+  const { data } = await sc.agent.com.atproto.repo.createRecord(
+    {
+      repo: by,
+      collection: 'com.para.civic.cabildeo',
+      record: {
+        $type: 'com.para.civic.cabildeo',
+        title: opts.title,
+        description: opts.description,
+        community: opts.community,
+        phase: opts.phase,
+        options: opts.options,
+        createdAt: new Date().toISOString(),
+      },
+    },
+    {
+      encoding: 'application/json',
+      headers: sc.getHeaders(by),
+    },
+  )
+
+  return { uri: data.uri, cid: data.cid }
+}
+
+const createCabildeoPositionRecord = async (
+  sc: SeedClient,
+  by: string,
+  opts: {
+    cabildeo: string
+    stance: 'for' | 'against' | 'amendment'
+    optionIndex?: number
+    text: string
+  },
+): Promise<ParaStrongRef> => {
+  const { data } = await sc.agent.com.atproto.repo.createRecord(
+    {
+      repo: by,
+      collection: 'com.para.civic.position',
+      record: {
+        $type: 'com.para.civic.position',
+        cabildeo: opts.cabildeo,
+        stance: opts.stance,
+        optionIndex: opts.optionIndex,
+        text: opts.text,
+        createdAt: new Date().toISOString(),
+      },
+    },
+    {
+      encoding: 'application/json',
+      headers: sc.getHeaders(by),
+    },
+  )
+
+  return { uri: data.uri, cid: data.cid }
+}
+
+const createCabildeoVoteRecord = async (
+  sc: SeedClient,
+  by: string,
+  opts: {
+    cabildeo: string
+    selectedOption: number
+    isDirect: boolean
+  },
+): Promise<ParaStrongRef> => {
+  const { data } = await sc.agent.com.atproto.repo.createRecord(
+    {
+      repo: by,
+      collection: 'com.para.civic.vote',
+      record: {
+        $type: 'com.para.civic.vote',
+        cabildeo: opts.cabildeo,
+        selectedOption: opts.selectedOption,
+        isDirect: opts.isDirect,
+        createdAt: new Date().toISOString(),
+      },
+    },
+    {
+      encoding: 'application/json',
+      headers: sc.getHeaders(by),
+    },
+  )
+
+  return { uri: data.uri, cid: data.cid }
+}
+
+const createCabildeoDelegationRecord = async (
+  sc: SeedClient,
+  by: string,
+  opts: {
+    cabildeo?: string
+    delegateTo: string
+  },
+): Promise<ParaStrongRef> => {
+  const { data } = await sc.agent.com.atproto.repo.createRecord(
+    {
+      repo: by,
+      collection: 'com.para.civic.delegation',
+      record: {
+        $type: 'com.para.civic.delegation',
+        cabildeo: opts.cabildeo,
+        delegateTo: opts.delegateTo,
+        createdAt: new Date().toISOString(),
+      },
+    },
+    {
+      encoding: 'application/json',
+      headers: sc.getHeaders(by),
+    },
+  )
+
+  return { uri: data.uri, cid: data.cid }
 }
 
 const callPara = async <T>(

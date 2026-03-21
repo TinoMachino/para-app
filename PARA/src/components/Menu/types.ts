@@ -1,10 +1,16 @@
 import {
+  type ComponentType,
+  type KeyboardEvent,
+  type PropsWithChildren,
+  type ReactNode,
+  type RefObject,
+} from 'react'
+import {
   type AccessibilityProps,
   type AccessibilityRole,
   type GestureResponderEvent,
   type PressableProps,
 } from 'react-native'
-import type React from 'react'
 
 import {type TextStyleProp, type ViewStyleProp} from '#/alf'
 import type * as Dialog from '#/components/Dialog'
@@ -19,7 +25,7 @@ export type ItemContextType = {
 }
 
 export type RadixPassThroughTriggerProps = {
-  ref: React.RefObject<any>
+  ref: RefObject<any>
   id: string
   type: 'button'
   disabled: boolean
@@ -28,7 +34,7 @@ export type RadixPassThroughTriggerProps = {
   ['aria-controls']?: string
   ['aria-haspopup']?: boolean
   ['aria-expanded']?: AccessibilityProps['aria-expanded']
-  onKeyDown: (e: React.KeyboardEvent) => void
+  onKeyDown: (e: KeyboardEvent) => void
   /**
    * Radix provides this, but we override on web to use `onPress` instead,
    * which is less sensitive while scrolling.
@@ -36,7 +42,7 @@ export type RadixPassThroughTriggerProps = {
   onPointerDown: PressableProps['onPointerDown']
 }
 export type TriggerProps = {
-  children(props: TriggerChildProps): React.ReactNode
+  children(props: TriggerChildProps): ReactNode
   label: string
   hint?: string
   role?: AccessibilityRole
@@ -95,7 +101,7 @@ export type TriggerChildProps =
       }
     }
 
-export type ItemProps = React.PropsWithChildren<
+export type ItemProps = PropsWithChildren<
   Omit<PressableProps, 'style'> &
     ViewStyleProp & {
       label: string
@@ -103,11 +109,11 @@ export type ItemProps = React.PropsWithChildren<
     }
 >
 
-export type ItemTextProps = React.PropsWithChildren<TextStyleProp & {}>
-export type ItemIconProps = React.PropsWithChildren<{
-  icon: React.ComponentType<SVGIconProps>
+export type ItemTextProps = PropsWithChildren<TextStyleProp & {}>
+export type ItemIconProps = PropsWithChildren<{
+  icon: ComponentType<SVGIconProps>
   position?: 'left' | 'right'
   fill?: (props: {disabled: boolean}) => string
 }>
 
-export type GroupProps = React.PropsWithChildren<ViewStyleProp & {}>
+export type GroupProps = PropsWithChildren<ViewStyleProp & {}>

@@ -17,6 +17,9 @@ List the currently active servers.
 
 Create a new PDS instance. Data is stored in memory.
 
+The repo-level persistent launcher overrides this with fixed storage paths and a
+Postgres-backed PLC. See [`../../PARAMX_SHARED_DEMO.md`](../../PARAMX_SHARED_DEMO.md).
+
 ### `stop(port: number)`
 
 Stop the server at the given port.

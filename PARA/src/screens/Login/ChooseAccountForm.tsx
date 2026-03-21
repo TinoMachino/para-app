@@ -1,18 +1,18 @@
-import React from 'react'
+import {useCallback, useState} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {logEvent} from '#/lib/statsig/statsig'
 import {logger} from '#/logger'
 import {type SessionAccount, useSession, useSessionApi} from '#/state/session'
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
-import * as Toast from '#/view/com/util/Toast'
 import {atoms as a, web} from '#/alf'
 import {AccountList} from '#/components/AccountList'
 import {Button, ButtonText} from '#/components/Button'
 import * as TextField from '#/components/forms/TextField'
+import * as Toast from '#/components/Toast'
 import {FormContainer} from './FormContainer'
 
 export const ChooseAccountForm = ({
@@ -22,13 +22,13 @@ export const ChooseAccountForm = ({
   onSelectAccount: (account?: SessionAccount) => void
   onPressBack: () => void
 }) => {
-  const [pendingDid, setPendingDid] = React.useState<string | null>(null)
+  const [pendingDid, setPendingDid] = useState<string | null>(null)
   const {_} = useLingui()
   const {currentAccount} = useSession()
   const {resumeSession} = useSessionApi()
   const {setShowLoggedOut} = useLoggedOutViewControls()
 
-  const onSelect = React.useCallback(
+  const onSelect = useCallback(
     async (account: SessionAccount) => {
       if (pendingDid) {
         // The session API isn't resilient to race conditions so let's just ignore this.

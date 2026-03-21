@@ -1,4 +1,5 @@
 import {Platform} from 'react-native'
+import * as Device from 'expo-device'
 import {
   Agent as BaseAgent,
   type AppBskyActorProfile,
@@ -71,11 +72,20 @@ export async function createAgentAndResume(
   const isLegacyLocalBskyAccount =
     storedAccount.service === LOCAL_DEV_SERVICE &&
     storedAccount.handle.endsWith('.bsky.social')
+  const isIosSimulator = Platform.OS === 'ios' && !Device.isDevice
   if (isLegacyLocalBskyAccount) {
     serviceUrl = BSKY_SERVICE
   }
   if (
+    isIosSimulator &&
+    !process.env.EXPO_PUBLIC_LOCAL_DEV_SERVICE &&
+    serviceUrl === LOCAL_DEV_SERVICE
+  ) {
+    serviceUrl = 'http://localhost:2583'
+  }
+  if (
     Platform.OS === 'ios' &&
+    Device.isDevice &&
     (serviceUrl.includes('localhost') || serviceUrl.includes('127.0.0.1'))
   ) {
     serviceUrl = LOCAL_DEV_SERVICE
@@ -98,19 +108,6 @@ export async function createAgentAndResume(
     await networkRetry(1, () => agent.resumeSession(prevSession))
   } else {
     agent.sessionManager.session = prevSession
-    if (!storedAccount.signupQueued) {
-      networkRetry(3, () => agent.resumeSession(prevSession)).catch(
-        (e: any) => {
-          logger.error(`networkRetry failed to resume session`, {
-            status: e?.status || 'unknown',
-            // this field name is ignored by Sentry scrubbers
-            safeMessage: e?.message || 'unknown',
-          })
-
-          throw e
-        },
-      )
-    }
   }
 
   // after session is attached

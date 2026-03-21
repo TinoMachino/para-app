@@ -1,5 +1,4 @@
 import {type ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
-import type React from 'react'
 
 import {useTheme} from '#/alf'
 import {ChevronRight_Stroke2_Corner0_Rounded as ChevronRight} from '#/components/icons/Chevron'

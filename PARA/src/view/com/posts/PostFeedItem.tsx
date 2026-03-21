@@ -504,13 +504,7 @@ let PostContent = ({
           )}
         </View>
       ) : undefined}
-      {record ? (
-        <TranslatedPost
-          hideTranslateLink={true}
-          post={post}
-          postText={record.text}
-        />
-      ) : undefined}
+      {record ? <TranslatedPost hideTranslateLink post={post} /> : undefined}
       {postEmbed ? (
         <View style={[a.pb_xs]}>
           <Embed

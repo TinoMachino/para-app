@@ -11,15 +11,15 @@ import {
   manipulateAsync,
   SaveFormat,
 } from 'expo-image-manipulator'
-import { nanoid } from 'nanoid/non-secure'
+import {nanoid} from 'nanoid/non-secure'
 
-import { POST_IMG_MAX } from '#/lib/constants'
-import { getImageDim } from '#/lib/media/manip'
-import { openCropper } from '#/lib/media/picker'
-import { type PickerImage } from '#/lib/media/picker.shared'
-import { getDataUriSize } from '#/lib/media/util'
-import { isCancelledError } from '#/lib/strings/errors'
-import { IS_NATIVE, IS_WEB } from '#/env'
+import {POST_IMG_MAX} from '#/lib/constants'
+import {getImageDim} from '#/lib/media/manip'
+import {openCropper} from '#/lib/media/picker'
+import {type PickerImage} from '#/lib/media/picker.shared'
+import {getDataUriSize} from '#/lib/media/util'
+import {isCancelledError} from '#/lib/strings/errors'
+import {IS_NATIVE, IS_WEB} from '#/env'
 
 export type ImageTransformation = {
   crop?: ActionCrop['crop']
@@ -91,7 +91,7 @@ export type InitialImage = {
 export function createInitialImages(
   uris: InitialImage[] = [],
 ): ComposerImageWithoutTransformation[] {
-  return uris.map(({ uri, width, height, altText = '' }) => {
+  return uris.map(({uri, width, height, altText = ''}) => {
     return {
       alt: altText,
       source: {
@@ -108,7 +108,7 @@ export function createInitialImages(
 export async function pasteImage(
   uri: string,
 ): Promise<ComposerImageWithoutTransformation> {
-  const { width, height } = await getImageDim(uri)
+  const {width, height} = await getImageDim(uri)
   const match = /^data:(.+?);/.exec(uri)
 
   return {
@@ -160,7 +160,7 @@ export async function manipulateImage(
   img: ComposerImage,
   trans: ImageTransformation,
 ): Promise<ComposerImage> {
-  const rawActions: (Action | undefined)[] = [trans.crop && { crop: trans.crop }]
+  const rawActions: (Action | undefined)[] = [trans.crop && {crop: trans.crop}]
 
   const actions = rawActions.filter((a): a is Action => a !== undefined)
 
@@ -169,7 +169,7 @@ export async function manipulateImage(
       return img
     }
 
-    return { alt: img.alt, source: img.source }
+    return {alt: img.alt, source: img.source}
   }
 
   const source = img.source
@@ -194,7 +194,7 @@ export function resetImageManipulation(
   img: ComposerImage,
 ): ComposerImageWithoutTransformation {
   if (img.transformed !== undefined) {
-    return { alt: img.alt, source: img.source }
+    return {alt: img.alt, source: img.source}
   }
 
   return img
@@ -216,7 +216,7 @@ export async function compressImage(img: ComposerImage): Promise<PickerImage> {
 
     const res = await manipulateAsync(
       source.path,
-      [{ resize: { width: w, height: h } }],
+      [{resize: {width: w, height: h}}],
       {
         compress: qualityPercentage / 100,
         format: SaveFormat.JPEG,
@@ -253,8 +253,8 @@ async function moveIfNecessary(from: string) {
   if (cacheDir && from.startsWith(cacheDir)) {
     const to = joinPath(cacheDir, nanoid(36))
 
-    await makeDirectoryAsync(cacheDir, { intermediates: true })
-    await moveAsync({ from, to })
+    await makeDirectoryAsync(cacheDir, {intermediates: true})
+    await moveAsync({from, to})
 
     return to
   }
@@ -298,14 +298,14 @@ async function copyToCache(from: string): Promise<string> {
   }
 
   const to = joinPath(cacheDir, nanoid(36))
-  await makeDirectoryAsync(cacheDir, { intermediates: true })
+  await makeDirectoryAsync(cacheDir, {intermediates: true})
 
   let normalizedFrom = from
   if (!from.startsWith('file://') && from.startsWith('/')) {
     normalizedFrom = `file://${from}`
   }
 
-  await copyAsync({ from: normalizedFrom, to })
+  await copyAsync({from: normalizedFrom, to})
   return to
 }
 
@@ -332,7 +332,7 @@ export async function purgeTemporaryImageFiles() {
   const cacheDir = IS_NATIVE && getImageCacheDirectory()
 
   if (cacheDir) {
-    await deleteAsync(cacheDir, { idempotent: true })
+    await deleteAsync(cacheDir, {idempotent: true})
     await makeDirectoryAsync(cacheDir)
   }
 }
@@ -352,7 +352,7 @@ function joinPath(a: string, b: string) {
 function containImageRes(
   w: number,
   h: number,
-  { width: maxW, height: maxH }: { width: number; height: number },
+  {width: maxW, height: maxH}: {width: number; height: number},
 ): [width: number, height: number] {
   let scale = 1
 

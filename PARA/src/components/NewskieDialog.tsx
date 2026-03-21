@@ -2,8 +2,8 @@ import {useMemo, useState} from 'react'
 import {View} from 'react-native'
 import {type AppBskyActorDefs, moderateProfile} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {differenceInSeconds} from 'date-fns'
 
 import {HITSLOP_10} from '#/lib/constants'
@@ -99,9 +99,7 @@ function DialogInner({
 
     if (isMe) {
       if (profile.joinedViaStarterPack) {
-        return _(
-          msg`You joined PARA using a starter pack ${timeAgoString} ago`,
-        )
+        return _(msg`You joined PARA using a starter pack ${timeAgoString} ago`)
       } else {
         return _(msg`You joined PARA ${timeAgoString} ago`)
       }

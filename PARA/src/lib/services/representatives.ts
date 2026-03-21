@@ -14,7 +14,8 @@ import {
 } from './types'
 
 export interface RepresentativesQueryParams
-  extends FilterParams, PaginationParams {}
+  extends FilterParams,
+    PaginationParams {}
 
 /**
  * Fetch representatives with optional filtering and pagination

@@ -1,43 +1,43 @@
-import { useCallback, useState } from 'react'
-import { Keyboard, Pressable, View } from 'react-native'
+import {useCallback, useState} from 'react'
+import {Keyboard, Pressable, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
 import {
   useCameraPermission,
   usePhotoLibraryPermission,
   useVideoLibraryPermission,
 } from '#/lib/hooks/usePermissions'
-import { openCamera, openUnifiedPicker } from '#/lib/media/picker'
-import { logger } from '#/logger'
-import { useCurrentAccountProfile } from '#/state/queries/useCurrentAccountProfile'
-import { MAX_IMAGES } from '#/view/com/composer/state/composer'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { atoms as a, native, useTheme, web } from '#/alf'
-import { Button } from '#/components/Button'
-import { useSheetWrapper } from '#/components/Dialog/sheet-wrapper'
-import { Camera_Stroke2_Corner0_Rounded as CameraIcon } from '#/components/icons/Camera'
-import { Image_Stroke2_Corner0_Rounded as ImageIcon } from '#/components/icons/Image'
-import { SubtleHover } from '#/components/SubtleHover'
-import { Text } from '#/components/Typography'
-import { IS_NATIVE } from '#/env'
+import {openCamera, openUnifiedPicker} from '#/lib/media/picker'
+import {logger} from '#/logger'
+import {useCurrentAccountProfile} from '#/state/queries/useCurrentAccountProfile'
+import {MAX_IMAGES} from '#/view/com/composer/state/composer'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {atoms as a, native, useTheme, web} from '#/alf'
+import {Button} from '#/components/Button'
+import {useSheetWrapper} from '#/components/Dialog/sheet-wrapper'
+import {Camera_Stroke2_Corner0_Rounded as CameraIcon} from '#/components/icons/Camera'
+import {Image_Stroke2_Corner0_Rounded as ImageIcon} from '#/components/icons/Image'
+import {SubtleHover} from '#/components/SubtleHover'
+import {Text} from '#/components/Typography'
+import {IS_NATIVE} from '#/env'
 
 export function ComposerPrompt() {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const t = useTheme()
-  const { openComposer } = useOpenComposer()
+  const {openComposer} = useOpenComposer()
   const profile = useCurrentAccountProfile()
   const [hover, setHover] = useState(false)
-  const { requestCameraAccessIfNeeded } = useCameraPermission()
-  const { requestPhotoAccessIfNeeded } = usePhotoLibraryPermission()
-  const { requestVideoAccessIfNeeded } = useVideoLibraryPermission()
+  const {requestCameraAccessIfNeeded} = useCameraPermission()
+  const {requestPhotoAccessIfNeeded} = usePhotoLibraryPermission()
+  const {requestVideoAccessIfNeeded} = useVideoLibraryPermission()
   const sheetWrapper = useSheetWrapper()
 
   const onPress = useCallback(() => {
     logger.metric('composerPrompt:press', {})
-    openComposer({ logContext: 'ComposerPrompt' })
+    openComposer({logContext: 'ComposerPrompt'})
   }, [openComposer])
 
   const onPressImage = useCallback(async () => {
@@ -45,7 +45,7 @@ export function ComposerPrompt() {
 
     // On web, open the composer with the gallery picker auto-opening
     if (!IS_NATIVE) {
-      const galleryRef = { current: null as (() => void) | null }
+      const galleryRef = {current: null as (() => void) | null}
       openComposer({
         openGallery: () => {
           if (galleryRef.current) {
@@ -81,8 +81,8 @@ export function ComposerPrompt() {
       }
 
       const selectionCountRemaining = MAX_IMAGES
-      const { assets, canceled } = await sheetWrapper(
-        openUnifiedPicker({ selectionCountRemaining }),
+      const {assets, canceled} = await sheetWrapper(
+        openUnifiedPicker({selectionCountRemaining}),
       )
 
       if (canceled) {
@@ -100,12 +100,12 @@ export function ComposerPrompt() {
           }))
 
         if (imageUris.length > 0) {
-          openComposer({ imageUris, logContext: 'ComposerPrompt' })
+          openComposer({imageUris, logContext: 'ComposerPrompt'})
         }
       }
     } catch (err: any) {
       if (!String(err).toLowerCase().includes('cancel')) {
-        logger.warn('Error opening image picker', { error: err })
+        logger.warn('Error opening image picker', {error: err})
       }
     }
   }, [
@@ -145,7 +145,7 @@ export function ComposerPrompt() {
       })
     } catch (err: any) {
       if (!String(err).toLowerCase().includes('cancel')) {
-        logger.warn('Error opening camera', { error: err })
+        logger.warn('Error opening camera', {error: err})
       }
     }
   }, [openComposer, requestCameraAccessIfNeeded])
@@ -163,7 +163,7 @@ export function ComposerPrompt() {
       accessibilityHint={_(msg`Opens the post composer`)}
       onPointerEnter={() => setHover(true)}
       onPointerLeave={() => setHover(false)}
-      style={({ pressed }) => [
+      style={({pressed}) => [
         a.relative,
         a.flex_row,
         a.align_start,
@@ -180,7 +180,7 @@ export function ComposerPrompt() {
           cursor: 'pointer',
           outline: 'none',
         }),
-        pressed && web({ outline: 'none' }),
+        pressed && web({outline: 'none'}),
       ]}>
       <SubtleHover hover={hover} />
       <UserAvatar
@@ -204,7 +204,7 @@ export function ComposerPrompt() {
             a.text_xl,
             t.atoms.text_contrast_medium,
             a.flex_1,
-            { includeFontPadding: false },
+            {includeFontPadding: false},
           ]}
           numberOfLines={1}>
           <Trans>What's up?</Trans>
@@ -220,7 +220,7 @@ export function ComposerPrompt() {
               accessibilityHint={_(msg`Opens device camera`)}
               variant="ghost"
               shape="round">
-              {({ hovered, pressed, focused }) => (
+              {({hovered, pressed, focused}) => (
                 <CameraIcon
                   size="lg"
                   style={{
@@ -242,7 +242,7 @@ export function ComposerPrompt() {
             accessibilityHint={_(msg`Opens image picker`)}
             variant="ghost"
             shape="round">
-            {({ hovered, pressed, focused }) => (
+            {({hovered, pressed, focused}) => (
               <ImageIcon
                 size="lg"
                 style={{

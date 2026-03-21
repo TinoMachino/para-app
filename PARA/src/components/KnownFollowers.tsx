@@ -1,4 +1,4 @@
-import React from 'react'
+import {useRef} from 'react'
 import {View} from 'react-native'
 import {
   type AppBskyActorDefs,
@@ -46,9 +46,7 @@ export function KnownFollowers({
   minimal?: boolean
   showIfEmpty?: boolean
 }) {
-  const cache = React.useRef<Map<string, AppBskyActorDefs.KnownFollowers>>(
-    new Map(),
-  )
+  const cache = useRef<Map<string, AppBskyActorDefs.KnownFollowers>>(new Map())
 
   /*
    * Results for `knownFollowers` are not sorted consistently, so when

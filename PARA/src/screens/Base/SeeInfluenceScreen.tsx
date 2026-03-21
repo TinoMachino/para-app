@@ -1,8 +1,8 @@
-import React from 'react'
+import {useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {usePalette} from '#/lib/hooks/usePalette'
@@ -128,7 +128,7 @@ export function SeeInfluenceScreen({}: Props) {
   const t = useTheme()
   const pal = usePalette('default')
   const {_} = useLingui()
-  const [filter, setFilter] = React.useState<
+  const [filter, setFilter] = useState<
     'all' | 'post' | 'comment' | 'policy' | 'highlight'
   >('all')
 

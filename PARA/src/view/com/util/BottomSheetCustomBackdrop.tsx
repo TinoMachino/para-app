@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {type FC, useMemo} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import Animated, {
   Extrapolation,
@@ -8,11 +8,9 @@ import Animated, {
 import {type BottomSheetBackdropProps} from '@discord/bottom-sheet/src'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
-import type React from 'react'
-
 export function createCustomBackdrop(
   onClose?: () => void,
-): React.FC<BottomSheetBackdropProps> {
+): FC<BottomSheetBackdropProps> {
   const CustomBackdrop = ({animatedIndex, style}: BottomSheetBackdropProps) => {
     const {_} = useLingui()
 

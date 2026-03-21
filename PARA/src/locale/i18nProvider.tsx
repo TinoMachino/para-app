@@ -1,15 +1,15 @@
 import {createContext, useContext} from 'react'
+import {type ReactNode} from 'react'
 import {i18n} from '@lingui/core'
 import {I18nProvider as DefaultI18nProvider} from '@lingui/react'
 import {type Locale} from 'date-fns'
-import type React from 'react'
 
 import {useLocaleLanguage} from './i18n'
 
 const DateLocaleContext = createContext<Locale | undefined>(undefined)
 DateLocaleContext.displayName = 'DateLocaleContext'
 
-export default function I18nProvider({children}: {children: React.ReactNode}) {
+export default function I18nProvider({children}: {children: ReactNode}) {
   const dateLocale = useLocaleLanguage()
   return (
     <DateLocaleContext value={dateLocale}>

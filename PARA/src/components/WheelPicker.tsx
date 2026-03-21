@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {
   ScrollView,
   StyleSheet,
@@ -41,7 +41,7 @@ export function WheelPicker({
     Math.round(offset / ITEM_HEIGHT)
 
   // First useEffect - mount only, suppress the warning since it's intentional
-  React.useEffect(() => {
+  useEffect(() => {
     const index = items.findIndex(item => item === selectedValue)
     const targetIndex = index >= 0 ? index : 0
     setSelectedIndex(targetIndex)
@@ -55,7 +55,7 @@ export function WheelPicker({
   }, [])
 
   // Second useEffect - only respond to external changes
-  React.useEffect(() => {
+  useEffect(() => {
     const index = items.findIndex(item => item === selectedValue)
     const targetIndex = index >= 0 ? index : 0
     if (targetIndex !== selectedIndex) {

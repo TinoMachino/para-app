@@ -1,9 +1,9 @@
-import React, {useCallback} from 'react'
+import {Fragment, useCallback} from 'react'
 import {View} from 'react-native'
 import {type AppBskyActorDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {useActorStatus} from '#/lib/actor-status'
 import {isJwtExpired} from '#/lib/jwt'
@@ -53,7 +53,7 @@ export function AccountList({
         t.atoms.border_contrast_low,
       ]}>
       {accounts.map(account => (
-        <React.Fragment key={account.did}>
+        <Fragment key={account.did}>
           <AccountItem
             profile={profiles?.profiles.find(p => p.did === account.did)}
             account={account}
@@ -62,7 +62,7 @@ export function AccountList({
             isPendingAccount={account.did === pendingDid}
           />
           <View style={[a.border_b, t.atoms.border_contrast_low]} />
-        </React.Fragment>
+        </Fragment>
       ))}
       <Button
         testID="chooseAddAccountBtn"

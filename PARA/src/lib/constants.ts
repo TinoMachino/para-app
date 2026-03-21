@@ -256,6 +256,9 @@ export const BLUESKY_PROXY_HEADER = {
 
 const LOCAL_DEV_APPVIEW_PROXY_DID =
   process.env.EXPO_PUBLIC_LOCAL_BSKY_PROXY_DID || DEV_ENV_APPVIEW_DID
+const LOCAL_DEV_SERVICE_HOSTNAME = parseServiceHostname(
+  LOCAL_DEV_SERVICE_OVERRIDE || LOCAL_DEV_SERVICE,
+)
 
 function parseServiceHostname(serviceUrl?: string): string | null {
   if (!serviceUrl) return null
@@ -269,14 +272,13 @@ function parseServiceHostname(serviceUrl?: string): string | null {
   }
 }
 
-export function isLikelyLocalServiceUrl(serviceUrl?: string): boolean {
-  const hostname = parseServiceHostname(serviceUrl)
-  if (!hostname) return false
-
+function isDirectLocalHostname(hostname: string): boolean {
   const octets = hostname.split('.')
   const isIpv4 =
     octets.length === 4 &&
-    octets.every(part => /^\d+$/.test(part) && Number(part) >= 0 && Number(part) <= 255)
+    octets.every(
+      part => /^\d+$/.test(part) && Number(part) >= 0 && Number(part) <= 255,
+    )
   const firstOctet = isIpv4 ? Number(octets[0]) : -1
   const secondOctet = isIpv4 ? Number(octets[1]) : -1
   const isPrivateIpv4 =
@@ -293,6 +295,15 @@ export function isLikelyLocalServiceUrl(serviceUrl?: string): boolean {
   )
 }
 
+export function isLikelyLocalServiceUrl(serviceUrl?: string): boolean {
+  const hostname = parseServiceHostname(serviceUrl)
+  if (!hostname) return false
+
+  return (
+    isDirectLocalHostname(hostname) || hostname === LOCAL_DEV_SERVICE_HOSTNAME
+  )
+}
+
 export function normalizeLocalServiceUrl(serviceUrl: string): string {
   if (!isLikelyLocalServiceUrl(serviceUrl)) return serviceUrl
   try {
@@ -300,8 +311,10 @@ export function normalizeLocalServiceUrl(serviceUrl: string): string {
       ? serviceUrl
       : `http://${serviceUrl}`
     const url = new URL(normalizedUrl)
-    url.protocol = 'http:'
-    if (!url.port) {
+    if (isDirectLocalHostname(url.hostname)) {
+      url.protocol = 'http:'
+    }
+    if (!url.port && isDirectLocalHostname(url.hostname)) {
       url.port = '2583'
     }
     return url.toString().replace(/\/+$/, '')

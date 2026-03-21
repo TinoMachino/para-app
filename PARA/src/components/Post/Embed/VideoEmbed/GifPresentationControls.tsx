@@ -1,7 +1,7 @@
 import {ActivityIndicator, StyleSheet, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {atoms as a} from '#/alf'
 import {Button} from '#/components/Button'

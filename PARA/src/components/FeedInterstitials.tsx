@@ -568,26 +568,17 @@ export function ProfileGrid({
         {!isProfileHeaderContext && (
           <Button
             label={_(msg`See more suggested profiles`)}
+            color="secondary"
+            size="small"
             onPress={() => {
               followDialogControl.open()
               ax.metric('suggestedUser:seeMore', {
                 logContext: isFeedContext ? 'Explore' : 'Profile',
               })
             }}>
-            {({hovered}) => (
-              <Text
-                style={[
-                  a.text_sm,
-                  {color: t.palette.primary_500},
-                  hovered &&
-                    web({
-                      textDecorationLine: 'underline',
-                      textDecorationColor: t.palette.primary_500,
-                    }),
-                ]}>
-                <Trans>See more</Trans>
-              </Text>
-            )}
+            <ButtonText>
+              <Trans>See more</Trans>
+            </ButtonText>
           </Button>
         )}
       </View>

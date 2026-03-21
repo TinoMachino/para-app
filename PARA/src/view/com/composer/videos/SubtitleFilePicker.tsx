@@ -1,15 +1,14 @@
-import {useRef} from 'react'
+import {type ChangeEvent, useRef} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import type React from 'react'
 
 import {logger} from '#/logger'
-import * as Toast from '#/view/com/util/Toast'
 import {atoms as a} from '#/alf'
 import {Button, ButtonIcon, ButtonText} from '#/components/Button'
 import {CC_Stroke2_Corner0_Rounded as CCIcon} from '#/components/icons/CC'
+import * as Toast from '#/components/Toast'
 
 export function SubtitleFilePicker({
   onSelectFile,
@@ -25,7 +24,7 @@ export function SubtitleFilePicker({
     ref.current?.click()
   }
 
-  const handlePick = (evt: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePick = (evt: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = evt.target.files?.[0]
     if (selectedFile) {
       if (

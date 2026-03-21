@@ -1,38 +1,38 @@
-import { type JSX, useCallback } from 'react'
-import { type GestureResponderEvent, View } from 'react-native'
+import {type JSX, useCallback} from 'react'
+import {type GestureResponderEvent, View} from 'react-native'
 import Animated from 'react-native-reanimated'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg, plural} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { type BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import { StackActions } from '@react-navigation/native'
+import {type BottomTabBarProps} from '@react-navigation/bottom-tabs'
+import {StackActions} from '@react-navigation/native'
 
-import { useActorStatus } from '#/lib/actor-status'
-import { PressableScale } from '#/lib/custom-animations/PressableScale'
-import { BOTTOM_BAR_AVI } from '#/lib/demo'
-import { useHaptics } from '#/lib/haptics'
-import { useDedupe } from '#/lib/hooks/useDedupe'
-import { useHideBottomBarBorder } from '#/lib/hooks/useHideBottomBarBorder'
-import { useMinimalShellFooterTransform } from '#/lib/hooks/useMinimalShellTransform'
-import { useNavigationTabState } from '#/lib/hooks/useNavigationTabState'
-import { clamp } from '#/lib/numbers'
-import { getTabState, TabState } from '#/lib/routes/helpers'
-import { emitSoftReset } from '#/state/events'
-import { useUnreadMessageCount } from '#/state/queries/messages/list-conversations'
-import { useUnreadNotifications } from '#/state/queries/notifications/unread'
-import { useProfileQuery } from '#/state/queries/profile'
-import { useSession } from '#/state/session'
-import { useLoggedOutViewControls } from '#/state/shell/logged-out'
-import { useShellLayout } from '#/state/shell/shell-layout'
-import { useCloseAllActiveElements } from '#/state/util'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { Logo } from '#/view/icons/Logo'
-import { Logotype } from '#/view/icons/Logotype'
-import { atoms as a, useTheme } from '#/alf'
-import { Button, ButtonText } from '#/components/Button'
-import { useDialogControl } from '#/components/Dialog'
-import { SwitchAccountDialog } from '#/components/dialogs/SwitchAccount'
+import {useActorStatus} from '#/lib/actor-status'
+import {PressableScale} from '#/lib/custom-animations/PressableScale'
+import {BOTTOM_BAR_AVI} from '#/lib/demo'
+import {useHaptics} from '#/lib/haptics'
+import {useDedupe} from '#/lib/hooks/useDedupe'
+import {useHideBottomBarBorder} from '#/lib/hooks/useHideBottomBarBorder'
+import {useMinimalShellFooterTransform} from '#/lib/hooks/useMinimalShellTransform'
+import {useNavigationTabState} from '#/lib/hooks/useNavigationTabState'
+import {clamp} from '#/lib/numbers'
+import {getTabState, TabState} from '#/lib/routes/helpers'
+import {emitSoftReset} from '#/state/events'
+import {useUnreadMessageCount} from '#/state/queries/messages/list-conversations'
+import {useUnreadNotifications} from '#/state/queries/notifications/unread'
+import {useProfileQuery} from '#/state/queries/profile'
+import {useSession} from '#/state/session'
+import {useLoggedOutViewControls} from '#/state/shell/logged-out'
+import {useShellLayout} from '#/state/shell/shell-layout'
+import {useCloseAllActiveElements} from '#/state/util'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {Logo} from '#/view/icons/Logo'
+import {Logotype} from '#/view/icons/Logotype'
+import {atoms as a, useTheme} from '#/alf'
+import {Button, ButtonText} from '#/components/Button'
+import {useDialogControl} from '#/components/Dialog'
+import {SwitchAccountDialog} from '#/components/dialogs/SwitchAccount'
 import {
   Book_Filled_Corner0_Rounded as BookFilled,
   Book_Stroke2_Corner0_Rounded as Book,
@@ -49,27 +49,27 @@ import {
   MagnifyingGlass_Filled_Stroke2_Corner0_Rounded as MagnifyingGlassFilled,
   MagnifyingGlass_Stroke2_Corner0_Rounded as MagnifyingGlass,
 } from '#/components/icons/MagnifyingGlass'
-import { Text } from '#/components/Typography'
+import {Text} from '#/components/Typography'
 import {useAgeAssurance} from '#/ageAssurance'
-import { useDemoMode } from '#/storage/hooks/demo-mode'
-import { styles } from './BottomBarStyles'
+import {useDemoMode} from '#/storage/hooks/demo-mode'
+import {styles} from './BottomBarStyles'
 
 type TabOptions = 'Home' | 'Search' | 'Base' | 'Notifications' | 'MyProfile'
 
-export function BottomBar({ navigation }: BottomTabBarProps) {
-  const { hasSession, currentAccount } = useSession()
+export function BottomBar({navigation}: BottomTabBarProps) {
+  const {hasSession, currentAccount} = useSession()
   const t = useTheme()
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const safeAreaInsets = useSafeAreaInsets()
-  const { footerHeight } = useShellLayout()
-  const { isAtHome, isAtSearch, isAtNotifications, isAtMyProfile, isAtBase } =
+  const {footerHeight} = useShellLayout()
+  const {isAtHome, isAtSearch, isAtNotifications, isAtMyProfile, isAtBase} =
     useNavigationTabState()
   const numUnreadNotifications = useUnreadNotifications()
   const numUnreadMessages = useUnreadMessageCount()
   const aa = useAgeAssurance()
   const footerMinimalShellTransform = useMinimalShellFooterTransform()
-  const { data: profile } = useProfileQuery({ did: currentAccount?.did })
-  const { requestSwitchToAccount } = useLoggedOutViewControls()
+  const {data: profile} = useProfileQuery({did: currentAccount?.did})
+  const {requestSwitchToAccount} = useLoggedOutViewControls()
   const closeAllActiveElements = useCloseAllActiveElements()
   const dedupe = useDedupe()
   const accountSwitchControl = useDialogControl()
@@ -79,12 +79,12 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
 
   const showSignIn = useCallback(() => {
     closeAllActiveElements()
-    requestSwitchToAccount({ requestedAccount: 'none' })
+    requestSwitchToAccount({requestedAccount: 'none'})
   }, [requestSwitchToAccount, closeAllActiveElements])
 
   const showCreateAccount = useCallback(() => {
     closeAllActiveElements()
-    requestSwitchToAccount({ requestedAccount: 'new' })
+    requestSwitchToAccount({requestedAccount: 'new'})
     // setShowLoggedOut(true)
   }, [requestSwitchToAccount, closeAllActiveElements])
 
@@ -109,7 +109,7 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
             // fallback: reset navigation
             navigation.reset({
               index: 0,
-              routes: [{ name: `${tab}Tab` }],
+              routes: [{name: `${tab}Tab`}],
             })
           }
         })
@@ -138,7 +138,7 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
   }, [accountSwitchControl, playHaptic])
 
   const [demoMode] = useDemoMode()
-  const { isActive: live } = useActorStatus(profile)
+  const {isActive: live} = useActorStatus(profile)
 
   return (
     <>
@@ -149,9 +149,9 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
           styles.bottomBar,
           t.atoms.bg,
           hideBorder
-            ? { borderColor: t.atoms.bg.backgroundColor }
+            ? {borderColor: t.atoms.bg.backgroundColor}
             : t.atoms.border_contrast_low,
-          { paddingBottom: clamp(safeAreaInsets.bottom, 15, 60) },
+          {paddingBottom: clamp(safeAreaInsets.bottom, 15, 60)},
           footerMinimalShellTransform,
         ]}
         onLayout={e => {
@@ -225,11 +225,11 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
               accessibilityHint={
                 !aa.flags.chatDisabled && numUnreadMessages.count > 0
                   ? _(
-                    plural(numUnreadMessages.numUnread ?? 0, {
-                      one: '# unread item',
-                      other: '# unread items',
-                    }),
-                  )
+                      plural(numUnreadMessages.numUnread ?? 0, {
+                        one: '# unread item',
+                        other: '# unread items',
+                      }),
+                    )
                   : ''
               }
             />
@@ -257,11 +257,11 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
                 numUnreadNotifications === ''
                   ? ''
                   : _(
-                    plural(numUnreadNotifications ?? 0, {
-                      one: '# unread item',
-                      other: '# unread items',
-                    }),
-                  )
+                      plural(numUnreadNotifications ?? 0, {
+                        one: '# unread item',
+                        other: '# unread items',
+                      }),
+                    )
               }
             />
             <Btn
@@ -290,7 +290,6 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
                       hideLiveBadge
                     />
                   </View>
-
                 </View>
               }
               onPress={onPressProfile}
@@ -315,9 +314,9 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
                 gap: 8,
               }}>
               <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
                 <Logo width={28} />
-                <View style={{ paddingTop: 4 }}>
+                <View style={{paddingTop: 4}}>
                   <Logotype width={80} fill={t.atoms.text.color} />
                 </View>
               </View>
@@ -352,13 +351,14 @@ export function BottomBar({ navigation }: BottomTabBarProps) {
   )
 }
 
-interface BtnProps extends Pick<
-  React.ComponentProps<typeof PressableScale>,
-  | 'accessible'
-  | 'accessibilityRole'
-  | 'accessibilityHint'
-  | 'accessibilityLabel'
-> {
+interface BtnProps
+  extends Pick<
+    React.ComponentProps<typeof PressableScale>,
+    | 'accessible'
+    | 'accessibilityRole'
+    | 'accessibilityHint'
+    | 'accessibilityLabel'
+  > {
   testID?: string
   icon: JSX.Element
   notificationCount?: string
@@ -398,7 +398,7 @@ function Btn({
           style={[
             styles.notificationCount,
             a.rounded_full,
-            { backgroundColor: t.palette.primary_500 },
+            {backgroundColor: t.palette.primary_500},
           ]}>
           <Text style={styles.notificationCountLabel}>{notificationCount}</Text>
         </View>

@@ -10,6 +10,8 @@ export interface Author {
 
 export interface Highlight {
   id: string
+  sourcePostUri?: string
+  sourcePostCid?: string
   text: string
   postAuthor: string // handle
   authorName: string

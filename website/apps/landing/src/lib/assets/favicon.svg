@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+	<title>PARA</title>
+	<defs>
+		<linearGradient id="para-gradient" x1="14" x2="50" y1="10" y2="54" gradientUnits="userSpaceOnUse">
+			<stop stop-color="#A78BFA" />
+			<stop offset="1" stop-color="#F472B6" />
+		</linearGradient>
+	</defs>
+	<rect width="64" height="64" rx="18" fill="#0F0A14" />
+	<path
+		fill="url(#para-gradient)"
+		d="M18 14h18c8.837 0 16 7.163 16 16s-7.163 16-16 16h-8v10H18V14Zm10 10v12h8c3.314 0 6-2.686 6-6s-2.686-6-6-6h-8Z"
+	/>
+	<path
+		fill="#FFF"
+		d="M28 24v12h8c3.314 0 6-2.686 6-6s-2.686-6-6-6h-8Zm0 22h8c8.837 0 16-7.163 16-16s-7.163-16-16-16H18v42h10V46Z"
+		opacity=".92"
+	/>
+</svg>

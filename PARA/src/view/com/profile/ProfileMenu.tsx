@@ -1,8 +1,8 @@
-import React, {memo} from 'react'
+import {memo, type ReactNode, useCallback, useMemo} from 'react'
 import {type AppBskyActorDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
@@ -25,7 +25,6 @@ import {
 import {useCanGoLive} from '#/state/service-config'
 import {useSession} from '#/state/session'
 import {EventStopper} from '#/view/com/util/EventStopper'
-import * as Toast from '#/view/com/util/Toast'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonIcon} from '#/components/Button'
 import {useDialogControl} from '#/components/Dialog'
@@ -56,6 +55,7 @@ import {
   useReportDialogControl,
 } from '#/components/moderation/ReportDialog'
 import * as Prompt from '#/components/Prompt'
+import * as Toast from '#/components/Toast'
 import {useFullVerificationState} from '#/components/verification'
 import {VerificationCreatePrompt} from '#/components/verification/VerificationCreatePrompt'
 import {VerificationRemovePrompt} from '#/components/verification/VerificationRemovePrompt'
@@ -68,7 +68,7 @@ let ProfileMenu = ({
   profile,
 }: {
   profile: Shadow<AppBskyActorDefs.ProfileViewDetailed>
-}): React.ReactNode => {
+}): ReactNode => {
   const t = useTheme()
   const {_} = useLingui()
   const {currentAccount, hasSession} = useSession()
@@ -105,24 +105,24 @@ let ProfileMenu = ({
   const goLiveDialogControl = useDialogControl()
   const goLiveDisabledDialogControl = useDialogControl()
 
-  const showLoggedOutWarning = React.useMemo(() => {
+  const showLoggedOutWarning = useMemo(() => {
     return (
       profile.did !== currentAccount?.did &&
       !!profile.labels?.find(label => label.val === '!no-unauthenticated')
     )
   }, [currentAccount, profile])
 
-  const invalidateProfileQuery = React.useCallback(() => {
+  const invalidateProfileQuery = useCallback(() => {
     queryClient.invalidateQueries({
       queryKey: profileQueryKey(profile.did),
     })
   }, [queryClient, profile.did])
 
-  const onPressShare = React.useCallback(() => {
+  const onPressShare = useCallback(() => {
     shareUrl(toShareUrl(makeProfileLink(profile)))
   }, [profile])
 
-  const onPressAddRemoveLists = React.useCallback(() => {
+  const onPressAddRemoveLists = useCallback(() => {
     openModal({
       name: 'user-add-remove-lists',
       subject: profile.did,
@@ -133,7 +133,7 @@ let ProfileMenu = ({
     })
   }, [profile, openModal, invalidateProfileQuery])
 
-  const onPressMuteAccount = React.useCallback(async () => {
+  const onPressMuteAccount = useCallback(async () => {
     if (profile.viewer?.muted) {
       try {
         await queueUnmute()
@@ -141,7 +141,9 @@ let ProfileMenu = ({
       } catch (e: any) {
         if (e?.name !== 'AbortError') {
           logger.error('Failed to unmute account', {message: e})
-          Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+          Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+            type: 'error',
+          })
         }
       }
     } else {
@@ -151,13 +153,15 @@ let ProfileMenu = ({
       } catch (e: any) {
         if (e?.name !== 'AbortError') {
           logger.error('Failed to mute account', {message: e})
-          Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+          Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+            type: 'error',
+          })
         }
       }
     }
   }, [profile.viewer?.muted, queueUnmute, _, queueMute])
 
-  const blockAccount = React.useCallback(async () => {
+  const blockAccount = useCallback(async () => {
     if (profile.viewer?.blocking) {
       try {
         await queueUnblock()
@@ -165,7 +169,9 @@ let ProfileMenu = ({
       } catch (e: any) {
         if (e?.name !== 'AbortError') {
           logger.error('Failed to unblock account', {message: e})
-          Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+          Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+            type: 'error',
+          })
         }
       }
     } else {
@@ -175,49 +181,55 @@ let ProfileMenu = ({
       } catch (e: any) {
         if (e?.name !== 'AbortError') {
           logger.error('Failed to block account', {message: e})
-          Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+          Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+            type: 'error',
+          })
         }
       }
     }
   }, [profile.viewer?.blocking, _, queueUnblock, queueBlock])
 
-  const onPressFollowAccount = React.useCallback(async () => {
+  const onPressFollowAccount = useCallback(async () => {
     try {
       await queueFollow()
       Toast.show(_(msg({message: 'Account followed', context: 'toast'})))
     } catch (e: any) {
       if (e?.name !== 'AbortError') {
         logger.error('Failed to follow account', {message: e})
-        Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+        Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+          type: 'error',
+        })
       }
     }
   }, [_, queueFollow])
 
-  const onPressUnfollowAccount = React.useCallback(async () => {
+  const onPressUnfollowAccount = useCallback(async () => {
     try {
       await queueUnfollow()
       Toast.show(_(msg({message: 'Account unfollowed', context: 'toast'})))
     } catch (e: any) {
       if (e?.name !== 'AbortError') {
         logger.error('Failed to unfollow account', {message: e})
-        Toast.show(_(msg`There was an issue! ${e.toString()}`), 'xmark')
+        Toast.show(_(msg`There was an issue! ${e.toString()}`), {
+          type: 'error',
+        })
       }
     }
   }, [_, queueUnfollow])
 
-  const onPressReportAccount = React.useCallback(() => {
+  const onPressReportAccount = useCallback(() => {
     reportDialogControl.open()
   }, [reportDialogControl])
 
-  const onPressShareATUri = React.useCallback(() => {
+  const onPressShareATUri = useCallback(() => {
     shareText(`at://${profile.did}`)
   }, [profile.did])
 
-  const onPressShareDID = React.useCallback(() => {
+  const onPressShareDID = useCallback(() => {
     shareText(profile.did)
   }, [profile.did])
 
-  const onPressSearch = React.useCallback(() => {
+  const onPressSearch = useCallback(() => {
     navigation.navigate('ProfileSearch', {name: profile.handle})
   }, [navigation, profile.handle])
 

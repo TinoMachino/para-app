@@ -28,6 +28,7 @@ import {
 } from '#/state/cache/post-shadow'
 import {useProfileShadow} from '#/state/cache/profile-shadow'
 import {FeedFeedbackProvider, useFeedFeedback} from '#/state/feed-feedback'
+import {useHighlights} from '#/state/highlights/useHighlights'
 import {useLanguagePrefs} from '#/state/preferences'
 import {type ThreadItem} from '#/state/queries/usePostThread/types'
 import {useSession} from '#/state/session'
@@ -55,8 +56,12 @@ import {PostAlerts} from '#/components/moderation/PostAlerts'
 import {type AppModerationCause} from '#/components/Pills'
 import {Embed, PostEmbedViewContext} from '#/components/Post/Embed'
 import {PostFlairStrip} from '#/components/Post/PostFlairStrip'
+import {TranslatedPost} from '#/components/Post/Translated'
 import {PostControls, PostControlsSkeleton} from '#/components/PostControls'
-import {useFormatPostStatCount} from '#/components/PostControls/util'
+import {
+  getParaPostSummaryMetrics,
+  useFormatPostStatCount,
+} from '#/components/PostControls/util'
 import {ProfileHoverCard} from '#/components/ProfileHoverCard'
 import * as Prompt from '#/components/Prompt'
 import * as Skele from '#/components/Skeleton'
@@ -209,14 +214,19 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
     const urip = new AtUri(post.uri)
     return makeProfileLink(post.author, 'post', urip.rkey, 'liked-by')
   }, [post.uri, post.author])
-  const repostsHref = useMemo(() => {
+  const highlightsHref = useMemo(() => {
     const urip = new AtUri(post.uri)
-    return makeProfileLink(post.author, 'post', urip.rkey, 'reposted-by')
+    return makeProfileLink(post.author, 'post', urip.rkey, 'highlights')
   }, [post.uri, post.author])
   const quotesHref = useMemo(() => {
     const urip = new AtUri(post.uri)
     return makeProfileLink(post.author, 'post', urip.rkey, 'quotes')
   }, [post.uri, post.author])
+  const {highlights} = useHighlights(post.uri)
+  const paraSummaryMetrics = useMemo(
+    () => getParaPostSummaryMetrics(post, highlights.length),
+    [post, highlights.length],
+  )
 
   const threadgateHiddenReplies = useMergedThreadgateHiddenReplies({
     threadgateRecord,
@@ -422,6 +432,7 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
                 authorHandle={post.author.handle}
               />
             ) : undefined}
+            <TranslatedPost post={post} postTextStyle={[a.text_lg]} />
             {post.embed && (
               <View style={[a.py_xs]}>
                 <Embed
@@ -437,10 +448,11 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
             post={item.value.post}
             isThreadAuthor={isThreadAuthor}
           />
-          {post.repostCount !== 0 ||
-          post.likeCount !== 0 ||
-          post.quoteCount !== 0 ||
-          post.bookmarkCount !== 0 ? (
+          {paraSummaryMetrics.votes !== 0 ||
+          paraSummaryMetrics.comments !== 0 ||
+          paraSummaryMetrics.highlights !== 0 ||
+          paraSummaryMetrics.quotes !== 0 ||
+          paraSummaryMetrics.saves !== 0 ? (
             // Show this section unless we're *sure* it has no engagement.
             <View
               style={[
@@ -457,60 +469,73 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
                 a.py_md,
                 t.atoms.border_contrast_low,
               ]}>
-              {post.repostCount != null && post.repostCount !== 0 ? (
-                <Link to={repostsHref} label={_(msg`Reposts of this post`)}>
+              {paraSummaryMetrics.votes !== 0 ? (
+                <Link to={likesHref} label={_(msg`Votes on this post`)}>
                   <Text
-                    testID="repostCount-expanded"
+                    testID="votesCount-expanded"
                     style={[a.text_md, t.atoms.text_contrast_medium]}>
                     <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
-                      {formatPostStatCount(post.repostCount)}
+                      {formatPostStatCount(paraSummaryMetrics.votes)}
+                    </Text>{' '}
+                    <Plural value={paraSummaryMetrics.votes} one="vote" other="votes" />
+                  </Text>
+                </Link>
+              ) : null}
+              {paraSummaryMetrics.comments !== 0 ? (
+                <Text
+                  testID="commentsCount-expanded"
+                  style={[a.text_md, t.atoms.text_contrast_medium]}>
+                  <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
+                    {formatPostStatCount(paraSummaryMetrics.comments)}
+                  </Text>{' '}
+                  <Plural
+                    value={paraSummaryMetrics.comments}
+                    one="comment"
+                    other="comments"
+                  />
+                </Text>
+              ) : null}
+              {paraSummaryMetrics.highlights !== 0 ? (
+                <Link to={highlightsHref} label={_(msg`Highlights on this post`)}>
+                  <Text
+                    testID="highlightCount-expanded"
+                    style={[a.text_md, t.atoms.text_contrast_medium]}>
+                    <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
+                      {formatPostStatCount(paraSummaryMetrics.highlights)}
                     </Text>{' '}
                     <Plural
-                      value={post.repostCount}
-                      one="repost"
-                      other="reposts"
+                      value={paraSummaryMetrics.highlights}
+                      one="highlight"
+                      other="highlights"
                     />
                   </Text>
                 </Link>
               ) : null}
-              {post.quoteCount != null &&
-              post.quoteCount !== 0 &&
+              {paraSummaryMetrics.quotes !== 0 &&
               !post.viewer?.embeddingDisabled ? (
                 <Link to={quotesHref} label={_(msg`Quotes of this post`)}>
                   <Text
                     testID="quoteCount-expanded"
                     style={[a.text_md, t.atoms.text_contrast_medium]}>
                     <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
-                      {formatPostStatCount(post.quoteCount)}
+                      {formatPostStatCount(paraSummaryMetrics.quotes)}
                     </Text>{' '}
                     <Plural
-                      value={post.quoteCount}
+                      value={paraSummaryMetrics.quotes}
                       one="quote"
                       other="quotes"
                     />
                   </Text>
                 </Link>
               ) : null}
-              {post.likeCount != null && post.likeCount !== 0 ? (
-                <Link to={likesHref} label={_(msg`Likes on this post`)}>
-                  <Text
-                    testID="likeCount-expanded"
-                    style={[a.text_md, t.atoms.text_contrast_medium]}>
-                    <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
-                      {formatPostStatCount(post.likeCount)}
-                    </Text>{' '}
-                    <Plural value={post.likeCount} one="like" other="likes" />
-                  </Text>
-                </Link>
-              ) : null}
-              {post.bookmarkCount != null && post.bookmarkCount !== 0 ? (
+              {paraSummaryMetrics.saves !== 0 ? (
                 <Text
-                  testID="bookmarkCount-expanded"
+                  testID="saveCount-expanded"
                   style={[a.text_md, t.atoms.text_contrast_medium]}>
                   <Text style={[a.text_md, a.font_semi_bold, t.atoms.text]}>
-                    {formatPostStatCount(post.bookmarkCount)}
+                    {formatPostStatCount(paraSummaryMetrics.saves)}
                   </Text>{' '}
-                  <Plural value={post.bookmarkCount} one="save" other="saves" />
+                  <Plural value={paraSummaryMetrics.saves} one="save" other="saves" />
                 </Text>
               ) : null}
             </View>
@@ -570,7 +595,7 @@ function ExpandedPostDetails({
   const onTranslatePress = useCallback(
     (e: GestureResponderEvent) => {
       e.preventDefault()
-      translate(post.record.text || '', langPrefs.primaryLanguage)
+      void translate(post.record.text || '', langPrefs.primaryLanguage)
 
       if (
         bsky.dangerousIsType<AppBskyFeedPost.Record>(

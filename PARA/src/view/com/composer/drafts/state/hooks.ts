@@ -1,19 +1,19 @@
-import { useCallback } from 'react'
-import { AppBskyDraftCreateDraft, type AppBskyDraftDefs } from '@atproto/api'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {useCallback} from 'react'
+import {AppBskyDraftCreateDraft, type AppBskyDraftDefs} from '@atproto/api'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
-import { getDeviceName } from '#/lib/deviceName'
-import { isNetworkError } from '#/lib/strings/errors'
-import { useAgent } from '#/state/session'
-import { type ComposerState } from '#/view/com/composer/state/composer'
+import {getDeviceName} from '#/lib/deviceName'
+import {isNetworkError} from '#/lib/strings/errors'
+import {useAgent} from '#/state/session'
+import {type ComposerState} from '#/view/com/composer/state/composer'
 import {
   composerStateToDraft,
   draftToComposerPosts,
   draftViewToSummary,
   threadgateToUISettings,
 } from './api'
-import { logger } from './logger'
-import { type DraftSummary } from './schema'
+import {logger} from './logger'
+import {type DraftSummary} from './schema'
 import * as storage from './storage'
 
 const DRAFTS_QUERY_KEY = ['drafts']
@@ -95,7 +95,7 @@ export function useLoadDraft() {
         }
       }
 
-      return { draft: draftView.draft, loadedMedia }
+      return {draft: draftView.draft, loadedMedia}
     },
     [agent],
   )
@@ -117,7 +117,7 @@ export function useSaveDraft() {
       existingDraftId?: string
     }): Promise<string> => {
       // Convert composer state to server draft format
-      const { draft, localRefPaths } = await composerStateToDraft(composerState)
+      const {draft, localRefPaths} = await composerStateToDraft(composerState)
 
       // Save media files locally
       for (const [localRefPath, sourcePath] of localRefPaths) {
@@ -138,17 +138,17 @@ export function useSaveDraft() {
         return existingDraftId
       } else {
         // Create new draft
-        const res = await agent.app.bsky.draft.createDraft({ draft })
+        const res = await agent.app.bsky.draft.createDraft({draft})
         return res.data.id
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: DRAFTS_QUERY_KEY })
+      queryClient.invalidateQueries({queryKey: DRAFTS_QUERY_KEY})
     },
     onError: error => {
       // Check for draft limit error
       if (error instanceof AppBskyDraftCreateDraft.DraftLimitReachedError) {
-        logger.error('Draft limit reached', { safeMessage: error.message })
+        logger.error('Draft limit reached', {safeMessage: error.message})
         // Error will be handled by caller
       } else if (!isNetworkError(error)) {
         logger.error('Could not create draft (reason unknown)', {
@@ -189,10 +189,10 @@ export function useDeleteDraft() {
       }
 
       // Delete from server
-      await agent.app.bsky.draft.deleteDraft({ id: draftId })
+      await agent.app.bsky.draft.deleteDraft({id: draftId})
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: DRAFTS_QUERY_KEY })
+      queryClient.invalidateQueries({queryKey: DRAFTS_QUERY_KEY})
     },
   })
 }
@@ -219,10 +219,10 @@ export function useCleanupPublishedDraftMutation() {
         mediaFileCount: originalLocalRefs.size,
       })
       // Delete from server first
-      await agent.app.bsky.draft.deleteDraft({ id: draftId })
-      logger.debug('deleted draft from server', { draftId })
+      await agent.app.bsky.draft.deleteDraft({id: draftId})
+      logger.debug('deleted draft from server', {draftId})
     },
-    onSuccess: async (_, { originalLocalRefs }) => {
+    onSuccess: async (_, {originalLocalRefs}) => {
       // Delete all local media files for this draft
       for (const localRef of originalLocalRefs) {
         logger.debug('deleting media file after publish', {
@@ -230,7 +230,7 @@ export function useCleanupPublishedDraftMutation() {
         })
         await storage.deleteMediaFromLocal(localRef)
       }
-      queryClient.invalidateQueries({ queryKey: DRAFTS_QUERY_KEY })
+      queryClient.invalidateQueries({queryKey: DRAFTS_QUERY_KEY})
       logger.debug('cleanup after publish complete')
     },
     onError: error => {
@@ -243,4 +243,4 @@ export function useCleanupPublishedDraftMutation() {
 }
 
 // Re-export utilities for use in composer
-export { draftToComposerPosts, threadgateToUISettings }
+export {draftToComposerPosts, threadgateToUISettings}

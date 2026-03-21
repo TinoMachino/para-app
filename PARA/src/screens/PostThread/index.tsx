@@ -1,58 +1,58 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useWindowDimensions, View } from 'react-native'
-import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useWindowDimensions, View} from 'react-native'
+import Animated, {useAnimatedStyle} from 'react-native-reanimated'
 import {Trans} from '@lingui/react/macro'
 
-import { useInitialNumToRender } from '#/lib/hooks/useInitialNumToRender'
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { usePostViewTracking } from '#/lib/hooks/usePostViewTracking'
-import { logger } from '#/logger'
-import { useFeedFeedback } from '#/state/feed-feedback'
-import { type ThreadViewOption } from '#/state/queries/preferences/useThreadPreferences'
+import {useInitialNumToRender} from '#/lib/hooks/useInitialNumToRender'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {usePostViewTracking} from '#/lib/hooks/usePostViewTracking'
+import {logger} from '#/logger'
+import {useFeedFeedback} from '#/state/feed-feedback'
+import {type ThreadViewOption} from '#/state/queries/preferences/useThreadPreferences'
 import {
   PostThreadContextProvider,
   type ThreadItem,
   usePostThread,
 } from '#/state/queries/usePostThread'
-import { useSession } from '#/state/session'
-import { type OnPostSuccessData } from '#/state/shell/composer'
-import { useShellLayout } from '#/state/shell/shell-layout'
-import { useUnstablePostSource } from '#/state/unstable-post-source'
-import { List, type ListMethods } from '#/view/com/util/List'
-import { HeaderDropdown } from '#/screens/PostThread/components/HeaderDropdown'
-import { ThreadComposePrompt } from '#/screens/PostThread/components/ThreadComposePrompt'
-import { ThreadError } from '#/screens/PostThread/components/ThreadError'
+import {useSession} from '#/state/session'
+import {type OnPostSuccessData} from '#/state/shell/composer'
+import {useShellLayout} from '#/state/shell/shell-layout'
+import {useUnstablePostSource} from '#/state/unstable-post-source'
+import {List, type ListMethods} from '#/view/com/util/List'
+import {HeaderDropdown} from '#/screens/PostThread/components/HeaderDropdown'
+import {ThreadComposePrompt} from '#/screens/PostThread/components/ThreadComposePrompt'
+import {ThreadError} from '#/screens/PostThread/components/ThreadError'
 import {
   ThreadItemAnchor,
   ThreadItemAnchorSkeleton,
 } from '#/screens/PostThread/components/ThreadItemAnchor'
-import { ThreadItemAnchorNoUnauthenticated } from '#/screens/PostThread/components/ThreadItemAnchorNoUnauthenticated'
+import {ThreadItemAnchorNoUnauthenticated} from '#/screens/PostThread/components/ThreadItemAnchorNoUnauthenticated'
 import {
   ThreadItemPost,
   ThreadItemPostSkeleton,
 } from '#/screens/PostThread/components/ThreadItemPost'
-import { ThreadItemPostNoUnauthenticated } from '#/screens/PostThread/components/ThreadItemPostNoUnauthenticated'
-import { ThreadItemPostTombstone } from '#/screens/PostThread/components/ThreadItemPostTombstone'
-import { ThreadItemReadMore } from '#/screens/PostThread/components/ThreadItemReadMore'
-import { ThreadItemReadMoreUp } from '#/screens/PostThread/components/ThreadItemReadMoreUp'
-import { ThreadItemReplyComposerSkeleton } from '#/screens/PostThread/components/ThreadItemReplyComposer'
-import { ThreadItemShowOtherReplies } from '#/screens/PostThread/components/ThreadItemShowOtherReplies'
+import {ThreadItemPostNoUnauthenticated} from '#/screens/PostThread/components/ThreadItemPostNoUnauthenticated'
+import {ThreadItemPostTombstone} from '#/screens/PostThread/components/ThreadItemPostTombstone'
+import {ThreadItemReadMore} from '#/screens/PostThread/components/ThreadItemReadMore'
+import {ThreadItemReadMoreUp} from '#/screens/PostThread/components/ThreadItemReadMoreUp'
+import {ThreadItemReplyComposerSkeleton} from '#/screens/PostThread/components/ThreadItemReplyComposer'
+import {ThreadItemShowOtherReplies} from '#/screens/PostThread/components/ThreadItemShowOtherReplies'
 import {
   ThreadItemTreePost,
   ThreadItemTreePostSkeleton,
 } from '#/screens/PostThread/components/ThreadItemTreePost'
-import { atoms as a, native, platform, useBreakpoints, web } from '#/alf'
+import {atoms as a, native, platform, useBreakpoints, web} from '#/alf'
 import * as Layout from '#/components/Layout'
-import { ListFooter } from '#/components/Lists'
+import {ListFooter} from '#/components/Lists'
 
 const PARENT_CHUNK_SIZE = 5
 const CHILDREN_CHUNK_SIZE = 50
 
-export function PostThread({ uri }: { uri: string }) {
-  const { gtMobile } = useBreakpoints()
-  const { hasSession } = useSession()
+export function PostThread({uri}: {uri: string}) {
+  const {gtMobile} = useBreakpoints()
+  const {hasSession} = useSession()
   const initialNumToRender = useInitialNumToRender()
-  const { height: windowHeight } = useWindowDimensions()
+  const {height: windowHeight} = useWindowDimensions()
   const anchorPostSource = useUnstablePostSource(uri)
   const feedFeedback = useFeedFeedback(
     anchorPostSource?.feedSourceInfo,
@@ -62,16 +62,16 @@ export function PostThread({ uri }: { uri: string }) {
   /*
    * One query to rule them all
    */
-  const thread = usePostThread({ anchor: uri })
-  const { anchor, hasParents } = useMemo(() => {
+  const thread = usePostThread({anchor: uri})
+  const {anchor, hasParents} = useMemo(() => {
     let hasParents = false
     for (const item of thread.data.items) {
       if (item.type === 'threadPost' && item.depth === 0) {
-        return { anchor: item, hasParents }
+        return {anchor: item, hasParents}
       }
       hasParents = true
     }
-    return { hasParents }
+    return {hasParents}
   }, [thread.data.items])
 
   // Track post:view event when anchor post is viewed
@@ -92,7 +92,7 @@ export function PostThread({ uri }: { uri: string }) {
           logContext: 'Post',
           feedDescriptor: feedFeedback.feedDescriptor,
         },
-        { statsig: false },
+        {statsig: false},
       )
     }
   }, [anchor, feedFeedback.feedDescriptor])
@@ -100,11 +100,11 @@ export function PostThread({ uri }: { uri: string }) {
   // Track post:view events for parent posts and replies (non-anchor posts)
   const trackThreadItemView = usePostViewTracking('PostThreadItem')
 
-  const { openComposer } = useOpenComposer()
+  const {openComposer} = useOpenComposer()
   const optimisticOnPostReply = useCallback(
     (payload: OnPostSuccessData) => {
       if (payload) {
-        const { replyToUri, posts } = payload
+        const {replyToUri, posts} = payload
         if (replyToUri && posts.length) {
           thread.actions.insertReplies(replyToUri, posts)
         }
@@ -227,7 +227,7 @@ export function PostThread({ uri }: { uri: string }) {
        * back _up_ to the top of the screen.
        */
       const offset = anchorOffsetTop - headerHeight
-      list.scrollToOffset({ offset })
+      list.scrollToOffset({offset})
 
       /*
        * After we manage to do a positive adjustment, we need to ensure this
@@ -400,7 +400,7 @@ export function PostThread({ uri }: { uri: string }) {
   }, [slices])
 
   const renderItem = useCallback(
-    ({ item, index }: { item: ThreadItem; index: number }) => {
+    ({item, index}: {item: ThreadItem; index: number}) => {
       if (item.type === 'threadPost') {
         if (item.depth < 0) {
           return (
@@ -571,7 +571,7 @@ export function PostThread({ uri }: { uri: string }) {
            * NATIVE ONLY
            * {@link https://reactnative.dev/docs/scrollview#maintainvisiblecontentposition}
            */
-          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
+          maintainVisibleContentPosition={{minIndexForVisible: 0}}
           desktopFixedHeight
           sideBorders={false}
           ListFooterComponent={
@@ -591,7 +591,7 @@ export function PostThread({ uri }: { uri: string }) {
                   ? windowHeight * 2
                   : defaultListFooterHeight,
               })}
-              style={isTombstoneView ? { borderTopWidth: 0 } : undefined}
+              style={isTombstoneView ? {borderTopWidth: 0} : undefined}
             />
           }
           initialNumToRender={initialNumToRender}
@@ -617,8 +617,8 @@ export function PostThread({ uri }: { uri: string }) {
   )
 }
 
-function MobileComposePrompt({ onPressReply }: { onPressReply: () => unknown }) {
-  const { footerHeight } = useShellLayout()
+function MobileComposePrompt({onPressReply}: {onPressReply: () => unknown}) {
+  const {footerHeight} = useShellLayout()
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

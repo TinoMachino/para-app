@@ -2,7 +2,7 @@ import '#/logger/sentry/setup' // must be near top
 import '#/view/icons'
 import './style.css'
 
-import React, {useEffect, useState} from 'react'
+import {Fragment, useEffect, useState} from 'react'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react-native'
 
 import {QueryProvider} from '#/lib/react-query'
 import {ThemeProvider} from '#/lib/ThemeContext'
+import {Provider as TranslationProvider} from '#/lib/translation'
 import I18nProvider from '#/locale/i18nProvider'
 import {logger} from '#/logger'
 import {Provider as A11yProvider} from '#/state/a11y'
@@ -43,7 +44,6 @@ import {Provider as ProgressGuideProvider} from '#/state/shell/progress-guide'
 import {Provider as SelectedFeedProvider} from '#/state/shell/selected-feed'
 import {Provider as StarterPackProvider} from '#/state/shell/starter-pack'
 import {Provider as HiddenRepliesProvider} from '#/state/threadgate-hidden-replies'
-import * as Toast from '#/view/com/util/Toast'
 import {Shell} from '#/view/shell/index'
 import {ThemeProvider as Alf} from '#/alf'
 import {useColorModeTheme} from '#/alf/util/useColorModeTheme'
@@ -54,6 +54,7 @@ import {Provider as PolicyUpdateOverlayProvider} from '#/components/PolicyUpdate
 import {Provider as PortalProvider} from '#/components/Portal'
 import {Provider as ActiveVideoProvider} from '#/components/Post/Embed/VideoEmbed/ActiveVideoWebContext'
 import {Provider as VideoVolumeProvider} from '#/components/Post/Embed/VideoEmbed/VideoVolumeContext'
+import * as Toast from '#/components/Toast'
 import {ToastOutlet} from '#/components/Toast'
 import {
   prefetchAgeAssuranceConfig,
@@ -70,7 +71,6 @@ import {
   Provider as LiveEventsProvider,
 } from '#/features/liveEvents/context'
 import * as Geo from '#/geolocation'
-import {Provider as TranslationProvider} from '#/lib/translation'
 import {Splash} from '#/Splash'
 import {BackgroundNotificationPreferencesProvider} from '../modules/expo-background-notification-handler/src/BackgroundNotificationHandlerProvider'
 import {Provider as HideBottomBarBorderProvider} from './lib/hooks/useHideBottomBarBorder'
@@ -83,7 +83,7 @@ prefetchAgeAssuranceConfig()
 prefetchLiveEvents()
 
 function InnerApp() {
-  const [isReady, setIsReady] = React.useState(false)
+  const [isReady, setIsReady] = useState(false)
   const {currentAccount} = useSession()
   const {resumeSession, logoutCurrentAccount} = useSessionApi()
   const theme = useColorModeTheme()
@@ -111,10 +111,9 @@ function InnerApp() {
 
   useEffect(() => {
     return listenSessionDropped(() => {
-      Toast.show(
-        _(msg`Sorry! Your session expired. Please sign in again.`),
-        'info',
-      )
+      Toast.show(_(msg`Sorry! Your session expired. Please sign in again.`), {
+        type: 'info',
+      })
       logoutCurrentAccount('Settings')
     })
   }, [_, logoutCurrentAccount])
@@ -128,7 +127,7 @@ function InnerApp() {
         <ContextMenuProvider>
           <VideoVolumeProvider>
             <ActiveVideoProvider>
-              <React.Fragment
+              <Fragment
                 // Resets the entire tree below when it changes:
                 key={currentAccount?.did}>
                 <AnalyticsFeaturesContext>
@@ -180,7 +179,7 @@ function InnerApp() {
                     </QueryProvider>
                   </TranslationProvider>
                 </AnalyticsFeaturesContext>
-              </React.Fragment>
+              </Fragment>
             </ActiveVideoProvider>
           </VideoVolumeProvider>
         </ContextMenuProvider>
@@ -192,7 +191,7 @@ function InnerApp() {
 function App() {
   const [isReady, setReady] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     Promise.all([initPersistedState(), Geo.resolve(), setupDeviceId]).then(() =>
       setReady(true),
     )

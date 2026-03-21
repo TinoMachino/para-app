@@ -1,6 +1,6 @@
-import { useNavigationState } from '@react-navigation/native'
+import {useNavigationState} from '@react-navigation/native'
 
-import { getCurrentRoute } from '#/lib/routes/helpers'
+import {getCurrentRoute} from '#/lib/routes/helpers'
 
 let lastActiveTab: 'Home' | 'Search' | 'Notifications' | 'MyProfile' | 'Base' =
   'Home'

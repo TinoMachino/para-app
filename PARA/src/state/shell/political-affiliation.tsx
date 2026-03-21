@@ -1,4 +1,10 @@
-import React, {createContext, useContext, useEffect, useState} from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const STORAGE_KEY = 'para_political_affiliation'
@@ -47,7 +53,7 @@ export function PoliticalAffiliationProvider({
     }
   }
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({
       affiliation,
       setAffiliation,

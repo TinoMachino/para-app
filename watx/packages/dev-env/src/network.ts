@@ -47,7 +47,6 @@ export class TestNetwork extends TestNetworkNoAppView {
 
     const thirdPartyPds = await TestPds.create({
       didPlcUrl: plc.url,
-      ...params.pds,
       inviteRequired: false,
       port: await getPort(),
     })

@@ -1,14 +1,14 @@
-import React from 'react'
-import { View } from 'react-native'
+import {useRef, useState} from 'react'
+import {View} from 'react-native'
 
-import { useDialogStateControlContext } from '#/state/dialogs'
-import { atoms as a } from '#/alf'
-import { Button, ButtonText } from '#/components/Button'
+import {useDialogStateControlContext} from '#/state/dialogs'
+import {atoms as a} from '#/alf'
+import {Button, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
 import * as Menu from '#/components/Menu'
 import * as Prompt from '#/components/Prompt'
-import { H3, P, Text } from '#/components/Typography'
-import { PlatformInfo } from '../../../../modules/expo-bluesky-swiss-army'
+import {H3, P, Text} from '#/components/Typography'
+import {PlatformInfo} from '../../../../modules/expo-bluesky-swiss-army'
 
 export function Dialogs() {
   const scrollable = Dialog.useDialogControl()
@@ -16,13 +16,11 @@ export function Dialogs() {
   const prompt = Prompt.usePromptControl()
   const withMenu = Dialog.useDialogControl()
   const testDialog = Dialog.useDialogControl()
-  const { closeAllDialogs } = useDialogStateControlContext()
+  const {closeAllDialogs} = useDialogStateControlContext()
   const unmountTestDialog = Dialog.useDialogControl()
-  const [reducedMotionEnabled, setReducedMotionEnabled] =
-    React.useState<boolean>()
-  const [shouldRenderUnmountTest, setShouldRenderUnmountTest] =
-    React.useState(false)
-  const unmountTestInterval = React.useRef<number>(undefined)
+  const [reducedMotionEnabled, setReducedMotionEnabled] = useState<boolean>()
+  const [shouldRenderUnmountTest, setShouldRenderUnmountTest] = useState(false)
+  const unmountTestInterval = useRef<number>(undefined)
 
   const onUnmountTestStartPressWithClose = () => {
     setShouldRenderUnmountTest(true)
@@ -174,7 +172,7 @@ export function Dialogs() {
           </Prompt.DescriptionText>
           <Prompt.Actions>
             <Prompt.Cancel />
-            <Prompt.Action cta="Confirm" onPress={() => { }} />
+            <Prompt.Action cta="Confirm" onPress={() => {}} />
           </Prompt.Actions>
         </Prompt.Content>
       </Prompt.Outer>
@@ -191,7 +189,7 @@ export function Dialogs() {
           <H3 nativeID="dialog-title">Dialog with Menu</H3>
           <Menu.Root>
             <Menu.Trigger label="Open menu">
-              {({ props }) => (
+              {({props}) => (
                 <Button
                   style={a.mt_2xl}
                   label="Open menu"
@@ -226,7 +224,7 @@ export function Dialogs() {
             <P nativeID="dialog-description">
               A scrollable dialog with an input within it.
             </P>
-            <Dialog.Input value="" onChangeText={() => { }} label="Type here" />
+            <Dialog.Input value="" onChangeText={() => {}} label="Type here" />
 
             <Button
               variant="outline"
@@ -236,7 +234,7 @@ export function Dialogs() {
               label="Close all dialogs">
               <ButtonText>Close all dialogs</ButtonText>
             </Button>
-            <View style={{ height: 1000 }} />
+            <View style={{height: 1000}} />
             <View style={[a.flex_row, a.justify_end]}>
               <Button
                 variant="outline"

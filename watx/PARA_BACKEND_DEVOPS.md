@@ -92,6 +92,17 @@ Useful knobs:
 - `DEV_ENV_ENABLE_DID_DOC_WITH_SESSION` (default `true`; set `false` if dev-env bootstrap errors while using public tunnel hostnames)
 - `DEV_ENV_PLC_PORT`, `DEV_ENV_PDS_PORT`, `DEV_ENV_BSKY_PORT`, `DEV_ENV_OZONE_PORT`, `DEV_ENV_CHAT_PORT`, `DEV_ENV_INTROSPECT_PORT`
 
+### Start a persistent shared demo
+
+For a stable demo host with persistent PLC/PDS/Postgres/Redis storage, use:
+
+```bash
+cp -n .env.shared-demo.example .env.shared-demo
+make run-dev-env-persistent
+```
+
+This path is documented in [`PARAMX_SHARED_DEMO.md`](./PARAMX_SHARED_DEMO.md).
+
 ### Start Indigo relay
 
 In another terminal:

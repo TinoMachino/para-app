@@ -1,7 +1,7 @@
 import {FlatList, StyleSheet, View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {
   PROPOSED_QUESTIONS as MOCK_PROPOSED_QUESTIONS,

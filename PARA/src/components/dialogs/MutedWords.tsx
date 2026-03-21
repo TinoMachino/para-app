@@ -1,9 +1,9 @@
-import React from 'react'
+import {type PropsWithChildren, useCallback, useState} from 'react'
 import {View} from 'react-native'
 import {type AppBskyActorDefs, sanitizeMutedWordValue} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {logger} from '#/logger'
 import {
@@ -56,13 +56,13 @@ function MutedWordsInner() {
     error: preferencesError,
   } = usePreferencesQuery()
   const {isPending, mutateAsync: addMutedWord} = useUpsertMutedWordsMutation()
-  const [field, setField] = React.useState('')
-  const [targets, setTargets] = React.useState(['content'])
-  const [error, setError] = React.useState('')
-  const [durations, setDurations] = React.useState(['forever'])
-  const [excludeFollowing, setExcludeFollowing] = React.useState(false)
+  const [field, setField] = useState('')
+  const [targets, setTargets] = useState(['content'])
+  const [error, setError] = useState('')
+  const [durations, setDurations] = useState(['forever'])
+  const [excludeFollowing, setExcludeFollowing] = useState(false)
 
-  const submit = React.useCallback(async () => {
+  const submit = useCallback(async () => {
     const sanitizedValue = sanitizeMutedWordValue(field)
     const surfaces = ['tag', targets.includes('content') && 'content'].filter(
       Boolean,
@@ -428,7 +428,7 @@ function MutedWordRow({
   const isExpired = expiryDate && expiryDate < new Date()
   const formatDistance = useFormatDistance()
 
-  const remove = React.useCallback(async () => {
+  const remove = useCallback(async () => {
     control.close()
     removeMutedWord(word)
   }, [removeMutedWord, word, control])
@@ -543,7 +543,7 @@ function MutedWordRow({
   )
 }
 
-function TargetToggle({children}: React.PropsWithChildren<{}>) {
+function TargetToggle({children}: PropsWithChildren<{}>) {
   const t = useTheme()
   const ctx = Toggle.useItemContext()
   const {gtMobile} = useBreakpoints()

@@ -62,16 +62,16 @@ export type Metadata = {
    * @see https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
    */
   type?:
-  | 'default'
-  | 'debug'
-  | 'error'
-  | 'navigation'
-  | 'http'
-  | 'info'
-  | 'query'
-  | 'transaction'
-  | 'ui'
-  | 'user'
+    | 'default'
+    | 'debug'
+    | 'error'
+    | 'navigation'
+    | 'http'
+    | 'info'
+    | 'query'
+    | 'transaction'
+    | 'ui'
+    | 'user'
 
   /**
    * Passed through to `Sentry.captureException`
@@ -97,5 +97,5 @@ export type Serializable =
   | undefined
   | Serializable[]
   | {
-    [key: string]: Serializable
-  }
+      [key: string]: Serializable
+    }

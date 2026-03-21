@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react'
+import {useMemo, useReducer, useState} from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,8 +9,8 @@ import {
 } from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
@@ -83,7 +83,7 @@ export function CreatePostScreen() {
   const {} = useModalControls() // Removed openModal
   const textInput = useRef<TextInputRef>(null)
 
-  const [composerState, dispatch] = React.useReducer(
+  const [composerState, dispatch] = useReducer(
     composerReducer,
     {
       initText: undefined,

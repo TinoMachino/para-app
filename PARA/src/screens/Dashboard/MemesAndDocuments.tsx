@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react'
+import {useMemo, useState} from 'react'
 import {
   Alert,
   Animated,
@@ -23,16 +23,10 @@ import {Text} from '#/view/com/util/text/Text'
 import {useTheme} from '#/alf'
 import {ActiveFiltersStackButton} from '#/components/BaseFilterControls'
 import {SearchInput} from '#/components/forms/SearchInput'
-import {
-  ArrowsDiagonalOut_Stroke2_Corner2_Rounded as ExpandIcon,
-} from '#/components/icons/ArrowsDiagonal'
+import {ArrowsDiagonalOut_Stroke2_Corner2_Rounded as ExpandIcon} from '#/components/icons/ArrowsDiagonal'
 import {Bubble_Stroke2_Corner2_Rounded as CommentIcon} from '#/components/icons/Bubble'
-import {
-  MagnifyingGlass_Stroke2_Corner0_Rounded as SearchIcon,
-} from '#/components/icons/MagnifyingGlass'
-import {
-  SquareBehindSquare4_Stroke2_Corner0_Rounded as DeckIcon,
-} from '#/components/icons/SquareBehindSquare4'
+import {MagnifyingGlass_Stroke2_Corner0_Rounded as SearchIcon} from '#/components/icons/MagnifyingGlass'
+import {SquareBehindSquare4_Stroke2_Corner0_Rounded as DeckIcon} from '#/components/icons/SquareBehindSquare4'
 import * as Layout from '#/components/Layout'
 import {RedditVoteButton} from '#/components/PostControls/VoteButton'
 
@@ -60,7 +54,9 @@ function matchesCompassFilter(
   if (!activeFilters.length) return true
   return activeFilters.some(filter => {
     return (
-      item.community === filter || item.party === filter || item.state === filter
+      item.community === filter ||
+      item.party === filter ||
+      item.state === filter
     )
   })
 }
@@ -101,7 +97,8 @@ export function MemesAndDocumentsScreen({
     [],
   )
   const documents = useMemo(
-    () => [...MOCK_DOCS].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
+    () =>
+      [...MOCK_DOCS].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
     [],
   )
 
@@ -178,9 +175,7 @@ export function MemesAndDocumentsScreen({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={_(msg`Mostrar búsqueda`)}
-            accessibilityHint={_(
-              msg`Abre o cierra la barra de búsqueda`,
-            )}
+            accessibilityHint={_(msg`Abre o cierra la barra de búsqueda`)}
             onPress={() => {
               if (isSearchOpen) {
                 setQuery('')
@@ -216,9 +211,7 @@ export function MemesAndDocumentsScreen({
             accessibilityLabel={_(
               msg`Cambiar entre vista tablero y vista superpuesta`,
             )}
-            accessibilityHint={_(
-              msg`Cambia la presentación de las tarjetas`,
-            )}
+            accessibilityHint={_(msg`Cambia la presentación de las tarjetas`)}
             onPress={() =>
               setNextView(viewStyle === 'board' ? 'deck' : 'board')
             }
@@ -233,7 +226,6 @@ export function MemesAndDocumentsScreen({
             />
           </Pressable>
         </View>
-
       </View>
 
       {viewStyle === 'board' ? (
@@ -254,18 +246,18 @@ export function MemesAndDocumentsScreen({
             />
           ) : (
             <View style={styles.boardGrid}>
-            {activeItems.map(item => (
-              <MediaCard
-                key={item.id}
-                item={item}
-                mode={activeMode}
-                width={boardWidth}
-                vote={itemVotes[item.id] ?? 0}
-                onVoteChange={vote =>
-                  setItemVotes(prev => ({...prev, [item.id]: vote}))
-                }
-              />
-            ))}
+              {activeItems.map(item => (
+                <MediaCard
+                  key={item.id}
+                  item={item}
+                  mode={activeMode}
+                  width={boardWidth}
+                  vote={itemVotes[item.id] ?? 0}
+                  onVoteChange={vote =>
+                    setItemVotes(prev => ({...prev, [item.id]: vote}))
+                  }
+                />
+              ))}
             </View>
           )}
         </Layout.Content>
@@ -303,7 +295,7 @@ export function MemesAndDocumentsScreen({
       <ExpandedItemModal
         item={expandedItem}
         mode={activeMode}
-        vote={expandedItem ? itemVotes[expandedItem.id] ?? 0 : 0}
+        vote={expandedItem ? (itemVotes[expandedItem.id] ?? 0) : 0}
         onClose={() => setExpandedItem(null)}
         onVoteChange={vote => {
           if (!expandedItem) return
@@ -336,10 +328,7 @@ function SegmentButton({
           : {backgroundColor: 'transparent'},
       ]}>
       <Text
-        style={[
-          styles.segmentText,
-          active ? {color: '#fff'} : t.atoms.text,
-        ]}>
+        style={[styles.segmentText, active ? {color: '#fff'} : t.atoms.text]}>
         {title}
       </Text>
     </Pressable>
@@ -460,52 +449,63 @@ function DeckChain({
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
-        return (
-          !isAnimating &&
-          (Boolean(next) || Boolean(prev)) &&
-          Math.abs(gestureState.dy) > 4 &&
-          Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
-        )
-      },
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return (
-          !isAnimating &&
-          (Boolean(next) || Boolean(prev)) &&
-          Math.abs(gestureState.dy) > 4 &&
-          Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
-        )
-      },
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderMove: (_, gestureState) => {
-        const progress =
-          gestureState.dy < 0 && next
-            ? Math.max(0, Math.min(1, -gestureState.dy / DECK_SECONDARY_TOP))
-            : gestureState.dy > 0 && prev
-              ? -Math.max(
-                  0,
-                  Math.min(1, gestureState.dy / (DECK_SECONDARY_TOP * 0.55)),
-                )
-              : 0
-        animation.setValue(progress)
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (progressRef.current > 0.18 || gestureState.vy < -0.45) {
-          advance()
-        } else if (progressRef.current < -0.08 || gestureState.vy > 0.18) {
-          retreat()
-        } else if ((gestureState.dy < -24 || gestureState.vy < -0.3) && !next) {
-          showBoundaryMessage('Ya viste la ultima tarjeta')
+        onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+          return (
+            !isAnimating &&
+            (Boolean(next) || Boolean(prev)) &&
+            Math.abs(gestureState.dy) > 4 &&
+            Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
+          )
+        },
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+          return (
+            !isAnimating &&
+            (Boolean(next) || Boolean(prev)) &&
+            Math.abs(gestureState.dy) > 4 &&
+            Math.abs(gestureState.dy) > Math.abs(gestureState.dx)
+          )
+        },
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderMove: (_, gestureState) => {
+          const progress =
+            gestureState.dy < 0 && next
+              ? Math.max(0, Math.min(1, -gestureState.dy / DECK_SECONDARY_TOP))
+              : gestureState.dy > 0 && prev
+                ? -Math.max(
+                    0,
+                    Math.min(1, gestureState.dy / (DECK_SECONDARY_TOP * 0.55)),
+                  )
+                : 0
+          animation.setValue(progress)
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          if (progressRef.current > 0.18 || gestureState.vy < -0.45) {
+            advance()
+          } else if (progressRef.current < -0.08 || gestureState.vy > 0.18) {
+            retreat()
+          } else if (
+            (gestureState.dy < -24 || gestureState.vy < -0.3) &&
+            !next
+          ) {
+            showBoundaryMessage('Ya viste la ultima tarjeta')
+            resetPosition()
+          } else {
+            resetPosition()
+          }
+        },
+        onPanResponderTerminate: () => {
           resetPosition()
-        } else {
-          resetPosition()
-        }
-      },
-      onPanResponderTerminate: () => {
-        resetPosition()
-      },
+        },
       }),
-    [advance, isAnimating, next, prev, resetPosition, retreat, showBoundaryMessage],
+    [
+      advance,
+      isAnimating,
+      next,
+      prev,
+      resetPosition,
+      retreat,
+      showBoundaryMessage,
+    ],
   )
 
   if (!current) {
@@ -646,16 +646,8 @@ function DeckChain({
 
       {third ? (
         <Animated.View
-          style={[
-            styles.deckHidden,
-            t.atoms.border_contrast_low,
-            thirdStyle,
-          ]}>
-          <DeckCard
-            item={third}
-            mode={mode}
-            showOptions={false}
-          />
+          style={[styles.deckHidden, t.atoms.border_contrast_low, thirdStyle]}>
+          <DeckCard item={third} mode={mode} showOptions={false} />
         </Animated.View>
       ) : null}
 
@@ -701,11 +693,7 @@ function DeckChain({
         />
       </Animated.View>
 
-      <Animated.View
-        style={[
-          styles.deckPrimaryRail,
-          currentRailStyle,
-        ]}>
+      <Animated.View style={[styles.deckPrimaryRail, currentRailStyle]}>
         <DeckEngagementRail
           align="left"
           item={current}
@@ -715,11 +703,7 @@ function DeckChain({
       </Animated.View>
 
       {next ? (
-        <Animated.View
-          style={[
-            styles.deckSecondaryRail,
-            nextAccessoryStyle,
-          ]}>
+        <Animated.View style={[styles.deckSecondaryRail, nextAccessoryStyle]}>
           <DeckEngagementRail
             align="right"
             item={next}
@@ -737,9 +721,6 @@ function DeckChain({
           </Text>
         </View>
       ) : null}
-
-
-
     </View>
   )
 }
@@ -792,9 +773,7 @@ function CommentChip({
         t.atoms.bg_contrast_25,
       ]}>
       <CommentIcon size="sm" style={{color: '#46576A'}} />
-      <Text style={[styles.commentChipText, t.atoms.text]}>
-        {comments}
-      </Text>
+      <Text style={[styles.commentChipText, t.atoms.text]}>{comments}</Text>
     </View>
   )
 }
@@ -826,11 +805,7 @@ function DeckExpandButton({
   )
 }
 
-function DeckOptionsButton({
-  onPress,
-}: {
-  onPress?: () => void
-}) {
+function DeckOptionsButton({onPress}: {onPress?: () => void}) {
   const t = useTheme()
 
   return (
@@ -842,13 +817,22 @@ function DeckOptionsButton({
       style={styles.deckOptionsButton}>
       <View style={styles.deckOptionsDots}>
         <View
-          style={[styles.deckOptionsDot, {backgroundColor: t.palette.contrast_900}]}
+          style={[
+            styles.deckOptionsDot,
+            {backgroundColor: t.palette.contrast_900},
+          ]}
         />
         <View
-          style={[styles.deckOptionsDot, {backgroundColor: t.palette.contrast_900}]}
+          style={[
+            styles.deckOptionsDot,
+            {backgroundColor: t.palette.contrast_900},
+          ]}
         />
         <View
-          style={[styles.deckOptionsDot, {backgroundColor: t.palette.contrast_900}]}
+          style={[
+            styles.deckOptionsDot,
+            {backgroundColor: t.palette.contrast_900},
+          ]}
         />
       </View>
     </Pressable>
@@ -878,7 +862,11 @@ function DeckCard({
     <View style={styles.deckCardShell}>
       {showOptions ? (
         <View style={styles.deckOptionsPlacement}>
-          <DeckOptionsButton onPress={() => Alert.alert('Opciones', 'Funcionalidad en desarrollo')} />
+          <DeckOptionsButton
+            onPress={() =>
+              Alert.alert('Opciones', 'Funcionalidad en desarrollo')
+            }
+          />
         </View>
       ) : null}
 
@@ -902,10 +890,7 @@ function DeckCard({
         </View>
       </View>
 
-      <View
-        style={[
-          styles.deckBody,
-        ]}>
+      <View style={[styles.deckBody]}>
         <View style={styles.deckBodyContent}>
           <Text style={[styles.cardMeta, t.atoms.text_contrast_medium]}>
             {item.party} · {item.state}
@@ -920,9 +905,9 @@ function DeckCard({
               ]}>
               {isMeme
                 ? `${(item as Meme).author} · ${(item as Meme).category}`
-                : `${(item as MediaDocument).community} · ${(
-                    item as MediaDocument
-                  ).size} · ${formatDateLabel((item as MediaDocument).date)}`}
+                : `${(item as MediaDocument).community} · ${
+                    (item as MediaDocument).size
+                  } · ${formatDateLabel((item as MediaDocument).date)}`}
             </Text>
           </View>
           <CommentChip comments={item.comments} compact />
@@ -938,18 +923,21 @@ function DeckCard({
               ? styles.deckExpandPlacementBottomRight
               : styles.deckExpandPlacementTopLeft,
           ]}>
-          <View style={[
-            styles.deckExpandSubpixelBleedBlocker,
-            expandPlacement === 'bottom-right'
-              ? { bottom: 0, right: 0 }
-              : { top: 0, left: 0 },
-          ]} />
-          <View style={[
-            styles.deckExpandInnerBody,
-            expandPlacement === 'bottom-right'
-              ? { borderTopLeftRadius: 36 }
-              : { borderBottomRightRadius: 36 },
-          ]}>
+          <View
+            style={[
+              styles.deckExpandSubpixelBleedBlocker,
+              expandPlacement === 'bottom-right'
+                ? {bottom: 0, right: 0}
+                : {top: 0, left: 0},
+            ]}
+          />
+          <View
+            style={[
+              styles.deckExpandInnerBody,
+              expandPlacement === 'bottom-right'
+                ? {borderTopLeftRadius: 36}
+                : {borderBottomRightRadius: 36},
+            ]}>
             <DeckExpandButton onPress={onExpand} placement={expandPlacement} />
           </View>
         </View>
@@ -998,9 +986,9 @@ function MediaCard({
         <Text style={[styles.cardSubmeta, t.atoms.text_contrast_medium]}>
           {isMeme
             ? `${(item as Meme).author} · ${(item as Meme).category}`
-            : `${(item as MediaDocument).community} · ${(
-                item as MediaDocument
-              ).size} · ${formatDateLabel((item as MediaDocument).date)}`}
+            : `${(item as MediaDocument).community} · ${
+                (item as MediaDocument).size
+              } · ${formatDateLabel((item as MediaDocument).date)}`}
         </Text>
 
         <View style={styles.actionsRow}>
@@ -1061,11 +1049,7 @@ function ExpandedItemModal({
         <View style={[styles.expandedModalSheet, t.atoms.bg]}>
           <View style={[styles.expandedHandle, t.atoms.bg_contrast_100]} />
 
-          <View
-            style={[
-              styles.expandedVisual,
-              {backgroundColor: item.color},
-            ]}>
+          <View style={[styles.expandedVisual, {backgroundColor: item.color}]}>
             <View style={styles.cardBadgeRow}>
               <Text style={styles.cardBadge}>
                 {isMeme ? (item as Meme).community : item.category}
@@ -1081,9 +1065,9 @@ function ExpandedItemModal({
             <Text style={[styles.cardSubmeta, t.atoms.text_contrast_medium]}>
               {isMeme
                 ? `${(item as Meme).author} · ${(item as Meme).category}`
-                : `${(item as MediaDocument).community} · ${(
-                    item as MediaDocument
-                  ).size} · ${formatDateLabel((item as MediaDocument).date)}`}
+                : `${(item as MediaDocument).community} · ${
+                    (item as MediaDocument).size
+                  } · ${formatDateLabel((item as MediaDocument).date)}`}
             </Text>
 
             <View style={styles.actionsRow}>

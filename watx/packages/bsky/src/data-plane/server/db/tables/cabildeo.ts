@@ -21,6 +21,18 @@ export interface CabildeoCabildeo {
   phase: string
   phaseDeadline: string | null
   createdAt: string
+  positionCount: number
+  positionForCount: number
+  positionAgainstCount: number
+  positionAmendmentCount: number
+  voteCount: number
+  directVoteCount: number
+  delegatedVoteCount: number
+  delegationCount: number
+  optionVoteCounts: number[] | null
+  optionPositionCounts: number[] | null
+  winningOption: number | null
+  isTie: 0 | 1
   indexedAt: string
   sortAt: GeneratedAlways<string>
 }

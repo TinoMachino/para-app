@@ -1,4 +1,4 @@
-import React, {useEffect, useImperativeHandle} from 'react'
+import {forwardRef} from 'react'
 import {findNodeHandle, View} from 'react-native'
 
 import {HIGHLIGHTS as MOCK_HIGHLIGHTS} from '#/lib/mock-data'
@@ -16,7 +16,7 @@ interface Props {
   isFocused: boolean
 }
 
-export const ProfileHighlightsSection = React.forwardRef<SectionRef, Props>(
+export const ProfileHighlightsSection = forwardRef<SectionRef, Props>(
   function ProfileHighlightsSection(
     {headerHeight, scrollElRef, setScrollViewTag, isFocused},
     ref,

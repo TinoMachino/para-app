@@ -21,3 +21,21 @@ This is the service entrypoint for the bsky appview. The entrypoint command shou
 - `BSKY_SEARCH_URL` - (alt. `BSKY_SEARCH_ENDPOINT`) -
 - `BSKY_LABELS_FROM_ISSUER_DIDS` - comma-separated list of labelers to always use for record labels.
 - `MOD_SERVICE_DID` - the DID of the mod service, used to receive service authed requests.
+
+## PARA public-figure workflow
+
+For PARA, the appview is the place where verification becomes visible to clients.
+
+Current manual process:
+
+1. PARA approves a profile manually and records that in `com.para.identity`.
+2. A trusted verifier account issues `app.bsky.graph.verification`.
+3. AppView returns verified profile state, which the PARA client uses for `f/` display treatment.
+
+If seeded verification records are not showing as valid in profile responses, the first thing to check is whether the issuer account has been promoted to a trusted verifier in backend/AppView data.
+
+Future direction for Mexico:
+
+- keep manual approval as the short-term fallback
+- move the approval proof step to Instituto Nacional Electoral-backed checks
+- adopt zero-knowledge proofs so the service can validate eligibility without collecting or revealing full identity documents

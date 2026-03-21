@@ -1,4 +1,11 @@
-import React, {useMemo} from 'react'
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 
@@ -44,10 +51,10 @@ export type ProgressGuide =
   | Follow10ProgressGuide
   | undefined
 
-const ProgressGuideContext = React.createContext<ProgressGuide>(undefined)
+const ProgressGuideContext = createContext<ProgressGuide>(undefined)
 ProgressGuideContext.displayName = 'ProgressGuideContext'
 
-const ProgressGuideControlContext = React.createContext<{
+const ProgressGuideControlContext = createContext<{
   startProgressGuide(guide: ProgressGuideName): void
   endProgressGuide(): void
   captureAction(action: ProgressGuideAction, count?: number): void
@@ -59,7 +66,7 @@ const ProgressGuideControlContext = React.createContext<{
 ProgressGuideControlContext.displayName = 'ProgressGuideControlContext'
 
 export function useProgressGuide(guide: ProgressGuideName) {
-  const ctx = React.useContext(ProgressGuideContext)
+  const ctx = useContext(ProgressGuideContext)
   if (ctx?.guide === guide) {
     return ctx
   }
@@ -67,10 +74,10 @@ export function useProgressGuide(guide: ProgressGuideName) {
 }
 
 export function useProgressGuideControls() {
-  return React.useContext(ProgressGuideControlContext)
+  return useContext(ProgressGuideControlContext)
 }
 
-export function Provider({children}: React.PropsWithChildren<{}>) {
+export function Provider({children}: PropsWithChildren<{}>) {
   const {_} = useLingui()
   const {data: preferences} = usePreferencesQuery()
   const {mutateAsync, variables, isPending} =
@@ -100,21 +107,21 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
   }, [isPending, variables, preferences])
 
   const [localGuideState, setLocalGuideState] =
-    React.useState<ProgressGuide>(undefined)
+    useState<ProgressGuide>(undefined)
 
   if (activeProgressGuide && !localGuideState) {
     // hydrate from the server if needed
     setLocalGuideState(activeProgressGuide)
   }
 
-  const firstLikeToastRef = React.useRef<ProgressGuideToastRef | null>(null)
-  const fifthLikeToastRef = React.useRef<ProgressGuideToastRef | null>(null)
-  const tenthLikeToastRef = React.useRef<ProgressGuideToastRef | null>(null)
+  const firstLikeToastRef = useRef<ProgressGuideToastRef | null>(null)
+  const fifthLikeToastRef = useRef<ProgressGuideToastRef | null>(null)
+  const tenthLikeToastRef = useRef<ProgressGuideToastRef | null>(null)
 
-  const fifthFollowToastRef = React.useRef<ProgressGuideToastRef | null>(null)
-  const tenthFollowToastRef = React.useRef<ProgressGuideToastRef | null>(null)
+  const fifthFollowToastRef = useRef<ProgressGuideToastRef | null>(null)
+  const tenthFollowToastRef = useRef<ProgressGuideToastRef | null>(null)
 
-  const controls = React.useMemo(() => {
+  const controls = useMemo(() => {
     return {
       startProgressGuide(guide: ProgressGuideName) {
         if (guide === 'like-10-and-follow-7') {

@@ -1,19 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
-import { AppState, type AppStateStatus } from 'react-native'
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
-import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
+import {useEffect, useRef, useState} from 'react'
+import {AppState, type AppStateStatus} from 'react-native'
+import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister'
+import {focusManager, onlineManager, QueryClient} from '@tanstack/react-query'
 import {
   type PersistQueryClientOptions,
   PersistQueryClientProvider,
   type PersistQueryClientProviderProps,
 } from '@tanstack/react-query-persist-client'
-import type React from 'react'
 
-import { createPersistedQueryStorage } from '#/lib/persisted-query-storage'
-import { listenNetworkConfirmed, listenNetworkLost } from '#/state/events'
-import { PERSISTED_QUERY_ROOT } from '#/state/queries'
+import {createPersistedQueryStorage} from '#/lib/persisted-query-storage'
+import {listenNetworkConfirmed, listenNetworkLost} from '#/state/events'
+import {PERSISTED_QUERY_ROOT} from '#/state/queries'
 import * as env from '#/env'
-import { IS_NATIVE, IS_WEB } from '#/env'
+import {IS_NATIVE, IS_WEB} from '#/env'
 
 declare global {
   interface Window {
@@ -22,7 +21,6 @@ declare global {
 }
 
 // any query keys in this array will be persisted to AsyncStorage
-
 
 async function checkIsOnline(): Promise<boolean> {
   try {
@@ -137,13 +135,13 @@ const createQueryClient = () =>
   })
 
 const dehydrateOptions: PersistQueryClientProviderProps['persistOptions']['dehydrateOptions'] =
-{
-  shouldDehydrateMutation: (_: any) => false,
-  shouldDehydrateQuery: query => {
-    const root = String(query.queryKey[0])
-    return root === PERSISTED_QUERY_ROOT
-  },
-}
+  {
+    shouldDehydrateMutation: (_: any) => false,
+    shouldDehydrateQuery: query => {
+      const root = String(query.queryKey[0])
+      return root === PERSISTED_QUERY_ROOT
+    },
+  }
 
 export function QueryProvider({
   children,

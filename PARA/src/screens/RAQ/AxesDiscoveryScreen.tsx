@@ -1,8 +1,8 @@
 import {useCallback, useMemo, useState} from 'react'
 import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {COMMUNITY_AXES, RAQ_AXES as RAQ_DATA} from '#/lib/mock-data'
 import {

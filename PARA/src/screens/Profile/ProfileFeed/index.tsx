@@ -1,74 +1,74 @@
-import React, { useCallback, useMemo } from 'react'
-import { StyleSheet, View } from 'react-native'
-import { useAnimatedRef } from 'react-native-reanimated'
-import { AppBskyFeedDefs } from '@atproto/api'
+import {useCallback, useEffect, useMemo, useState} from 'react'
+import {StyleSheet, View} from 'react-native'
+import {useAnimatedRef} from 'react-native-reanimated'
+import {AppBskyFeedDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
-import { useIsFocused, useNavigation } from '@react-navigation/native'
-import { type NativeStackScreenProps } from '@react-navigation/native-stack'
-import { useQueryClient } from '@tanstack/react-query'
+import {useIsFocused, useNavigation} from '@react-navigation/native'
+import {type NativeStackScreenProps} from '@react-navigation/native-stack'
+import {useQueryClient} from '@tanstack/react-query'
 
-import { VIDEO_FEED_URIS } from '#/lib/constants'
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { usePalette } from '#/lib/hooks/usePalette'
-import { useSetTitle } from '#/lib/hooks/useSetTitle'
-import { ComposeIcon2 } from '#/lib/icons'
-import { type CommonNavigatorParams } from '#/lib/routes/types'
-import { type NavigationProp } from '#/lib/routes/types'
-import { makeRecordUri } from '#/lib/strings/url-helpers'
-import { s } from '#/lib/styles'
-import { listenSoftReset } from '#/state/events'
-import { FeedFeedbackProvider, useFeedFeedback } from '#/state/feed-feedback'
+import {VIDEO_FEED_URIS} from '#/lib/constants'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {usePalette} from '#/lib/hooks/usePalette'
+import {useSetTitle} from '#/lib/hooks/useSetTitle'
+import {ComposeIcon2} from '#/lib/icons'
+import {type CommonNavigatorParams} from '#/lib/routes/types'
+import {type NavigationProp} from '#/lib/routes/types'
+import {makeRecordUri} from '#/lib/strings/url-helpers'
+import {s} from '#/lib/styles'
+import {listenSoftReset} from '#/state/events'
+import {FeedFeedbackProvider, useFeedFeedback} from '#/state/feed-feedback'
 import {
   type FeedSourceFeedInfo,
   useFeedSourceInfoQuery,
 } from '#/state/queries/feed'
-import { type FeedDescriptor, type FeedParams } from '#/state/queries/post-feed'
-import { RQKEY as FEED_RQKEY } from '#/state/queries/post-feed'
+import {type FeedDescriptor, type FeedParams} from '#/state/queries/post-feed'
+import {RQKEY as FEED_RQKEY} from '#/state/queries/post-feed'
 import {
   usePreferencesQuery,
   type UsePreferencesQueryResponse,
 } from '#/state/queries/preferences'
-import { useResolveUriQuery } from '#/state/queries/resolve-uri'
-import { truncateAndInvalidate } from '#/state/queries/util'
-import { useSession } from '#/state/session'
-import { PostFeed } from '#/view/com/posts/PostFeed'
-import { EmptyState } from '#/view/com/util/EmptyState'
-import { FAB } from '#/view/com/util/fab/FAB'
-import { Button } from '#/view/com/util/forms/Button'
-import { type ListRef } from '#/view/com/util/List'
-import { LoadLatestBtn } from '#/view/com/util/load-latest/LoadLatestBtn'
-import { PostFeedLoadingPlaceholder } from '#/view/com/util/LoadingPlaceholder'
-import { Text } from '#/view/com/util/text/Text'
+import {useResolveUriQuery} from '#/state/queries/resolve-uri'
+import {truncateAndInvalidate} from '#/state/queries/util'
+import {useSession} from '#/state/session'
+import {PostFeed} from '#/view/com/posts/PostFeed'
+import {EmptyState} from '#/view/com/util/EmptyState'
+import {FAB} from '#/view/com/util/fab/FAB'
+import {Button} from '#/view/com/util/forms/Button'
+import {type ListRef} from '#/view/com/util/List'
+import {LoadLatestBtn} from '#/view/com/util/load-latest/LoadLatestBtn'
+import {PostFeedLoadingPlaceholder} from '#/view/com/util/LoadingPlaceholder'
+import {Text} from '#/view/com/util/text/Text'
 import {
   ProfileFeedHeader,
   ProfileFeedHeaderSkeleton,
 } from '#/screens/Profile/components/ProfileFeedHeader'
-import { HashtagWide_Stroke1_Corner0_Rounded as HashtagWideIcon } from '#/components/icons/Hashtag'
+import {HashtagWide_Stroke1_Corner0_Rounded as HashtagWideIcon} from '#/components/icons/Hashtag'
 import * as Layout from '#/components/Layout'
-import { IS_NATIVE } from '#/env'
+import {IS_NATIVE} from '#/env'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'ProfileFeed'>
 export function ProfileFeedScreen(props: Props) {
-  const { rkey, name: handleOrDid } = props.route.params
+  const {rkey, name: handleOrDid} = props.route.params
 
   const feedParams: FeedParams | undefined = props.route.params.feedCacheKey
     ? {
-      feedCacheKey: props.route.params.feedCacheKey,
-    }
+        feedCacheKey: props.route.params.feedCacheKey,
+      }
     : undefined
   const pal = usePalette('default')
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const navigation = useNavigation<NavigationProp>()
 
   const uri = useMemo(
     () => makeRecordUri(handleOrDid, 'app.bsky.feed.generator', rkey),
     [rkey, handleOrDid],
   )
-  const { error, data: resolvedUri } = useResolveUriQuery(uri)
+  const {error, data: resolvedUri} = useResolveUriQuery(uri)
 
-  const onPressBack = React.useCallback(() => {
+  const onPressBack = useCallback(() => {
     if (navigation.canGoBack()) {
       navigation.goBack()
     } else {
@@ -88,13 +88,13 @@ export function ProfileFeedScreen(props: Props) {
               {error.toString()}
             </Text>
 
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{flexDirection: 'row'}}>
               <Button
                 type="default"
                 accessibilityLabel={_(msg`Go back`)}
                 accessibilityHint={_(msg`Returns to previous page`)}
                 onPress={onPressBack}
-                style={{ flexShrink: 1 }}>
+                style={{flexShrink: 1}}>
                 <Text type="button" style={pal.text}>
                   <Trans>Go Back</Trans>
                 </Text>
@@ -130,8 +130,8 @@ function ProfileFeedScreenIntermediate({
   feedUri: string
   feedParams: FeedParams | undefined
 }) {
-  const { data: preferences } = usePreferencesQuery()
-  const { data: info } = useFeedSourceInfoQuery({ uri: feedUri })
+  const {data: preferences} = usePreferencesQuery()
+  const {data: info} = useFeedSourceInfoQuery({uri: feedUri})
 
   if (!preferences || !info) {
     return (
@@ -159,17 +159,17 @@ export function ProfileFeedScreenInner({
   feedInfo: FeedSourceFeedInfo
   feedParams: FeedParams | undefined
 }) {
-  const { _ } = useLingui()
-  const { hasSession } = useSession()
-  const { openComposer } = useOpenComposer()
+  const {_} = useLingui()
+  const {hasSession} = useSession()
+  const {openComposer} = useOpenComposer()
   const isScreenFocused = useIsFocused()
 
   useSetTitle(feedInfo?.displayName)
 
   const feed = `feedgen|${feedInfo.uri}` as FeedDescriptor
 
-  const [hasNew, setHasNew] = React.useState(false)
-  const [isScrolledDown, setIsScrolledDown] = React.useState(false)
+  const [hasNew, setHasNew] = useState(false)
+  const [isScrolledDown, setIsScrolledDown] = useState(false)
   const queryClient = useQueryClient()
   const feedFeedback = useFeedFeedback(feedInfo, hasSession)
   const scrollElRef = useAnimatedRef() as ListRef
@@ -183,7 +183,7 @@ export function ProfileFeedScreenInner({
     setHasNew(false)
   }, [scrollElRef, queryClient, feed, setHasNew])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isScreenFocused) {
       return
     }
@@ -200,7 +200,7 @@ export function ProfileFeedScreenInner({
     )
   }, [_])
 
-  const isVideoFeed = React.useMemo(() => {
+  const isVideoFeed = useMemo(() => {
     const isBskyVideoFeed = VIDEO_FEED_URIS.includes(feedInfo.uri)
     const feedIsVideoMode =
       feedInfo.contentMode === AppBskyFeedDefs.CONTENTMODEVIDEO
@@ -237,12 +237,12 @@ export function ProfileFeedScreenInner({
       {hasSession && (
         <FAB
           testID="composeFAB"
-          onPress={() => openComposer({ logContext: 'Fab' })}
+          onPress={() => openComposer({logContext: 'Fab'})}
           icon={
             <ComposeIcon2
               strokeWidth={1.5}
               size={29}
-              style={{ color: 'white' }}
+              style={{color: 'white'}}
             />
           }
           accessibilityRole="button"

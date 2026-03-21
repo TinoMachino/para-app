@@ -1,4 +1,4 @@
-import React from 'react'
+import {type ElementType, type ReactNode, useMemo, useState} from 'react'
 import {type ColorValue, Dimensions, StyleSheet, View} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Animated, {
@@ -21,7 +21,7 @@ interface GestureAction {
   color: ColorValue
   action: () => void
   threshold: number
-  icon: React.ElementType
+  icon: ElementType
 }
 
 interface GestureActions {
@@ -38,7 +38,7 @@ export function GestureActionView({
   children,
   actions,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   actions: GestureActions
 }) {
   if (
@@ -50,7 +50,7 @@ export function GestureActionView({
     )
   }
 
-  const [activeAction, setActiveAction] = React.useState<
+  const [activeAction, setActiveAction] = useState<
     'leftFirst' | 'leftSecond' | 'rightFirst' | 'rightSecond' | null
   >(null)
 
@@ -231,7 +231,7 @@ export function GestureActionView({
     }
   })
 
-  const leftSideInterpolation = React.useMemo(() => {
+  const leftSideInterpolation = useMemo(() => {
     return createInterpolation({
       firstColor: actions.leftFirst?.color,
       secondColor: actions.leftSecond?.color,
@@ -241,7 +241,7 @@ export function GestureActionView({
     })
   }, [actions.leftFirst, actions.leftSecond])
 
-  const rightSideInterpolation = React.useMemo(() => {
+  const rightSideInterpolation = useMemo(() => {
     return createInterpolation({
       firstColor: actions.rightFirst?.color,
       secondColor: actions.rightSecond?.color,
@@ -251,7 +251,7 @@ export function GestureActionView({
     })
   }, [actions.rightFirst, actions.rightSecond])
 
-  const interpolation = React.useMemo<{
+  const interpolation = useMemo<{
     inputRange: number[]
     outputRange: ColorValue[]
   }>(() => {

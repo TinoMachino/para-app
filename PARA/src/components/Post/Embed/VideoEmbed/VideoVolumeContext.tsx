@@ -1,20 +1,28 @@
-import React from 'react'
+import {
+  createContext,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 
-const Context = React.createContext<{
+const Context = createContext<{
   // native
   muted: boolean
-  setMuted: React.Dispatch<React.SetStateAction<boolean>>
+  setMuted: Dispatch<SetStateAction<boolean>>
   // web
   volume: number
-  setVolume: React.Dispatch<React.SetStateAction<number>>
+  setVolume: Dispatch<SetStateAction<number>>
 } | null>(null)
 Context.displayName = 'VideoVolumeContext'
 
-export function Provider({children}: {children: React.ReactNode}) {
-  const [muted, setMuted] = React.useState(true)
-  const [volume, setVolume] = React.useState(1)
+export function Provider({children}: {children: ReactNode}) {
+  const [muted, setMuted] = useState(true)
+  const [volume, setVolume] = useState(1)
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({
       muted,
       setMuted,
@@ -28,7 +36,7 @@ export function Provider({children}: {children: React.ReactNode}) {
 }
 
 export function useVideoVolumeState() {
-  const context = React.useContext(Context)
+  const context = useContext(Context)
   if (!context) {
     throw new Error(
       'useVideoVolumeState must be used within a VideoVolumeProvider',
@@ -38,7 +46,7 @@ export function useVideoVolumeState() {
 }
 
 export function useVideoMuteState() {
-  const context = React.useContext(Context)
+  const context = useContext(Context)
   if (!context) {
     throw new Error(
       'useVideoMuteState must be used within a VideoVolumeProvider',

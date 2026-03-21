@@ -1,29 +1,25 @@
+import {useMemo} from 'react'
 import {FlatList, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {type AppBskyFeedDefs} from '@atproto/api'
-import {AtUri} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
-// Fallback mock data when no AT Proto posts are found
-import {OPEN_QUESTIONS} from '#/lib/mock-data'
 import {type NavigationProp} from '#/lib/routes/types'
 import {useOpenQuestions} from '#/state/queries/useOpenQuestions'
 import {Text} from '#/view/com/util/text/Text'
 import {TimeElapsed} from '#/view/com/util/TimeElapsed'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {
+  mapOpenQuestionPosts,
+  toPostThreadParamsFromUri,
+} from '#/screens/RAQ/open-questions-utils'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
 import * as Layout from '#/components/Layout'
+import {ListMaybePlaceholder} from '#/components/Lists'
 import {RedditVoteButton} from '#/components/PostControls/VoteButton'
-
-// Fallback mock data when no AT Proto posts are found
-const FALLBACK_QUESTIONS = OPEN_QUESTIONS.map(q => ({
-  ...q,
-  isMock: true,
-}))
 
 export default function OpenQuestionsListScreen() {
   const t = useTheme()
@@ -31,40 +27,25 @@ export default function OpenQuestionsListScreen() {
   const navigation = useNavigation<NavigationProp>()
   const insets = useSafeAreaInsets()
 
-  // Fetch real Open Questions from AT Proto
-  const {data: openQuestions, isLoading, error} = useOpenQuestions()
+  const {
+    data: openQuestions = [],
+    isFetched,
+    isLoading,
+    isError,
+    refetch,
+  } = useOpenQuestions()
 
-  // Transform AT Proto posts to our display format
-  const questions =
-    openQuestions && openQuestions.length > 0
-      ? openQuestions.map((post: AppBskyFeedDefs.PostView) => ({
-          id: post.uri,
-          text:
-            (post.record as {text?: string})?.text?.replace(
-              /\|#\?OpenQuestion/g,
-              '',
-            ) || '',
-          author: {
-            handle: post.author.handle,
-            avatar: post.author.avatar || '',
-          },
-          replyCount: post.replyCount || 0,
-          timestamp: post.indexedAt,
-          isMock: false,
-          post, // Keep original for navigation
-        }))
-      : FALLBACK_QUESTIONS
+  const questions = useMemo(
+    () => mapOpenQuestionPosts(openQuestions),
+    [openQuestions],
+  )
 
   const navigateToPost = (item: (typeof questions)[0]) => {
-    if (item.isMock) {
-      // Navigate to mock screen for fallback data
-      navigation.navigate('OpenQuestionThread', {id: item.id})
-    } else {
-      // Navigate to real PostThread for AT Proto posts
-      const urip = new AtUri(item.id)
+    const routeParams = toPostThreadParamsFromUri(item.id)
+    if (routeParams) {
       navigation.navigate('PostThread', {
-        name: urip.host,
-        rkey: urip.rkey,
+        name: routeParams.name,
+        rkey: routeParams.rkey,
       })
     }
   }
@@ -78,13 +59,9 @@ export default function OpenQuestionsListScreen() {
         <UserAvatar size={24} type="user" avatar={item.author.avatar} />
         <Text style={[t.atoms.text_contrast_medium, a.text_sm]}>
           @{item.author.handle} ·{' '}
-          {item.isMock ? (
-            item.timestamp
-          ) : (
-            <TimeElapsed timestamp={item.timestamp}>
-              {({timeElapsed}) => <>{timeElapsed}</>}
-            </TimeElapsed>
-          )}
+          <TimeElapsed timestamp={item.timestamp}>
+            {({timeElapsed}) => <>{timeElapsed}</>}
+          </TimeElapsed>
         </Text>
       </View>
       <Text style={[t.atoms.text, a.text_md, a.font_bold, styles.questionText]}>
@@ -139,18 +116,17 @@ export default function OpenQuestionsListScreen() {
       </Layout.Header.Outer>
 
       <Layout.Center style={{flex: 1}}>
-        {isLoading ? (
-          <View style={[a.flex_1, a.justify_center, a.align_center]}>
-            <Text style={[t.atoms.text_contrast_medium]}>
-              <Trans>Loading...</Trans>
-            </Text>
-          </View>
-        ) : error ? (
-          <View style={[a.flex_1, a.justify_center, a.align_center]}>
-            <Text style={[t.atoms.text_contrast_medium]}>
-              <Trans>Could not load questions</Trans>
-            </Text>
-          </View>
+        {!questions.length ? (
+          <ListMaybePlaceholder
+            isLoading={isLoading || !isFetched}
+            isError={isError}
+            onRetry={refetch}
+            emptyType="results"
+            emptyTitle={_(msg`No open questions yet`)}
+            emptyMessage={_(
+              msg`No open questions were found for now. Pull to refresh or try again later.`,
+            )}
+          />
         ) : (
           <FlatList
             data={questions}

@@ -2,8 +2,8 @@ import {useState} from 'react'
 import {View} from 'react-native'
 import {XRPCError} from '@atproto/xrpc'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {validate as validateEmail} from 'email-validator'
 
 import {useCleanError} from '#/lib/hooks/useCleanError'
@@ -151,7 +151,8 @@ function Inner() {
               <Trans>
                 We're having issues initializing the age assurance process for
                 your account. Please{' '}
-                <SimpleInlineLinkText                  to={createSupportLink({code: SupportCode.AA_DID, email})}
+                <SimpleInlineLinkText
+                  to={createSupportLink({code: SupportCode.AA_DID, email})}
                   label={_(msg`Contact support`)}>
                   contact support
                 </SimpleInlineLinkText>{' '}
@@ -276,8 +277,8 @@ function Inner() {
                   <Admonition type="tip" style={[a.mt_sm]}>
                     <Trans>
                       Use your account email address, or another real email
-                      address you control, in case KWS or PARA needs to
-                      contact you.
+                      address you control, in case KWS or PARA needs to contact
+                      you.
                     </Trans>
                   </Admonition>
                 )}

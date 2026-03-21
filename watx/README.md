@@ -70,6 +70,18 @@ The Authenticated Transfer Protocol ("ATP" or "atproto") is a decentralized soci
 
 The Bluesky Social application encompasses a set of schemas and APIs built in the overall AT Protocol framework. The namespace for these "Lexicons" is `app.bsky.*`.
 
+## PARA verification notes
+
+This workspace is also being used for PARA-specific profile and community work.
+
+Current PARA public-figure model:
+
+- PARA stores product approval in `com.para.identity`
+- AppView-visible verification still relies on `app.bsky.graph.verification`
+- clients render `f/` for public figures once backend verification is surfaced in profile views
+
+Current rollout is manual. Future work for Mexico is planned around Instituto Nacional Electoral-backed verification plus zero-knowledge proofs so a user can prove eligibility from their ID without publicly revealing their identity.
+
 ## Contributions
 
 > While we do accept contributions, we prioritize high quality issues and pull requests. Adhering to the below guidelines will ensure a more timely review.

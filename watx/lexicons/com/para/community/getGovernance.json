@@ -15,6 +15,12 @@
             "maxGraphemes": 64,
             "description": "Community identifier or label (for example: mx-federal or p/mx-federal)."
           },
+          "communityId": {
+            "type": "string",
+            "maxLength": 128,
+            "maxGraphemes": 128,
+            "description": "Optional stable identifier for the community."
+          },
           "limit": {
             "type": "integer",
             "minimum": 1,
@@ -28,21 +34,75 @@
         "encoding": "application/json",
         "schema": {
           "type": "object",
-          "required": ["community", "summary", "moderators", "officials", "deputies", "computedAt"],
+          "required": [
+            "source",
+            "community",
+            "slug",
+            "createdAt",
+            "updatedAt",
+            "moderators",
+            "officials",
+            "deputies",
+            "editHistory",
+            "counters",
+            "summary",
+            "computedAt"
+          ],
           "properties": {
+            "source": {
+              "type": "string",
+              "knownValues": ["network", "repo", "mock"]
+            },
             "community": { "type": "string" },
-            "summary": { "type": "ref", "ref": "com.para.community.defs#summary" },
+            "communityId": { "type": "string" },
+            "slug": { "type": "string" },
+            "createdAt": {
+              "type": "string",
+              "format": "datetime"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "datetime"
+            },
             "moderators": {
               "type": "array",
-              "items": { "type": "ref", "ref": "com.para.community.defs#moderator" }
+              "items": {
+                "type": "ref",
+                "ref": "com.para.community.defs#moderatorView"
+              }
             },
             "officials": {
               "type": "array",
-              "items": { "type": "ref", "ref": "com.para.community.defs#official" }
+              "items": {
+                "type": "ref",
+                "ref": "com.para.community.defs#officialView"
+              }
             },
             "deputies": {
               "type": "array",
-              "items": { "type": "ref", "ref": "com.para.community.defs#deputyRole" }
+              "items": {
+                "type": "ref",
+                "ref": "com.para.community.defs#deputyRoleView"
+              }
+            },
+            "metadata": {
+              "type": "ref",
+              "ref": "com.para.community.defs#metadata"
+            },
+            "editHistory": {
+              "type": "array",
+              "items": {
+                "type": "ref",
+                "ref": "com.para.community.defs#historyEntry"
+              }
+            },
+            "counters": {
+              "type": "ref",
+              "ref": "com.para.community.defs#summary"
+            },
+            "summary": {
+              "type": "ref",
+              "ref": "com.para.community.defs#summary"
             },
             "computedAt": {
               "type": "string",

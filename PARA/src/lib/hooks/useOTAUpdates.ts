@@ -1,5 +1,11 @@
-import React from 'react'
-import {Alert, AppState, type AppStateStatus} from 'react-native'
+import {
+  type AppStateStatus,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import {Alert, AppState} from 'react-native'
 import {nativeBuildVersion} from 'expo-application'
 import {
   checkForUpdateAsync,
@@ -12,8 +18,7 @@ import {
 
 import {isNetworkError} from '#/lib/strings/errors'
 import {logger} from '#/logger'
-import {IS_ANDROID, IS_IOS} from '#/env'
-import {IS_TESTFLIGHT} from '#/env'
+import {IS_ANDROID, IS_IOS, IS_TESTFLIGHT} from '#/env'
 
 const MINIMUM_MINIMIZE_TIME = 15 * 60e3
 
@@ -68,7 +73,7 @@ async function updateTestflight() {
 
 export function useApplyPullRequestOTAUpdate() {
   const {currentlyRunning} = useUpdates()
-  const [pending, setPending] = React.useState(false)
+  const [pending, setPending] = useState(false)
   const currentChannel = currentlyRunning?.channel
   const isCurrentlyRunningPullRequestDeployment =
     currentChannel?.startsWith('pull-request')
@@ -125,14 +130,14 @@ export function useApplyPullRequestOTAUpdate() {
 export function useOTAUpdates() {
   const shouldReceiveUpdates = isEnabled && !__DEV__
 
-  const appState = React.useRef<AppStateStatus>('active')
-  const lastMinimize = React.useRef(0)
-  const ranInitialCheck = React.useRef(false)
-  const timeout = React.useRef<NodeJS.Timeout>(undefined)
+  const appState = useRef<AppStateStatus>('active')
+  const lastMinimize = useRef(0)
+  const ranInitialCheck = useRef(false)
+  const timeout = useRef<NodeJS.Timeout>(undefined)
   const {currentlyRunning, isUpdatePending} = useUpdates()
   const currentChannel = currentlyRunning?.channel
 
-  const setCheckTimeout = React.useCallback(() => {
+  const setCheckTimeout = useCallback(() => {
     timeout.current = setTimeout(async () => {
       try {
         await setExtraParams()
@@ -154,7 +159,7 @@ export function useOTAUpdates() {
     }, 10e3)
   }, [])
 
-  const onIsTestFlight = React.useCallback(async () => {
+  const onIsTestFlight = useCallback(async () => {
     try {
       await updateTestflight()
     } catch (err: any) {
@@ -164,7 +169,7 @@ export function useOTAUpdates() {
     }
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // We don't need to check anything if the current update is a PR update
     if (currentChannel?.startsWith('pull-request')) {
       return
@@ -187,7 +192,7 @@ export function useOTAUpdates() {
 
   // After the app has been minimized for 15 minutes, we want to either A. install an update if one has become available
   // or B check for an update again.
-  React.useEffect(() => {
+  useEffect(() => {
     // We also don't start this timeout if the user is on a pull request update
     if (!isEnabled || currentChannel?.startsWith('pull-request')) {
       return

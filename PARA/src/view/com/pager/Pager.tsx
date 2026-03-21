@@ -48,6 +48,7 @@ interface Props {
   ref?: React.Ref<PagerRef>
   initialPage?: number
   renderTabBar: RenderTabBarFn
+  tabBarPosition?: 'top' | 'bottom'
   // tab pressed, yet to scroll to page
   onTabPressed?: (index: number) => void
   // scroll settled
@@ -66,6 +67,7 @@ export function Pager({
   children,
   initialPage = 0,
   renderTabBar,
+  tabBarPosition = 'top',
   onPageSelected: parentOnPageSelected,
   onTabPressed: parentOnTabPressed,
   onPageScrollStateChanged: parentOnPageScrollStateChanged,
@@ -145,12 +147,13 @@ export function Pager({
 
   return (
     <View testID={testID} style={[a.flex_1, native(a.overflow_hidden)]}>
-      {renderTabBar({
-        selectedPage,
-        onSelect: onTabBarSelect,
-        dragProgress,
-        dragState,
-      })}
+      {tabBarPosition === 'top' &&
+        renderTabBar({
+          selectedPage,
+          onSelect: onTabBarSelect,
+          dragProgress,
+          dragState,
+        })}
       <DrawerGestureRequireFail>
         <MemoizedAnimatedPagerView
           ref={pagerView}
@@ -160,6 +163,13 @@ export function Pager({
           {children}
         </MemoizedAnimatedPagerView>
       </DrawerGestureRequireFail>
+      {tabBarPosition === 'bottom' &&
+        renderTabBar({
+          selectedPage,
+          onSelect: onTabBarSelect,
+          dragProgress,
+          dragState,
+        })}
     </View>
   )
 }

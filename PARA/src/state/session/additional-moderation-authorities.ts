@@ -1,7 +1,7 @@
-import { BskyAgent } from '@atproto/api'
+import {BskyAgent} from '@atproto/api'
 
-import { logger } from '#/logger'
-import { device } from '#/storage'
+import {logger} from '#/logger'
+import {device} from '#/storage'
 
 export const BR_LABELER = 'did:plc:ekitcvx7uwnauoqy5oest3hm' // Brazil
 export const DE_LABELER = 'did:plc:r55ow3tocux5kafs5dq445fy' // Germany
@@ -94,5 +94,5 @@ export function configureAdditionalModerationAuthorities() {
     appLabelers,
   })
 
-  BskyAgent.configure({ appLabelers })
+  BskyAgent.configure({appLabelers})
 }

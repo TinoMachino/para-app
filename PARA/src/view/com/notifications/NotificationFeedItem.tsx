@@ -19,8 +19,8 @@ import {
 import {AtUri} from '@atproto/api'
 import {TID} from '@atproto/common-web'
 import {msg, plural} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Plural, Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
@@ -45,7 +45,6 @@ import {FeedSourceCard} from '#/view/com/feeds/FeedSourceCard'
 import {Post} from '#/view/com/post/Post'
 import {formatCount} from '#/view/com/util/numeric/format'
 import {TimeElapsed} from '#/view/com/util/TimeElapsed'
-import * as Toast from '#/view/com/util/Toast'
 import {PreviewableUserAvatar, UserAvatar} from '#/view/com/util/UserAvatar'
 import {atoms as a, platform, useTheme} from '#/alf'
 import {Button, ButtonIcon, ButtonText} from '#/components/Button'
@@ -67,6 +66,7 @@ import * as MediaPreview from '#/components/MediaPreview'
 import {ProfileHoverCard} from '#/components/ProfileHoverCard'
 import {Notification as StarterPackCard} from '#/components/StarterPack/StarterPackCard'
 import {SubtleHover} from '#/components/SubtleHover'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useSimpleVerificationState} from '#/components/verification'
 import {VerificationCheck} from '#/components/verification/VerificationCheck'
@@ -442,7 +442,9 @@ let NotificationFeedItem = ({
     notificationContent = hasMultipleAuthors ? (
       <Trans>
         {firstAuthorLink} and{' '}
-        <Text style={[a.text_md, a.font_semi_bold, a.leading_snug]}>          <Plural
+        <Text style={[a.text_md, a.font_semi_bold, a.leading_snug]}>
+          {' '}
+          <Plural
             value={additionalAuthorsCount}
             one={`${formattedAuthorsCount} other`}
             other={`${formattedAuthorsCount} others`}
@@ -776,7 +778,9 @@ function FollowBackButton({profile}: {profile: AppBskyActorDefs.ProfileView}) {
       )
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        Toast.show(_(msg`An issue occurred, please try again.`), 'xmark')
+        Toast.show(_(msg`An issue occurred, please try again.`), {
+          type: 'error',
+        })
       }
     }
   }
@@ -796,7 +800,9 @@ function FollowBackButton({profile}: {profile: AppBskyActorDefs.ProfileView}) {
       )
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        Toast.show(_(msg`An issue occurred, please try again.`), 'xmark')
+        Toast.show(_(msg`An issue occurred, please try again.`), {
+          type: 'error',
+        })
       }
     }
   }
@@ -838,13 +844,19 @@ function FollowBackButton({profile}: {profile: AppBskyActorDefs.ProfileView}) {
         </Button>
       ) : (
         <Button
-          label={isFollowedBy ? _(msg`Follow back`) : _(msg`Follow`)}          color="primary"
+          label={isFollowedBy ? _(msg`Follow back`) : _(msg`Follow`)}
+          color="primary"
           size="small"
           style={[a.self_start]}
           onPress={onPressFollow}>
           <ButtonIcon icon={PlusIcon} />
           <ButtonText>
-            {isFollowedBy ? <Trans>Follow back</Trans> : <Trans>Follow</Trans>}          </ButtonText>
+            {isFollowedBy ? (
+              <Trans>Follow back</Trans>
+            ) : (
+              <Trans>Follow</Trans>
+            )}{' '}
+          </ButtonText>
         </Button>
       )}
     </View>

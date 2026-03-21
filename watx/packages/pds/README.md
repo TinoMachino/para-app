@@ -7,6 +7,27 @@ TypeScript reference implementation of an atproto PDS.
 
 If you are interested in self-hosting a PDS, you probably want this repository instead, which has a thin service wrapper, documentation, a Dockerfile, etc: https://github.com/bluesky-social/pds
 
+## PARA public-figure notes
+
+PARA stores public-figure approval as a repo record in `com.para.identity`.
+
+Current intended fields:
+
+- `isVerifiedPublicFigure`: whether PARA approved the account for `f/`
+- `verifiedAt`: when the approval was granted
+- `proofBlob`: optional pointer to the approval artifact or review payload
+
+Current rollout model is manual:
+
+- a reviewer approves the account manually
+- the subject repo receives `com.para.identity`
+- a trusted verifier later issues `app.bsky.graph.verification` so AppView can expose the verified state to clients
+
+Future plan for Mexico:
+
+- replace manual review with Instituto Nacional Electoral-backed checks
+- use zero-knowledge proofs so users can prove eligibility from their ID without revealing their full identity to the application or to the public
+
 ## License
 
 This project is dual-licensed under MIT and Apache 2.0 terms:

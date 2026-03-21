@@ -16,7 +16,7 @@
  * 3. Don't call this query's `refetch()` if you're trying to sync latest; call `checkUnread()` instead.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import {useCallback, useEffect, useMemo, useRef} from 'react'
 import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
@@ -31,21 +31,21 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 
-import { useModerationOpts } from '#/state/preferences/moderation-opts'
-import { STALE } from '#/state/queries'
-import { useAgent } from '#/state/session'
-import { useThreadgateHiddenReplyUris } from '#/state/threadgate-hidden-replies'
+import {useModerationOpts} from '#/state/preferences/moderation-opts'
+import {STALE} from '#/state/queries'
+import {useAgent} from '#/state/session'
+import {useThreadgateHiddenReplyUris} from '#/state/threadgate-hidden-replies'
 import type * as bsky from '#/types/bsky'
 import {
   didOrHandleUriMatches,
   embedViewRecordToPostView,
   getEmbeddedPost,
 } from '../util'
-import { type FeedPage } from './types'
-import { useUnreadNotificationsApi } from './unread'
-import { fetchPage } from './util'
+import {type FeedPage} from './types'
+import {useUnreadNotificationsApi} from './unread'
+import {fetchPage} from './util'
 
-export type { FeedNotification, FeedPage, NotificationType } from './types'
+export type {FeedNotification, FeedPage, NotificationType} from './types'
 
 const PAGE_SIZE = 30
 
@@ -66,7 +66,7 @@ export function useNotificationFeedQuery(opts: {
   const unreads = useUnreadNotificationsApi()
   const enabled = opts.enabled !== false
   const filter = opts.filter
-  const { uris: hiddenReplyUris } = useThreadgateHiddenReplyUris()
+  const {uris: hiddenReplyUris} = useThreadgateHiddenReplyUris()
 
   const selectArgs = useMemo(() => {
     return {
@@ -89,7 +89,7 @@ export function useNotificationFeedQuery(opts: {
   >({
     staleTime: STALE.INFINITY,
     queryKey: RQKEY(filter),
-    async queryFn({ pageParam }: { pageParam: RQPageParam }) {
+    async queryFn({pageParam}: {pageParam: RQPageParam}) {
       let page
       if (filter === 'all' && !pageParam) {
         // for the first page, we check the cached page held by the unread-checker first
@@ -105,7 +105,7 @@ export function useNotificationFeedQuery(opts: {
             'quote',
           ]
         }
-        const { page: fetchedPage } = await fetchPage({
+        const {page: fetchedPage} = await fetchPage({
           agent,
           limit: PAGE_SIZE,
           cursor: pageParam,
@@ -129,7 +129,7 @@ export function useNotificationFeedQuery(opts: {
     enabled,
     select: useCallback(
       (data: InfiniteData<FeedPage>) => {
-        const { moderationOpts, hiddenReplyUris } = selectArgs
+        const {moderationOpts, hiddenReplyUris} = selectArgs
 
         // Keep track of the last run and whether we can reuse
         // some already selected pages from there.
@@ -213,7 +213,7 @@ export function useNotificationFeedQuery(opts: {
           ],
         }
 
-        lastRun.current = { data, result, args: selectArgs }
+        lastRun.current = {data, result, args: selectArgs}
 
         return result
       },
@@ -229,7 +229,7 @@ export function useNotificationFeedQuery(opts: {
   const wantedItemCount = useRef(0)
   const autoPaginationAttemptCount = useRef(0)
   useEffect(() => {
-    const { data, isLoading, isRefetching, isFetchingNextPage, hasNextPage } =
+    const {data, isLoading, isRefetching, isFetchingNextPage, hasNextPage} =
       query
     // Count the items that we already have.
     let itemCount = 0

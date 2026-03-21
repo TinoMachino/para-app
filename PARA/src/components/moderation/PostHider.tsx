@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import {useCallback, useState} from 'react'
 import {
   LayoutAnimation,
   Pressable,
@@ -13,21 +13,21 @@ import {
   type ModerationUI,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
-import { useQueryClient } from '@tanstack/react-query'
+import {useQueryClient} from '@tanstack/react-query'
 
-import { useModerationCauseDescription } from '#/lib/moderation/useModerationCauseDescription'
-import { addStyle } from '#/lib/styles'
-import { unstableCacheProfileView } from '#/state/queries/unstable-profile-cache'
+import {useModerationCauseDescription} from '#/lib/moderation/useModerationCauseDescription'
+import {addStyle} from '#/lib/styles'
+import {unstableCacheProfileView} from '#/state/queries/unstable-profile-cache'
 // import {Link} from '#/components/Link' TODO this imposes some styles that screw things up
-import { Link } from '#/view/com/util/Link'
-import { atoms as a, useTheme } from '#/alf'
+import {Link} from '#/view/com/util/Link'
+import {atoms as a, useTheme} from '#/alf'
 import {
   ModerationDetailsDialog,
   useModerationDetailsDialogControl,
 } from '#/components/moderation/ModerationDetailsDialog'
-import { Text } from '#/components/Typography'
+import {Text} from '#/components/Typography'
 
 interface Props extends React.ComponentProps<typeof Link> {
   disabled: boolean
@@ -55,7 +55,7 @@ export function PostHider({
 }: Props) {
   const queryClient = useQueryClient()
   const t = useTheme()
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const [override, setOverride] = useState(false)
   const control = useModerationDetailsDialogControl()
   const blur =
@@ -103,7 +103,7 @@ export function PostHider({
           paddingLeft: 6,
           paddingRight: 18,
         },
-        override ? { paddingBottom: 0 } : undefined,
+        override ? {paddingBottom: 0} : undefined,
         t.atoms.bg,
         hiderStyle,
       ]}>
@@ -136,7 +136,7 @@ export function PostHider({
         {desc.name}
       </Text>
       {!modui.noOverride && (
-        <Text style={[{ color: t.palette.primary_500 }]}>
+        <Text style={[{color: t.palette.primary_500}]}>
           {override ? <Trans>Hide</Trans> : <Trans>Show</Trans>}
         </Text>
       )}

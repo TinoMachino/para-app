@@ -1,16 +1,16 @@
-import { useRef } from 'react'
-import { View } from 'react-native'
-import { Image } from 'expo-image'
-import { type ImagePickerAsset } from 'expo-image-picker'
-import { BlueskyVideoView } from '@haileyok/bluesky-video'
+import {useRef} from 'react'
+import {View} from 'react-native'
+import {Image} from 'expo-image'
+import {type ImagePickerAsset} from 'expo-image-picker'
+import {BlueskyVideoView} from '@haileyok/bluesky-video'
 
-import { type CompressedVideo } from '#/lib/media/video/types'
-import { clamp } from '#/lib/numbers'
-import { useAutoplayDisabled } from '#/state/preferences'
-import { ExternalEmbedRemoveBtn } from '#/view/com/composer/ExternalEmbedRemoveBtn'
-import { atoms as a, useTheme } from '#/alf'
-import { PlayButtonIcon } from '#/components/video/PlayButtonIcon'
-import { VideoTranscodeBackdrop } from './VideoTranscodeBackdrop'
+import {type CompressedVideo} from '#/lib/media/video/types'
+import {clamp} from '#/lib/numbers'
+import {useAutoplayDisabled} from '#/state/preferences'
+import {ExternalEmbedRemoveBtn} from '#/view/com/composer/ExternalEmbedRemoveBtn'
+import {atoms as a, useTheme} from '#/alf'
+import {PlayButtonIcon} from '#/components/video/PlayButtonIcon'
+import {VideoTranscodeBackdrop} from './VideoTranscodeBackdrop'
 
 export function VideoPreview({
   asset,
@@ -39,11 +39,11 @@ export function VideoPreview({
       style={[
         a.w_full,
         a.rounded_sm,
-        { aspectRatio },
+        {aspectRatio},
         a.overflow_hidden,
         a.border,
         t.atoms.border_contrast_low,
-        { backgroundColor: 'black' },
+        {backgroundColor: 'black'},
       ]}>
       <View style={[a.absolute, a.inset_0]}>
         <VideoTranscodeBackdrop uri={asset.uri} />
@@ -54,7 +54,7 @@ export function VideoPreview({
             <Image
               style={[a.flex_1]}
               autoplay={!autoplayDisabled}
-              source={{ uri: video.uri }}
+              source={{uri: video.uri}}
               accessibilityIgnoresInvertColors
               cachePolicy="none"
             />

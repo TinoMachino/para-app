@@ -4,10 +4,11 @@ import {BskyAgent, RichText} from '@atproto/api'
 // Assuming this script is run from project root: ts-node scripts/seed_highlights.ts
 import {MOCK_HIGHLIGHTS} from '../src/lib/mock-highlights'
 
-const SERVICE = 'http://localhost:2583'
+const SERVICE = process.env.HIGHLIGHT_SEED_SERVICE || 'http://localhost:2583'
 // Default local dev credentials (replace if you have different ones)
-const HANDLE = 'bob.test'
-const PASSWORD = 'hunter2'
+const HANDLE = process.env.HIGHLIGHT_SEED_HANDLE || 'bob.test'
+const PASSWORD = process.env.HIGHLIGHT_SEED_PASSWORD || 'hunter2'
+const HIGHLIGHT_COLLECTION = 'com.para.highlight.annotation'
 
 async function main() {
   const agent = new BskyAgent({service: SERVICE})
@@ -24,26 +25,49 @@ async function main() {
     process.exit(1)
   }
 
-  console.log(`Seeding ${MOCK_HIGHLIGHTS.length} highlights...`)
+  console.log(`Seeding ${MOCK_HIGHLIGHTS.length} highlight posts + annotations...`)
 
   for (const h of MOCK_HIGHLIGHTS) {
-    // Construct text with hashtags for metadata
+    // Construct a source post with hashtags so the post remains explorable in the app.
     const cleanState = h.state ? `#${h.state.replace(/\s+/g, '')}` : ''
     const cleanCommunity = `#${h.community.replace(/\s+/g, '')}`
-    const text = `${h.text}\n\n${cleanState} ${cleanCommunity}`
+    const fullText = `${h.postPreview || h.text}\n\n${cleanState} ${cleanCommunity}`.trim()
 
-    const rt = new RichText({text})
+    const rt = new RichText({text: fullText})
     await rt.detectFacets(agent)
 
     try {
-      const res = await agent.post({
+      const postRes = await agent.post({
         text: rt.text,
         facets: rt.facets,
         createdAt: new Date().toISOString(),
       })
-      console.log(`Posted: ${h.text.substring(0, 20)}... -> ${res.uri}`)
+
+      const start = fullText.indexOf(h.text)
+      const safeStart = start >= 0 ? start : 0
+      const safeEnd = start >= 0 ? start + h.text.length : h.text.length
+
+      await agent.com.atproto.repo.createRecord({
+        repo: agent.session!.did,
+        collection: HIGHLIGHT_COLLECTION,
+        record: {
+          subjectUri: postRes.uri,
+          subjectCid: postRes.cid,
+          text: h.text,
+          start: safeStart,
+          end: safeEnd,
+          color: h.color,
+          community: h.community,
+          state: h.state,
+          party: h.party,
+          visibility: 'public',
+          createdAt: new Date().toISOString(),
+        },
+      })
+
+      console.log(`Seeded highlight: ${h.text.substring(0, 32)}... -> ${postRes.uri}`)
     } catch (e) {
-      console.error(`Failed to post: ${h.text}`, e)
+      console.error(`Failed to seed highlight: ${h.text}`, e)
     }
 
     // Small delay to prevent rate limits or overwhelming the server

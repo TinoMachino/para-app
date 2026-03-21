@@ -1,10 +1,9 @@
-import {memo} from 'react'
+import {memo, type ReactNode} from 'react'
 import {type Insets} from 'react-native'
 import {type AppBskyFeedDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
-import type React from 'react'
+import {Trans} from '@lingui/react/macro'
 
 import {useCleanError} from '#/lib/hooks/useCleanError'
 import {logger} from '#/logger'
@@ -28,7 +27,7 @@ export const BookmarkButton = memo(function BookmarkButton({
   big?: boolean
   logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
   hitSlop?: Insets
-}): React.ReactNode {
+}): ReactNode {
   const t = useTheme()
   const {_} = useLingui()
   const {mutateAsync: bookmark} = useBookmarkMutation()

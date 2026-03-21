@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/core'
 
 import {FEEDBACK_FORM_URL, HELP_DESK_URL} from '#/lib/constants'

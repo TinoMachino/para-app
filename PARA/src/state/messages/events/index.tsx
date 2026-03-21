@@ -1,16 +1,20 @@
-import React from 'react'
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import {AppState} from 'react-native'
 
 import {MessagesEventBus} from '#/state/messages/events/agent'
 import {useAgent, useSession} from '#/state/session'
 
-const MessagesEventBusContext = React.createContext<MessagesEventBus | null>(
-  null,
-)
+const MessagesEventBusContext = createContext<MessagesEventBus | null>(null)
 MessagesEventBusContext.displayName = 'MessagesEventBusContext'
 
 export function useMessagesEventBus() {
-  const ctx = React.useContext(MessagesEventBusContext)
+  const ctx = useContext(MessagesEventBusContext)
   if (!ctx) {
     throw new Error(
       'useMessagesEventBus must be used within a MessagesEventBusProvider',
@@ -19,11 +23,7 @@ export function useMessagesEventBus() {
   return ctx
 }
 
-export function MessagesEventBusProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export function MessagesEventBusProvider({children}: {children: ReactNode}) {
   const {currentAccount} = useSession()
 
   if (!currentAccount) {
@@ -42,17 +42,17 @@ export function MessagesEventBusProvider({
 export function MessagesEventBusProviderInner({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   const agent = useAgent()
-  const [bus] = React.useState(
+  const [bus] = useState(
     () =>
       new MessagesEventBus({
         agent,
       }),
   )
 
-  React.useEffect(() => {
+  useEffect(() => {
     bus.resume()
 
     return () => {
@@ -60,7 +60,7 @@ export function MessagesEventBusProviderInner({
     }
   }, [bus])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'active') {
         bus.resume()

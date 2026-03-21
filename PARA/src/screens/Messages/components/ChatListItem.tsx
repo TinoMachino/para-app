@@ -1,4 +1,11 @@
-import React, {useCallback, useMemo, useState} from 'react'
+import {
+  type FocusEventHandler,
+  memo,
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import {type GestureResponderEvent, View} from 'react-native'
 import {
   AppBskyEmbedRecord,
@@ -57,8 +64,8 @@ export let ChatListItem = ({
 }: {
   convo: ChatBskyConvoDefs.ConvoView
   showMenu?: boolean
-  children?: React.ReactNode
-}): React.ReactNode => {
+  children?: ReactNode
+}): ReactNode => {
   const {currentAccount} = useSession()
   const moderationOpts = useModerationOpts()
 
@@ -81,7 +88,7 @@ export let ChatListItem = ({
   )
 }
 
-ChatListItem = React.memo(ChatListItem)
+ChatListItem = memo(ChatListItem)
 
 function ChatListItemReady({
   convo,
@@ -94,7 +101,7 @@ function ChatListItemReady({
   profile: bsky.profile.AnyProfileView
   moderationOpts: ModerationOpts
   showMenu?: boolean
-  children?: React.ReactNode
+  children?: ReactNode
 }) {
   const t = useTheme()
   const {_} = useLingui()
@@ -104,7 +111,7 @@ function ChatListItemReady({
   const {gtMobile} = useBreakpoints()
   const profile = useProfileShadow(profileUnshadowed)
   const {mutate: markAsRead} = useMarkAsReadMutation()
-  const moderation = React.useMemo(
+  const moderation = useMemo(
     () => moderateProfile(profile, moderationOpts),
     [profile, moderationOpts],
   )
@@ -275,7 +282,7 @@ function ChatListItemReady({
     setShowActions(false)
   }, [])
 
-  const onFocus = useCallback<React.FocusEventHandler>(e => {
+  const onFocus = useCallback<FocusEventHandler>(e => {
     if (e.nativeEvent.relatedTarget == null) return
     setShowActions(true)
   }, [])

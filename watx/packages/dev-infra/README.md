@@ -36,6 +36,15 @@ This script is similar to `with-test-db.sh`, but in addition to an ephemeral/sin
 
 The environment variables `DB_POSTGRES_URL` and `REDIS_HOST` will be set with a connection strings that can be used to connect to postgres and redis respectively.
 
+### `with-redis-and-db.sh`
+
+This script is the persistent counterpart to `with-test-redis-and-db.sh`. It starts the long-lived `db` and `redis` services from `docker-compose.yaml` and runs the provided command with:
+
+- `DB_POSTGRES_URL=postgresql://pg:password@127.0.0.1:5432/postgres`
+- `REDIS_HOST=127.0.0.1:6379`
+
+This is the wrapper used by the persistent shared-demo launcher in `packages/dev-env`.
+
 ### `docker-compose.yaml`
 
 The Docker compose file can be used to run containerized versions of postgres either for single use (as is used by `with-test-db.sh`), or for longer-term use. These are setup as separate services named `db_test` and `db` respectively. In both cases the database is available on the host machine's `localhost` and credentials are:

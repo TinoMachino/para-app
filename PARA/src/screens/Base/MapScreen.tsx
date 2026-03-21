@@ -1,16 +1,25 @@
 import {useRef, useState} from 'react'
-import {Modal, ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import MapView, {Polygon} from 'react-native-maps'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
 import {MEXICO_CITY_DATA} from '#/lib/constants/mexicoCityData'
 import * as MexicoGeoJSON from '#/lib/constants/mexicoGeoJSON.json'
 import {MOCK_CABILDEOS} from '#/lib/constants/mockData'
-import {type CommonNavigatorParams, type NavigationProp} from '#/lib/routes/types'
+import {
+  type CommonNavigatorParams,
+  type NavigationProp,
+} from '#/lib/routes/types'
 import {POST_FLAIRS} from '#/lib/tags'
 import {atoms as a, useBreakpoints, useTheme, web} from '#/alf'
 import {FlairSelectionList} from '#/components/FlairSelectionList'
@@ -46,10 +55,10 @@ export function MapScreen({navigation: _}: Props) {
 
   // State for Discourse Filtering
   const [showDiscourseModal, setShowDiscourseModal] = useState(false)
-  const [discourseType, setDiscourseType] = useState<'Matter' | 'Policy'>('Matter')
+  const [discourseType, setDiscourseType] = useState<'Matter' | 'Policy'>(
+    'Matter',
+  )
   const [selectedDiscourseItem, setSelectedDiscourseItem] = useState<string>('')
-
-
 
   const handleZoom = (factor: number) => {
     if (!mapRef.current) return
@@ -331,13 +340,23 @@ export function MapScreen({navigation: _}: Props) {
                 a.rounded_full,
                 a.shadow_md,
                 a.border,
-                (selectedDiscourseItem && selectedDiscourseItem !== 'Any') ? {borderColor: '#FF3B30'} : t.atoms.border_contrast_low,
+                selectedDiscourseItem && selectedDiscourseItem !== 'Any'
+                  ? {borderColor: '#FF3B30'}
+                  : t.atoms.border_contrast_low,
                 a.overflow_hidden,
                 a.align_center,
                 a.justify_center,
                 {width: 44, height: 44},
               ]}>
-              <FilterIcon width={20} height={20} fill={(selectedDiscourseItem && selectedDiscourseItem !== 'Any') ? '#FF3B30' : t.atoms.text.color} />
+              <FilterIcon
+                width={20}
+                height={20}
+                fill={
+                  selectedDiscourseItem && selectedDiscourseItem !== 'Any'
+                    ? '#FF3B30'
+                    : t.atoms.text.color
+                }
+              />
             </TouchableOpacity>
           </View>
 
@@ -436,7 +455,8 @@ export function MapScreen({navigation: _}: Props) {
                 {/* Cabildeo indicator */}
                 {(() => {
                   const activeCabildeos = MOCK_CABILDEOS.filter(
-                    c => c.region === selectedState.name && c.phase !== 'resolved',
+                    c =>
+                      c.region === selectedState.name && c.phase !== 'resolved',
                   )
                   if (activeCabildeos.length === 0) return null
                   return (
@@ -452,11 +472,18 @@ export function MapScreen({navigation: _}: Props) {
                         a.flex_row,
                         a.justify_center,
                         a.gap_xs,
-                        {backgroundColor: '#34C759' + '18', borderWidth: 1, borderColor: '#34C759' + '40'},
+                        {
+                          backgroundColor: '#34C759' + '18',
+                          borderWidth: 1,
+                          borderColor: '#34C759' + '40',
+                        },
                       ]}>
                       <Text style={{fontSize: 14}}>🗳️</Text>
-                      <Text style={[a.font_bold, {color: '#34C759', fontSize: 13}]}>
-                        {activeCabildeos.length} Cabildeo{activeCabildeos.length > 1 ? 's' : ''} activo{activeCabildeos.length > 1 ? 's' : ''}
+                      <Text
+                        style={[a.font_bold, {color: '#34C759', fontSize: 13}]}>
+                        {activeCabildeos.length} Cabildeo
+                        {activeCabildeos.length > 1 ? 's' : ''} activo
+                        {activeCabildeos.length > 1 ? 's' : ''}
                       </Text>
                     </TouchableOpacity>
                   )
@@ -564,7 +591,7 @@ export function MapScreen({navigation: _}: Props) {
 
           {/* Discourse Filter Info Overlay */}
           {selectedDiscourseItem && selectedDiscourseItem !== 'Any' && (
-             <View
+            <View
               style={[
                 a.absolute,
                 {top: 20, right: 80},
@@ -583,10 +610,19 @@ export function MapScreen({navigation: _}: Props) {
               <Text style={[a.text_sm, a.font_bold, t.atoms.text]}>
                 Heatmap: {selectedDiscourseItem}
               </Text>
-              <TouchableOpacity accessibilityRole="button" onPress={() => setSelectedDiscourseItem('')}>
-                <Text style={[a.text_md, a.font_bold, t.atoms.text_contrast_medium]}>✕</Text>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => setSelectedDiscourseItem('')}>
+                <Text
+                  style={[
+                    a.text_md,
+                    a.font_bold,
+                    t.atoms.text_contrast_medium,
+                  ]}>
+                  ✕
+                </Text>
               </TouchableOpacity>
-             </View>
+            </View>
           )}
         </View>
       </View>

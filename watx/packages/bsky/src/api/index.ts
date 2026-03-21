@@ -94,11 +94,16 @@ import queryLabels from './com/atproto/label/queryLabels'
 import getRecord from './com/atproto/repo/getRecord'
 import fetchLabels from './com/atproto/temp/fetchLabels'
 import getParaProfileStats from './com/para/actor/getProfileStats'
+import getParaCabildeo from './com/para/civic/getCabildeo'
+import listParaCabildeoPositions from './com/para/civic/listCabildeoPositions'
+import listParaCabildeos from './com/para/civic/listCabildeos'
 import getParaCommunityGovernance from './com/para/community/getGovernance'
 import getParaAuthorFeed from './com/para/feed/getAuthorFeed'
 import getParaPostThread from './com/para/feed/getPostThread'
 import getParaPosts from './com/para/feed/getPosts'
 import getParaTimeline from './com/para/feed/getTimeline'
+import getParaHighlight from './com/para/highlight/getHighlight'
+import listParaHighlights from './com/para/highlight/listHighlights'
 import getParaPostMeta from './com/para/social/getPostMeta'
 
 export * as health from './health'
@@ -209,7 +214,12 @@ export default function (server: Server, ctx: AppContext) {
   queryLabels(server, ctx)
   // com.para
   getParaProfileStats(server, ctx)
+  listParaCabildeos(server, ctx)
+  getParaCabildeo(server, ctx)
+  listParaCabildeoPositions(server, ctx)
   getParaCommunityGovernance(server, ctx)
+  listParaHighlights(server, ctx)
+  getParaHighlight(server, ctx)
   getParaAuthorFeed(server, ctx)
   getParaPostThread(server, ctx)
   getParaPosts(server, ctx)

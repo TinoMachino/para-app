@@ -1,8 +1,8 @@
-import React from 'react'
+import {useCallback, useState} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {interests, useInterestsDisplayNames} from '#/lib/interests'
 import {logEvent} from '#/lib/statsig/statsig'
@@ -26,12 +26,12 @@ export function StepInterests() {
   const interestsDisplayNames = useInterestsDisplayNames()
 
   const {state, dispatch} = useOnboardingInternalState()
-  const [saving, setSaving] = React.useState(false)
-  const [selectedInterests, setSelectedInterests] = React.useState<string[]>(
+  const [saving, setSaving] = useState(false)
+  const [selectedInterests, setSelectedInterests] = useState<string[]>(
     state.interestsStepResults.selectedInterests.map(i => i),
   )
 
-  const saveInterests = React.useCallback(async () => {
+  const saveInterests = useCallback(async () => {
     setSaving(true)
 
     try {

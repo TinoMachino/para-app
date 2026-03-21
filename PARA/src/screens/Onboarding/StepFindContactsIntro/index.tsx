@@ -1,8 +1,8 @@
 import {View} from 'react-native'
 import * as Contacts from 'expo-contacts'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useQuery} from '@tanstack/react-query'
 
 import {urls} from '#/lib/constants'
@@ -44,9 +44,9 @@ export function StepFindContactsIntro() {
       </OnboardingTitleText>
       <OnboardingDescriptionText>
         <Trans>
-          Find your friends on PARA by verifying your phone number and
-          matching with your contacts. We protect your information and you
-          control what happens next.{' '}
+          Find your friends on PARA by verifying your phone number and matching
+          with your contacts. We protect your information and you control what
+          happens next.{' '}
           <InlineLinkText
             to={urls.website.blog.findFriendsAnnouncement}
             label={_(

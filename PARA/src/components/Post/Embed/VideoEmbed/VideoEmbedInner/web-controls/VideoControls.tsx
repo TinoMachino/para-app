@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {Pressable, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import type Hls from 'hls.js'
 
 import {clamp} from '#/lib/numbers'
@@ -45,9 +45,10 @@ export function Controls({
   onScreen,
   fullscreenRef,
   hlsLoading,
-
   hasSubtitleTrack,
   isGif,
+  altText,
+  updateCuePositions,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>
   hlsRef: React.RefObject<Hls | undefined | null>
@@ -59,7 +60,9 @@ export function Controls({
   fullscreenRef: React.RefObject<HTMLDivElement | null>
   hlsLoading: boolean
   hasSubtitleTrack: boolean
-  isGif?: boolean
+  isGif: boolean
+  altText?: string
+  updateCuePositions: (controlsVisible?: boolean) => void
 }) {
   const {
     play,
@@ -130,13 +133,14 @@ export function Controls({
   const autoplayDisabled = useAutoplayDisabled() || isWithinMessage
   useEffect(() => {
     if (active) {
-      if (onScreen) {
+      // GIFs play immediately, videos wait until onScreen
+      if (onScreen || isGif) {
         if (!autoplayDisabled) play()
       } else {
         pause()
       }
     }
-  }, [onScreen, pause, active, play, autoplayDisabled])
+  }, [onScreen, pause, active, play, autoplayDisabled, isGif])
 
   // use minimal quality when not focused
   useEffect(() => {
@@ -219,7 +223,6 @@ export function Controls({
 
   const seekLeft = useCallback(() => {
     if (!videoRef.current) return
-    // if (isGif) return // Optional: disable seeking for gifs if desired, but not strictly requested
 
     const currentTime = videoRef.current.currentTime
 
@@ -229,7 +232,6 @@ export function Controls({
 
   const seekRight = useCallback(() => {
     if (!videoRef.current) return
-    // if (isGif) return
 
     const currentTime = videoRef.current.currentTime
 
@@ -294,25 +296,21 @@ export function Controls({
     ((focused || autoplayDisabled) && !playing) ||
     (interactingViaKeypress ? hasFocus : hovered)
 
+  // adjust subtitle cue positioning to avoid occlusion by controls
+  // uses percentage-based positioning (snapToLines=false) so wrapped
+  // multi-line cues grow upward instead of extending offscreen
+  useEffect(() => {
+    updateCuePositions(showControls)
+  }, [showControls, updateCuePositions])
+
   if (isGif) {
     return (
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          cursor: 'pointer',
-        }}
-        onClick={evt => {
-          evt.stopPropagation()
-          onPressEmptySpace()
-        }}>
-        <GifPresentationControls
-          isPlaying={playing}
-          togglePlayPause={onPressEmptySpace}
-        />
-      </div>
+      <GifPresentationControls
+        isPlaying={playing}
+        isLoading={showSpinner}
+        onPress={onPressPlayPause}
+        altText={altText}
+      />
     )
   }
 

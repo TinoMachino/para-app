@@ -2,8 +2,8 @@ import {memo, useCallback, useMemo, useState} from 'react'
 import {ActivityIndicator, View} from 'react-native'
 import {type AppBskyFeedDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {urls} from '#/lib/constants'
 import {usePostViewTracking} from '#/lib/hooks/usePostViewTracking'
@@ -46,7 +46,6 @@ let SearchResults = ({
   headerHeight: number
   initialPage?: number
 }): React.ReactNode => {
-  const ax = useAnalytics()
   const {_} = useLingui()
 
   const sections = useMemo(() => {
@@ -91,6 +90,9 @@ let SearchResults = ({
     }[]
   }, [_, query, queryWithParams, activeTab])
 
+  // There may be fewer tabs after changing the search options.
+  const selectedPage = initialPage > sections.length - 1 ? 0 : initialPage
+
   return (
     <Pager
       onPageSelected={onPageSelected}
@@ -99,7 +101,7 @@ let SearchResults = ({
           <TabBar items={sections.map(section => section.title)} {...props} />
         </Layout.Center>
       )}
-      initialPage={initialPage}>
+      initialPage={selectedPage}>
       {sections.map((section, i) => (
         <View key={i}>{section.component}</View>
       ))}

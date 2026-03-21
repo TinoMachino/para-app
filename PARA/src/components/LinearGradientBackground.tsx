@@ -1,6 +1,6 @@
+import {type ReactNode} from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {LinearGradient} from 'expo-linear-gradient'
-import type React from 'react'
 
 import {gradients} from '#/alf/tokens'
 
@@ -13,7 +13,7 @@ export function LinearGradientBackground({
 }: {
   style?: StyleProp<ViewStyle>
   gradient?: keyof typeof gradients
-  children?: React.ReactNode
+  children?: ReactNode
   start?: [number, number]
   end?: [number, number]
 }) {

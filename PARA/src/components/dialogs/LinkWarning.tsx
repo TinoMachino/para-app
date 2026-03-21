@@ -1,8 +1,8 @@
 import {useCallback, useMemo} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {useOpenLink} from '#/lib/hooks/useOpenLink'
 import {shareUrl} from '#/lib/sharing'

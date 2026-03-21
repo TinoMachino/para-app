@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import {useState} from 'react'
 import {
   Modal,
   ScrollView,
@@ -59,7 +59,10 @@ const STACK_MORE_WIDTH = 20
 
 function getFilterColor(name: string, index: number) {
   if (MEXICAN_STATES.includes(name)) return '#007AFF'
-  return filterColorByName.get(name) || fallbackFilterColors[index % fallbackFilterColors.length]
+  return (
+    filterColorByName.get(name) ||
+    fallbackFilterColors[index % fallbackFilterColors.length]
+  )
 }
 
 export function ActiveFiltersStackButton() {
@@ -69,15 +72,16 @@ export function ActiveFiltersStackButton() {
   const {activeFilters, removeActiveFilter} = useBaseFilter()
   const [showFilters, setShowFilters] = useState(false)
   const visibleFilters = activeFilters.slice(0, FILTER_STACK_MAX)
-  const remainingFilters = Math.max(activeFilters.length - visibleFilters.length, 0)
+  const remainingFilters = Math.max(
+    activeFilters.length - visibleFilters.length,
+    0,
+  )
 
   return (
     <>
       <TouchableOpacity
         accessibilityRole="button"
-        accessibilityLabel={_(
-          msg`Open active filters`,
-        )}
+        accessibilityLabel={_(msg`Open active filters`)}
         accessibilityHint={_(
           msg`Shows active filters and lets you remove them`,
         )}
@@ -126,7 +130,9 @@ export function ActiveFiltersStackButton() {
                     backgroundColor: t.palette.contrast_200,
                   },
                 ]}>
-                <Text style={styles.filterStackMoreText}>+{remainingFilters}</Text>
+                <Text style={styles.filterStackMoreText}>
+                  +{remainingFilters}
+                </Text>
               </View>
             )}
           </View>
@@ -144,13 +150,23 @@ export function ActiveFiltersStackButton() {
             <Text style={[styles.modalTitle, t.atoms.text]}>
               <Trans>Active filters</Trans>
             </Text>
-            <Text style={[styles.activeFiltersSubtitle, t.atoms.text_contrast_medium]}>
-              <Trans>Remove filters here. To add or change filters, go back to Base.</Trans>
+            <Text
+              style={[
+                styles.activeFiltersSubtitle,
+                t.atoms.text_contrast_medium,
+              ]}>
+              <Trans>
+                Remove filters here. To add or change filters, go back to Base.
+              </Trans>
             </Text>
 
             <View style={styles.activeFiltersList}>
               {activeFilters.length === 0 ? (
-                <Text style={[styles.activeFiltersEmpty, t.atoms.text_contrast_medium]}>
+                <Text
+                  style={[
+                    styles.activeFiltersEmpty,
+                    t.atoms.text_contrast_medium,
+                  ]}>
                   <Trans>No active filters</Trans>
                 </Text>
               ) : (
@@ -174,15 +190,17 @@ export function ActiveFiltersStackButton() {
                     </View>
                     <TouchableOpacity
                       accessibilityRole="button"
-                      accessibilityLabel={_(
-                        msg`Remove filter`,
-                      )}
+                      accessibilityLabel={_(msg`Remove filter`)}
                       accessibilityHint={_(
                         msg`Removes this filter from active filters`,
                       )}
                       onPress={() => removeActiveFilter(filter)}
                       style={styles.removeFilterButton}>
-                      <Text style={[styles.removeFilterText, t.atoms.text_contrast_medium]}>
+                      <Text
+                        style={[
+                          styles.removeFilterText,
+                          t.atoms.text_contrast_medium,
+                        ]}>
                         ×
                       </Text>
                     </TouchableOpacity>
@@ -459,7 +477,12 @@ export function CommunityFilterList({
   const mexicanStates = MEXICAN_STATES
 
   return (
-    <View style={[styles.communitySection, !hideBorder && t.atoms.border_contrast_low, style]}>
+    <View
+      style={[
+        styles.communitySection,
+        !hideBorder && t.atoms.border_contrast_low,
+        style,
+      ]}>
       <View style={{position: 'relative'}}>
         {/* Apply Button - Web: Top Right over Chevrons */}
         {IS_WEB && hasPendingChanges && applyFilters && (

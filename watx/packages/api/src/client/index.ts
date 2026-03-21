@@ -272,7 +272,11 @@ import * as ComGermnetworkDeclaration from './types/com/germnetwork/declaration.
 import * as ComParaActorDefs from './types/com/para/actor/defs.js'
 import * as ComParaActorGetProfileStats from './types/com/para/actor/getProfileStats.js'
 import * as ComParaCivicCabildeo from './types/com/para/civic/cabildeo.js'
+import * as ComParaCivicDefs from './types/com/para/civic/defs.js'
 import * as ComParaCivicDelegation from './types/com/para/civic/delegation.js'
+import * as ComParaCivicGetCabildeo from './types/com/para/civic/getCabildeo.js'
+import * as ComParaCivicListCabildeoPositions from './types/com/para/civic/listCabildeoPositions.js'
+import * as ComParaCivicListCabildeos from './types/com/para/civic/listCabildeos.js'
 import * as ComParaCivicPosition from './types/com/para/civic/position.js'
 import * as ComParaCivicVote from './types/com/para/civic/vote.js'
 import * as ComParaCommunityDefs from './types/com/para/community/defs.js'
@@ -281,6 +285,10 @@ import * as ComParaFeedGetAuthorFeed from './types/com/para/feed/getAuthorFeed.j
 import * as ComParaFeedGetPostThread from './types/com/para/feed/getPostThread.js'
 import * as ComParaFeedGetPosts from './types/com/para/feed/getPosts.js'
 import * as ComParaFeedGetTimeline from './types/com/para/feed/getTimeline.js'
+import * as ComParaHighlightAnnotation from './types/com/para/highlight/annotation.js'
+import * as ComParaHighlightDefs from './types/com/para/highlight/defs.js'
+import * as ComParaHighlightGetHighlight from './types/com/para/highlight/getHighlight.js'
+import * as ComParaHighlightListHighlights from './types/com/para/highlight/listHighlights.js'
 import * as ComParaPost from './types/com/para/post.js'
 import * as ComParaSocialGetPostMeta from './types/com/para/social/getPostMeta.js'
 import * as ComParaSocialPostMeta from './types/com/para/social/postMeta.js'
@@ -603,7 +611,11 @@ export * as ComGermnetworkDeclaration from './types/com/germnetwork/declaration.
 export * as ComParaActorDefs from './types/com/para/actor/defs.js'
 export * as ComParaActorGetProfileStats from './types/com/para/actor/getProfileStats.js'
 export * as ComParaCivicCabildeo from './types/com/para/civic/cabildeo.js'
+export * as ComParaCivicDefs from './types/com/para/civic/defs.js'
 export * as ComParaCivicDelegation from './types/com/para/civic/delegation.js'
+export * as ComParaCivicGetCabildeo from './types/com/para/civic/getCabildeo.js'
+export * as ComParaCivicListCabildeoPositions from './types/com/para/civic/listCabildeoPositions.js'
+export * as ComParaCivicListCabildeos from './types/com/para/civic/listCabildeos.js'
 export * as ComParaCivicPosition from './types/com/para/civic/position.js'
 export * as ComParaCivicVote from './types/com/para/civic/vote.js'
 export * as ComParaCommunityDefs from './types/com/para/community/defs.js'
@@ -612,6 +624,10 @@ export * as ComParaFeedGetAuthorFeed from './types/com/para/feed/getAuthorFeed.j
 export * as ComParaFeedGetPostThread from './types/com/para/feed/getPostThread.js'
 export * as ComParaFeedGetPosts from './types/com/para/feed/getPosts.js'
 export * as ComParaFeedGetTimeline from './types/com/para/feed/getTimeline.js'
+export * as ComParaHighlightAnnotation from './types/com/para/highlight/annotation.js'
+export * as ComParaHighlightDefs from './types/com/para/highlight/defs.js'
+export * as ComParaHighlightGetHighlight from './types/com/para/highlight/getHighlight.js'
+export * as ComParaHighlightListHighlights from './types/com/para/highlight/listHighlights.js'
 export * as ComParaPost from './types/com/para/post.js'
 export * as ComParaSocialGetPostMeta from './types/com/para/social/getPostMeta.js'
 export * as ComParaSocialPostMeta from './types/com/para/social/postMeta.js'
@@ -5195,6 +5211,7 @@ export class ComParaNS {
   civic: ComParaCivicNS
   community: ComParaCommunityNS
   feed: ComParaFeedNS
+  highlight: ComParaHighlightNS
   social: ComParaSocialNS
 
   constructor(client: XrpcClient) {
@@ -5203,6 +5220,7 @@ export class ComParaNS {
     this.civic = new ComParaCivicNS(client)
     this.community = new ComParaCommunityNS(client)
     this.feed = new ComParaFeedNS(client)
+    this.highlight = new ComParaHighlightNS(client)
     this.social = new ComParaSocialNS(client)
     this.post = new ComParaPostRecord(client)
     this.status = new ComParaStatusRecord(client)
@@ -5241,6 +5259,42 @@ export class ComParaCivicNS {
     this.delegation = new ComParaCivicDelegationRecord(client)
     this.position = new ComParaCivicPositionRecord(client)
     this.vote = new ComParaCivicVoteRecord(client)
+  }
+
+  getCabildeo(
+    params?: ComParaCivicGetCabildeo.QueryParams,
+    opts?: ComParaCivicGetCabildeo.CallOptions,
+  ): Promise<ComParaCivicGetCabildeo.Response> {
+    return this._client.call(
+      'com.para.civic.getCabildeo',
+      params,
+      undefined,
+      opts,
+    )
+  }
+
+  listCabildeoPositions(
+    params?: ComParaCivicListCabildeoPositions.QueryParams,
+    opts?: ComParaCivicListCabildeoPositions.CallOptions,
+  ): Promise<ComParaCivicListCabildeoPositions.Response> {
+    return this._client.call(
+      'com.para.civic.listCabildeoPositions',
+      params,
+      undefined,
+      opts,
+    )
+  }
+
+  listCabildeos(
+    params?: ComParaCivicListCabildeos.QueryParams,
+    opts?: ComParaCivicListCabildeos.CallOptions,
+  ): Promise<ComParaCivicListCabildeos.Response> {
+    return this._client.call(
+      'com.para.civic.listCabildeos',
+      params,
+      undefined,
+      opts,
+    )
   }
 }
 
@@ -5629,6 +5683,123 @@ export class ComParaFeedNS {
       params,
       undefined,
       opts,
+    )
+  }
+}
+
+export class ComParaHighlightNS {
+  _client: XrpcClient
+  annotation: ComParaHighlightAnnotationRecord
+
+  constructor(client: XrpcClient) {
+    this._client = client
+    this.annotation = new ComParaHighlightAnnotationRecord(client)
+  }
+
+  getHighlight(
+    params?: ComParaHighlightGetHighlight.QueryParams,
+    opts?: ComParaHighlightGetHighlight.CallOptions,
+  ): Promise<ComParaHighlightGetHighlight.Response> {
+    return this._client.call(
+      'com.para.highlight.getHighlight',
+      params,
+      undefined,
+      opts,
+    )
+  }
+
+  listHighlights(
+    params?: ComParaHighlightListHighlights.QueryParams,
+    opts?: ComParaHighlightListHighlights.CallOptions,
+  ): Promise<ComParaHighlightListHighlights.Response> {
+    return this._client.call(
+      'com.para.highlight.listHighlights',
+      params,
+      undefined,
+      opts,
+    )
+  }
+}
+
+export class ComParaHighlightAnnotationRecord {
+  _client: XrpcClient
+
+  constructor(client: XrpcClient) {
+    this._client = client
+  }
+
+  async list(
+    params: OmitKey<ComAtprotoRepoListRecords.QueryParams, 'collection'>,
+  ): Promise<{
+    cursor?: string
+    records: { uri: string; value: ComParaHighlightAnnotation.Record }[]
+  }> {
+    const res = await this._client.call('com.atproto.repo.listRecords', {
+      collection: 'com.para.highlight.annotation',
+      ...params,
+    })
+    return res.data
+  }
+
+  async get(
+    params: OmitKey<ComAtprotoRepoGetRecord.QueryParams, 'collection'>,
+  ): Promise<{
+    uri: string
+    cid: string
+    value: ComParaHighlightAnnotation.Record
+  }> {
+    const res = await this._client.call('com.atproto.repo.getRecord', {
+      collection: 'com.para.highlight.annotation',
+      ...params,
+    })
+    return res.data
+  }
+
+  async create(
+    params: OmitKey<
+      ComAtprotoRepoCreateRecord.InputSchema,
+      'collection' | 'record'
+    >,
+    record: Un$Typed<ComParaHighlightAnnotation.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = 'com.para.highlight.annotation'
+    const res = await this._client.call(
+      'com.atproto.repo.createRecord',
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: 'application/json', headers },
+    )
+    return res.data
+  }
+
+  async put(
+    params: OmitKey<
+      ComAtprotoRepoPutRecord.InputSchema,
+      'collection' | 'record'
+    >,
+    record: Un$Typed<ComParaHighlightAnnotation.Record>,
+    headers?: Record<string, string>,
+  ): Promise<{ uri: string; cid: string }> {
+    const collection = 'com.para.highlight.annotation'
+    const res = await this._client.call(
+      'com.atproto.repo.putRecord',
+      undefined,
+      { collection, ...params, record: { ...record, $type: collection } },
+      { encoding: 'application/json', headers },
+    )
+    return res.data
+  }
+
+  async delete(
+    params: OmitKey<ComAtprotoRepoDeleteRecord.InputSchema, 'collection'>,
+    headers?: Record<string, string>,
+  ): Promise<void> {
+    await this._client.call(
+      'com.atproto.repo.deleteRecord',
+      undefined,
+      { collection: 'com.para.highlight.annotation', ...params },
+      { headers },
     )
   }
 }

@@ -19,12 +19,11 @@ import {getModerationCauseKey} from '#/lib/moderation'
 import {makeProfileLink} from '#/lib/routes/links'
 import {forceLTR} from '#/lib/strings/bidi'
 import {NON_BREAKING_SPACE} from '#/lib/strings/constants'
-import {sanitizeDisplayName} from '#/lib/strings/display-names'
 import {sanitizeHandle} from '#/lib/strings/handles'
+import {formatUserDisplayName} from '#/lib/strings/profile-names'
 import {useProfileShadow} from '#/state/cache/profile-shadow'
 import {useProfileFollowMutationQueue} from '#/state/queries/profile'
 import {useSession} from '#/state/session'
-import * as Toast from '#/view/com/util/Toast'
 import {PreviewableUserAvatar, UserAvatar} from '#/view/com/util/UserAvatar'
 import {
   atoms as a,
@@ -44,6 +43,7 @@ import {PlusLarge_Stroke2_Corner0_Rounded as Plus} from '#/components/icons/Plus
 import {Link as InternalLink, type LinkProps} from '#/components/Link'
 import * as Pills from '#/components/Pills'
 import {RichText} from '#/components/RichText'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {useSimpleVerificationState} from '#/components/verification'
 import {VerificationCheck} from '#/components/verification/VerificationCheck'
@@ -146,6 +146,7 @@ export function Link({
 
   return (
     <InternalLink
+      testID={`profileCard-${profile.handle}-link`}
       label={_(
         msg`View ${
           profile.displayName || sanitizeHandle(profile.handle)
@@ -246,10 +247,12 @@ function InlineNameAndHandle({
   const t = useTheme()
   const verification = useSimpleVerificationState({profile})
   const moderation = moderateProfile(profile, moderationOpts)
-  const name = sanitizeDisplayName(
-    profile.displayName || sanitizeHandle(profile.handle),
-    moderation.ui('displayName'),
-  )
+  const name = formatUserDisplayName({
+    displayName: profile.displayName,
+    handle: profile.handle,
+    isFigure: verification.isVerified,
+    moderation: moderation.ui('displayName'),
+  })
   const handle = sanitizeHandle(profile.handle, '@')
   return (
     <View style={[a.flex_row, a.align_end, a.flex_shrink]}>
@@ -303,11 +306,13 @@ export function Name({
   textStyle?: StyleProp<TextStyle>
 }) {
   const moderation = moderateProfile(profile, moderationOpts)
-  const name = sanitizeDisplayName(
-    profile.displayName || sanitizeHandle(profile.handle),
-    moderation.ui('displayName'),
-  )
   const verification = useSimpleVerificationState({profile})
+  const name = formatUserDisplayName({
+    displayName: profile.displayName,
+    handle: profile.handle,
+    isFigure: verification.isVerified,
+    moderation: moderation.ui('displayName'),
+  })
   return (
     <View style={[a.flex_row, a.align_center, a.max_w_full, style]}>
       <Text
@@ -521,7 +526,9 @@ export function FollowButtonInner({
       onFollow?.()
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        Toast.show(_(msg`An issue occurred, please try again.`), 'xmark')
+        Toast.show(_(msg`An issue occurred, please try again.`), {
+          type: 'error',
+        })
       }
     }
   }
@@ -542,7 +549,9 @@ export function FollowButtonInner({
       onPressProp?.(e)
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
-        Toast.show(_(msg`An issue occurred, please try again.`), 'xmark')
+        Toast.show(_(msg`An issue occurred, please try again.`), {
+          type: 'error',
+        })
       }
     }
   }

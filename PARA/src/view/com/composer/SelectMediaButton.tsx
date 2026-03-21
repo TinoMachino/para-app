@@ -1,25 +1,25 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { Keyboard } from 'react-native'
-import { File } from 'expo-file-system'
-import { type ImagePickerAsset } from 'expo-image-picker'
+import {useCallback, useEffect, useRef} from 'react'
+import {Keyboard} from 'react-native'
+import {File} from 'expo-file-system'
+import {type ImagePickerAsset} from 'expo-image-picker'
 import {msg, plural} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
+import {useLingui} from '@lingui/react'
 
-import { VIDEO_MAX_DURATION_MS, VIDEO_MAX_SIZE } from '#/lib/constants'
+import {VIDEO_MAX_DURATION_MS, VIDEO_MAX_SIZE} from '#/lib/constants'
 import {
   usePhotoLibraryPermission,
   useVideoLibraryPermission,
 } from '#/lib/hooks/usePermissions'
-import { openUnifiedPicker } from '#/lib/media/picker'
-import { extractDataUriMime } from '#/lib/media/util'
-import { MAX_IMAGES } from '#/view/com/composer/state/composer'
-import { atoms as a, useTheme } from '#/alf'
-import { Button } from '#/components/Button'
-import { useSheetWrapper } from '#/components/Dialog/sheet-wrapper'
-import { Image_Stroke2_Corner0_Rounded as ImageIcon } from '#/components/icons/Image'
+import {openUnifiedPicker} from '#/lib/media/picker'
+import {extractDataUriMime} from '#/lib/media/util'
+import {MAX_IMAGES} from '#/view/com/composer/state/composer'
+import {atoms as a, useTheme} from '#/alf'
+import {Button} from '#/components/Button'
+import {useSheetWrapper} from '#/components/Dialog/sheet-wrapper'
+import {Image_Stroke2_Corner0_Rounded as ImageIcon} from '#/components/icons/Image'
 import * as toast from '#/components/Toast'
-import { IS_NATIVE, IS_WEB } from '#/env'
-import { isAnimatedGif } from './videos/isAnimatedGif'
+import {IS_NATIVE, IS_WEB} from '#/env'
+import {isAnimatedGif} from './videos/isAnimatedGif'
 
 export type SelectMediaButtonProps = {
   disabled?: boolean
@@ -133,19 +133,19 @@ const extensionToMimeType: Record<
  */
 async function classifyImagePickerAsset(asset: ImagePickerAsset): Promise<
   | {
-    success: true
-    type: AssetType
-    mimeType: string
-  }
+      success: true
+      type: AssetType
+      mimeType: string
+    }
   | {
-    success: false
-    type: undefined
-    mimeType: undefined
-  }
+      success: false
+      type: undefined
+      mimeType: undefined
+    }
 > {
   /*
-* Try to use the `mimeType` reported by `expo-image-picker` first.
-*/
+   * Try to use the `mimeType` reported by `expo-image-picker` first.
+   */
   let mimeType = asset.mimeType
 
   if (!mimeType) {
@@ -192,7 +192,7 @@ async function classifyImagePickerAsset(asset: ImagePickerAsset): Promise<
       }
     }
     if (bytes) {
-      const { isAnimated } = isAnimatedGif(bytes)
+      const {isAnimated} = isAnimatedGif(bytes)
       type = isAnimated ? 'gif' : 'image'
     } else {
       // If we can't read the file, assume it's animated
@@ -255,7 +255,7 @@ async function processImagePickerAssets(
   let supportedAssets: ValidatedImagePickerAsset[] = []
 
   for (const asset of assets) {
-    const { success, type, mimeType } = await classifyImagePickerAsset(asset)
+    const {success, type, mimeType} = await classifyImagePickerAsset(asset)
 
     if (!success) {
       errors.add(SelectedAssetError.Unsupported)
@@ -383,9 +383,9 @@ export function SelectMediaButton({
   onSelectAssets,
   autoOpen,
 }: SelectMediaButtonProps) {
-  const { _ } = useLingui()
-  const { requestPhotoAccessIfNeeded } = usePhotoLibraryPermission()
-  const { requestVideoAccessIfNeeded } = useVideoLibraryPermission()
+  const {_} = useLingui()
+  const {requestPhotoAccessIfNeeded} = usePhotoLibraryPermission()
+  const {requestVideoAccessIfNeeded} = useVideoLibraryPermission()
   const sheetWrapper = useSheetWrapper()
   const t = useTheme()
   const hasAutoOpened = useRef(false)
@@ -469,8 +469,8 @@ export function SelectMediaButton({
       Keyboard.dismiss()
     }
 
-    const { assets, canceled } = await sheetWrapper(
-      openUnifiedPicker({ selectionCountRemaining }),
+    const {assets, canceled} = await sheetWrapper(
+      openUnifiedPicker({selectionCountRemaining}),
     )
 
     if (canceled) return

@@ -5,6 +5,7 @@ import { BackgroundQueue } from '../../background'
 import { Database } from '../../db'
 import { DatabaseSchema, DatabaseSchemaType } from '../../db/database-schema'
 import { RecordProcessor } from '../processor'
+import { recomputeCabildeoAggregates } from './recompute-cabildeo-aggregates'
 
 interface DelegationRecord {
   cabildeo?: string
@@ -84,7 +85,14 @@ const notifsForDelete = (
   return { notifs: [], toDelete: [deleted.record.uri] }
 }
 
-const updateAggregates = async () => {}
+const updateAggregates = async (
+  db: DatabaseSchema,
+  indexed: IndexedDelegation,
+) => {
+  const cabildeoUri = indexed.record.cabildeo
+  if (!cabildeoUri) return
+  await recomputeCabildeoAggregates(db, cabildeoUri)
+}
 
 export type PluginType = RecordProcessor<DelegationRecord, IndexedDelegation>
 

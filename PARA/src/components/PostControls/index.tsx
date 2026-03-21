@@ -1,5 +1,5 @@
-import { memo, useMemo, useState } from 'react'
-import { Platform, type StyleProp, View, type ViewStyle } from 'react-native'
+import {memo, useMemo, useState} from 'react'
+import {Platform, type StyleProp, View, type ViewStyle} from 'react-native'
 import {
   type AppBskyFeedDefs,
   type AppBskyFeedPost,
@@ -8,41 +8,41 @@ import {
   type RichText as RichTextAPI,
 } from '@atproto/api'
 import {msg, plural} from '@lingui/core/macro'
-import { useLingui } from '@lingui/react'
-import { useNavigation } from '@react-navigation/native'
+import {useLingui} from '@lingui/react'
+import {useNavigation} from '@react-navigation/native'
 
-import { useHaptics } from '#/lib/haptics'
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { makeProfileLink as _makeProfileLink } from '#/lib/routes/links'
-import { type NavigationProp } from '#/lib/routes/types'
-import { logger } from '#/logger'
-import { type Shadow } from '#/state/cache/types'
-import { useFeedFeedbackContext } from '#/state/feed-feedback'
-import { useHighlightMode, useHighlights } from '#/state/highlights'
+import {useHaptics} from '#/lib/haptics'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {makeProfileLink as _makeProfileLink} from '#/lib/routes/links'
+import {type NavigationProp} from '#/lib/routes/types'
+import {logger} from '#/logger'
+import {type Shadow} from '#/state/cache/types'
+import {useFeedFeedbackContext} from '#/state/feed-feedback'
+import {useHighlightMode, useHighlights} from '#/state/highlights'
 import {
   usePostLikeMutationQueue,
   usePostQuoteMutationQueue,
 } from '#/state/queries/post'
-import { useRequireAuth } from '#/state/session'
+import {useRequireAuth} from '#/state/session'
 import {
   ProgressGuideAction,
   useProgressGuideControls,
 } from '#/state/shell/progress-guide'
-import * as Toast from '#/view/com/util/Toast'
-import { atoms as a, useBreakpoints } from '#/alf'
-import { Reply as Bubble } from '#/components/icons/Reply'
-import { useFormatPostStatCount } from '#/components/PostControls/util'
+import {atoms as a, useBreakpoints} from '#/alf'
+import {Reply as Bubble} from '#/components/icons/Reply'
+import {useFormatPostStatCount} from '#/components/PostControls/util'
 import * as Skele from '#/components/Skeleton'
-import { BookmarkButton } from './BookmarkButton'
+import * as Toast from '#/components/Toast'
+import {BookmarkButton} from './BookmarkButton'
 import {
   PostControlButton,
   PostControlButtonIcon,
   PostControlButtonText,
 } from './PostControlButton'
-import { PostMenuButton } from './PostMenu'
-import { QuoteButton } from './QuoteButton'
-import { ShareMenuButton } from './ShareMenu'
-import { RedditVoteButton } from './VoteButton'
+import {PostMenuButton} from './PostMenu'
+import {QuoteButton} from './QuoteButton'
+import {ShareMenuButton} from './ShareMenu'
+import {RedditVoteButton} from './VoteButton'
 
 let PostControls = ({
   big,
@@ -73,13 +73,13 @@ let PostControls = ({
   logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
   threadgateRecord?: AppBskyFeedThreadgate.Record
   onShowLess?: (interaction: AppBskyFeedDefs.Interaction) => void
-  viaQuote?: { uri: string; cid: string }
+  viaQuote?: {uri: string; cid: string}
   variant?: 'compact' | 'normal' | 'large'
   forceGoogleTranslate?: boolean
 }): React.ReactNode => {
-  const { _ } = useLingui()
-  const { openComposer } = useOpenComposer()
-  const { feedDescriptor } = useFeedFeedbackContext()
+  const {_} = useLingui()
+  const {openComposer} = useOpenComposer()
+  const {feedDescriptor} = useFeedFeedbackContext()
   const [queueLike, queueUnlike] = usePostLikeMutationQueue(
     post,
     viaQuote,
@@ -93,16 +93,16 @@ let PostControls = ({
     logContext,
   )
   const requireAuth = useRequireAuth()
-  const { sendInteraction } = useFeedFeedbackContext()
-  const { captureAction } = useProgressGuideControls()
+  const {sendInteraction} = useFeedFeedbackContext()
+  const {captureAction} = useProgressGuideControls()
   const playHaptic = useHaptics()
   const isBlocked = Boolean(
     post.author.viewer?.blocking ||
-    post.author.viewer?.blockedBy ||
-    post.author.viewer?.blockingByList,
+      post.author.viewer?.blockedBy ||
+      post.author.viewer?.blockingByList,
   )
   const replyDisabled = post.viewer?.replyDisabled
-  const { gtPhone } = useBreakpoints()
+  const {gtPhone} = useBreakpoints()
   const formatPostStatCount = useFormatPostStatCount()
 
   const [hasVoteIconBeenToggled, setHasVoteIconBeenToggled] = useState(false)
@@ -126,10 +126,9 @@ let PostControls = ({
 
   const onPressUpvote = async () => {
     if (isBlocked) {
-      Toast.show(
-        _(msg`Cannot interact with a blocked user`),
-        'exclamation-circle',
-      )
+      Toast.show(_(msg`Cannot interact with a blocked user`), {
+        type: 'warning',
+      })
       return
     }
 
@@ -167,10 +166,9 @@ let PostControls = ({
 
   const onPressDownvote = async () => {
     if (isBlocked) {
-      Toast.show(
-        _(msg`Cannot interact with a blocked user`),
-        'exclamation-circle',
-      )
+      Toast.show(_(msg`Cannot interact with a blocked user`), {
+        type: 'warning',
+      })
       return
     }
 
@@ -200,10 +198,9 @@ let PostControls = ({
 
   const onRepost = async () => {
     if (isBlocked) {
-      Toast.show(
-        _(msg`Cannot interact with a blocked user`),
-        'exclamation-circle',
-      )
+      Toast.show(_(msg`Cannot interact with a blocked user`), {
+        type: 'warning',
+      })
       return
     }
 
@@ -228,10 +225,9 @@ let PostControls = ({
 
   const onQuote = () => {
     if (isBlocked) {
-      Toast.show(
-        _(msg`Cannot interact with a blocked user`),
-        'exclamation-circle',
-      )
+      Toast.show(_(msg`Cannot interact with a blocked user`), {
+        type: 'warning',
+      })
       return
     }
 
@@ -264,15 +260,14 @@ let PostControls = ({
   }
 
   const navigation = useNavigation<NavigationProp>()
-  const { enterHighlightMode } = useHighlightMode()
-  const { highlights, clearAll: clearAllHighlights } = useHighlights(post.uri)
+  const {enterHighlightMode} = useHighlightMode()
+  const {highlights, clearAll: clearAllHighlights} = useHighlights(post.uri)
 
   const onHighlight = () => {
     if (isBlocked) {
-      Toast.show(
-        _(msg`Cannot interact with a blocked user`),
-        'exclamation-circle',
-      )
+      Toast.show(_(msg`Cannot interact with a blocked user`), {
+        type: 'warning',
+      })
       return
     }
 
@@ -315,9 +310,9 @@ let PostControls = ({
         a.gap_md,
         style,
       ]}>
-      <View style={[a.flex_row, a.flex_1, { maxWidth: 320 }]}>
+      <View style={[a.flex_row, a.flex_1, {maxWidth: 320}]}>
         {/* Vote buttons with integrated CountWheel */}
-        <View style={[a.flex_1, a.align_start, { flex: 1 }]}>
+        <View style={[a.flex_1, a.align_start, {flex: 1}]}>
           <RedditVoteButton
             score={netScore}
             currentVote={currentVote}
@@ -333,22 +328,22 @@ let PostControls = ({
           style={[
             a.flex_1,
             a.align_start,
-            { marginLeft: Platform.OS === 'web' ? 36 : 40 },
+            {marginLeft: Platform.OS === 'web' ? 36 : 40},
           ]}>
           <PostControlButton
             testID="replyBtn"
             onPress={
               !replyDisabled
                 ? () =>
-                  requireAuth(() => {
-                    logger.metric('post:clickReply', {
-                      uri: post.uri,
-                      authorDid: post.author.did,
-                      logContext,
-                      feedDescriptor,
+                    requireAuth(() => {
+                      logger.metric('post:clickReply', {
+                        uri: post.uri,
+                        authorDid: post.author.did,
+                        logContext,
+                        feedDescriptor,
+                      })
+                      onPressReply()
                     })
-                    onPressReply()
-                  })
                 : undefined
             }
             label={_(
@@ -377,7 +372,7 @@ let PostControls = ({
         <View
           style={[
             a.align_start,
-            { marginRight: Platform.OS === 'web' ? 102 : 24 },
+            {marginRight: Platform.OS === 'web' ? 102 : 24},
           ]}>
           <QuoteButton
             isReposted={!!post.viewer?.repost}
@@ -436,7 +431,7 @@ let PostControls = ({
   )
 }
 PostControls = memo(PostControls)
-export { PostControls }
+export {PostControls}
 
 export function PostControlsSkeleton({
   big,
@@ -447,7 +442,7 @@ export function PostControlsSkeleton({
   style?: StyleProp<ViewStyle>
   variant?: 'compact' | 'normal' | 'large'
 }) {
-  const { gtPhone } = useBreakpoints()
+  const {gtPhone} = useBreakpoints()
 
   const rowHeight = big ? 32 : 28
   const padding = 4
@@ -466,7 +461,7 @@ export function PostControlsSkeleton({
   return (
     <Skele.Row
       style={[a.flex_row, a.justify_between, a.align_center, a.gap_md, style]}>
-      <View style={[a.flex_row, a.flex_1, { maxWidth: 320 }]}>
+      <View style={[a.flex_row, a.flex_1, {maxWidth: 320}]}>
         <View style={[itemStyles, a.flex_1, a.align_start]}>
           <Skele.Row>
             <Skele.Pill blend size={size} />
@@ -481,7 +476,7 @@ export function PostControlsSkeleton({
             itemStyles,
             a.flex_1,
             a.align_start,
-            { marginLeft: Platform.OS === 'web' ? 36 : 40 },
+            {marginLeft: Platform.OS === 'web' ? 36 : 40},
           ]}>
           <Skele.Pill blend size={size} />
         </View>
@@ -491,7 +486,7 @@ export function PostControlsSkeleton({
           style={[
             itemStyles,
             a.align_start,
-            { marginRight: Platform.OS === 'web' ? 102 : 24 },
+            {marginRight: Platform.OS === 'web' ? 102 : 24},
           ]}>
           <Skele.Pill blend size={size} />
         </View>
@@ -522,6 +517,6 @@ function useSecondaryControlSpacingStyles({
     let gap = 0 // default, we want `gap` to be defined on the resulting object
     if (variant !== 'compact') gap = a.gap_xs.gap
     if (big || gtPhone) gap = a.gap_sm.gap
-    return { gap }
+    return {gap}
   }, [variant, big, gtPhone])
 }

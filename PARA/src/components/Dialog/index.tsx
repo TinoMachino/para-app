@@ -19,9 +19,7 @@ import {
   View,
   type ViewStyle,
 } from 'react-native'
-import {
-  useReanimatedKeyboardAnimation,
-} from 'react-native-keyboard-controller'
+import {useReanimatedKeyboardAnimation} from 'react-native-keyboard-controller'
 import Animated, {
   runOnJS,
   type ScrollEvent,

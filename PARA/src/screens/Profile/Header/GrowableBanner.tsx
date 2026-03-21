@@ -13,7 +13,7 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {BlurView} from 'expo-blur'
 import {useIsFetching} from '@tanstack/react-query'
-import type React from 'react'
+import type {ReactNode} from 'react'
 
 import {RQKEY_ROOT as STARTERPACK_RQKEY_ROOT} from '#/state/queries/actor-starter-packs'
 import {RQKEY_ROOT as FEED_RQKEY_ROOT} from '#/state/queries/post-feed'
@@ -33,8 +33,8 @@ export function GrowableBanner({
   testID,
   label,
 }: {
-  backButton?: React.ReactNode
-  children: React.ReactNode
+  backButton?: ReactNode
+  children: ReactNode
   onPress?: () => void
   bannerRef?: AnimatedRef<Animated.View>
   testID?: string
@@ -85,8 +85,8 @@ function GrowableBannerInner({
   label,
 }: {
   scrollY: SharedValue<number>
-  backButton?: React.ReactNode
-  children: React.ReactNode
+  backButton?: ReactNode
+  children: ReactNode
   onPress?: () => void
   bannerRef?: AnimatedRef<Animated.View>
   testID?: string

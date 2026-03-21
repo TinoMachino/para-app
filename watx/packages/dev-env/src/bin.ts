@@ -1,4 +1,5 @@
 import './env'
+import path from 'node:path'
 import { generateMockSetup } from './mock'
 import { TestNetwork } from './network'
 import { mockMailer } from './util'
@@ -19,6 +20,17 @@ const envBool = (name: string, fallback: boolean): boolean => {
   const val = process.env[name]
   if (!val) return fallback
   return val === 'true'
+}
+
+const envMaybe = (name: string): string | undefined => {
+  const val = process.env[name]
+  return val && val.length > 0 ? val : undefined
+}
+
+const expandHome = (value: string): string => {
+  if (!value.startsWith('~/')) return value
+  const home = process.env.HOME
+  return home ? path.join(home, value.slice(2)) : value
 }
 
 const run = async () => {
@@ -42,6 +54,31 @@ const run = async () => {
     'DEV_ENV_ENABLE_DID_DOC_WITH_SESSION',
     true,
   )
+  const persistentMode = envBool('DEV_ENV_PERSISTENT', false)
+  const skipMockSetup = envBool('DEV_ENV_SKIP_MOCK_SETUP', persistentMode)
+  const storageRoot = expandHome(
+    envStr('DEV_ENV_STORAGE_ROOT', '~/.paramx-demo'),
+  )
+  const plcDbUrl =
+    envMaybe('DEV_ENV_PLC_DB_POSTGRES_URL') ||
+    (persistentMode ? process.env.DB_POSTGRES_URL : undefined)
+  const plcDbSchema =
+    envMaybe('DEV_ENV_PLC_DB_SCHEMA') ||
+    (persistentMode ? 'plc_demo' : undefined)
+  const pdsDataDirectory =
+    envMaybe('DEV_ENV_PDS_DATA_DIRECTORY') ||
+    (persistentMode ? path.join(storageRoot, 'pds') : undefined)
+  const pdsBlobstoreDirectory =
+    envMaybe('DEV_ENV_PDS_BLOBSTORE_DIRECTORY') ||
+    (persistentMode ? path.join(storageRoot, 'blobstore') : undefined)
+  const bskyDbSchema = envStr(
+    'DEV_ENV_BSKY_DB_SCHEMA',
+    persistentMode ? 'bsky_demo' : 'bsky',
+  )
+  const ozoneDbSchema = envStr(
+    'DEV_ENV_OZONE_DB_SCHEMA',
+    persistentMode ? 'ozone_demo' : 'ozone_db',
+  )
   const bskyDisplayUrl = bskyPublicUrl
   const chatUrl = envStr('DEV_ENV_OZONE_CHAT_URL', `http://localhost:${chatPort}`)
 
@@ -60,35 +97,54 @@ const run = async () => {
       port: pdsPort,
       hostname: pdsHostname,
       enableDidDocWithSession,
+      dataDirectory: pdsDataDirectory,
+      blobstoreDiskLocation: pdsBlobstoreDirectory,
+    },
+    plc: {
+      port: plcPort,
+      ...(plcDbUrl ? {dbUrl: plcDbUrl, dbSchema: plcDbSchema} : {}),
     },
     bsky: {
-      dbPostgresSchema: 'bsky',
+      dbPostgresSchema: bskyDbSchema,
       port: bskyPort,
       publicUrl: bskyPublicUrl,
     },
-    plc: { port: plcPort },
     ozone: {
       port: ozonePort,
       chatUrl, // must run separate chat service
       chatDid: 'did:example:chat',
       dbMaterializedViewRefreshIntervalMs: 30_000,
+      dbPostgresSchema: ozoneDbSchema,
     },
     introspect: { port: introspectPort },
   })
   mockMailer(network.pds)
-  await generateMockSetup(network)
+  if (!skipMockSetup) {
+    await generateMockSetup(network)
+  }
 
   if (network.introspect) {
     console.log(`🔍 Dev-env introspection server http://localhost:${introspectPort}`)
   }
   console.log(`👤 DID Placeholder server http://localhost:${plcPort}`)
+  if (plcDbUrl) {
+    console.log(`👤 PLC Postgres schema ${plcDbSchema}`)
+  }
   console.log(`🌞 Main PDS ${pdsDisplayUrl}`)
+  if (pdsDataDirectory) {
+    console.log(`🌞 PDS data ${pdsDataDirectory}`)
+  }
+  if (pdsBlobstoreDirectory) {
+    console.log(`🌞 PDS blobs ${pdsBlobstoreDirectory}`)
+  }
   console.log(
     `🔨 Lexicon authority DID ${network.pds.ctx.cfg.lexicon.didAuthority}`,
   )
   console.log(`🗼 Ozone server http://localhost:${ozonePort}`)
   console.log(`🗼 Ozone service DID ${network.ozone.ctx.cfg.service.did}`)
   console.log(`🌅 Bsky Appview ${bskyDisplayUrl}`)
+  console.log(`🌅 Bsky schema ${bskyDbSchema}`)
+  console.log(`🗼 Ozone schema ${ozoneDbSchema}`)
   console.log(`🌅 Bsky Appview DID ${network.bsky.serverDid}`)
   for (const fg of network.feedGens) {
     console.log(`🤖 Feed Generator (${fg.did}) http://localhost:${fg.port}`)

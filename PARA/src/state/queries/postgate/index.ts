@@ -1,4 +1,4 @@
-import React from 'react'
+import {useRef} from 'react'
 import {
   AppBskyEmbedRecord,
   AppBskyEmbedRecordWithMedia,
@@ -7,20 +7,20 @@ import {
   AtUri,
   type BskyAgent,
 } from '@atproto/api'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
-import { networkRetry, retry } from '#/lib/async/retry'
-import { logger } from '#/logger'
-import { updatePostShadow } from '#/state/cache/post-shadow'
-import { STALE } from '#/state/queries'
-import { useGetPosts } from '#/state/queries/post'
+import {networkRetry, retry} from '#/lib/async/retry'
+import {logger} from '#/logger'
+import {updatePostShadow} from '#/state/cache/post-shadow'
+import {STALE} from '#/state/queries'
+import {useGetPosts} from '#/state/queries/post'
 import {
   createMaybeDetachedQuoteEmbed,
   createPostgateRecord,
   mergePostgateRecords,
   POSTGATE_COLLECTION,
 } from '#/state/queries/postgate/util'
-import { useAgent } from '#/state/session'
+import {useAgent} from '#/state/session'
 import * as bsky from '#/types/bsky'
 
 export async function getPostgateRecord({
@@ -41,7 +41,7 @@ export async function getPostgateRecord({
   }
 
   try {
-    const { data } = await retry(
+    const {data} = await retry(
       2,
       e => {
         /*
@@ -134,13 +134,13 @@ export const createPostgateQueryKey = (postUri: string) => [
   'postgate-record',
   postUri,
 ]
-export function usePostgateQuery({ postUri }: { postUri: string }) {
+export function usePostgateQuery({postUri}: {postUri: string}) {
   const agent = useAgent()
   return useQuery({
     staleTime: STALE.SECONDS.THIRTY,
     queryKey: createPostgateQueryKey(postUri),
     async queryFn() {
-      return await getPostgateRecord({ agent, postUri }).then(res => res ?? null)
+      return await getPostgateRecord({agent, postUri}).then(res => res ?? null)
     },
   })
 }
@@ -162,7 +162,7 @@ export function useWritePostgateMutation() {
         postgate,
       })
     },
-    onSuccess(_, { postUri }) {
+    onSuccess(_, {postUri}) {
       queryClient.invalidateQueries({
         queryKey: createPostgateQueryKey(postUri),
       })
@@ -174,7 +174,7 @@ export function useToggleQuoteDetachmentMutation() {
   const agent = useAgent()
   const queryClient = useQueryClient()
   const getPosts = useGetPosts()
-  const prevEmbed = React.useRef<AppBskyFeedDefs.PostView['embed']>(undefined)
+  const prevEmbed = useRef<AppBskyFeedDefs.PostView['embed']>(undefined)
 
   return useMutation({
     mutationFn: async ({
@@ -200,7 +200,7 @@ export function useToggleQuoteDetachmentMutation() {
         })
       }
 
-      await upsertPostgate({ agent, postUri: quoteUri }, async prev => {
+      await upsertPostgate({agent, postUri: quoteUri}, async prev => {
         if (prev) {
           if (action === 'detach') {
             return mergePostgateRecords(prev, {
@@ -224,10 +224,10 @@ export function useToggleQuoteDetachmentMutation() {
         }
       })
     },
-    async onSuccess(_data, { post, quoteUri, action }) {
+    async onSuccess(_data, {post, quoteUri, action}) {
       if (action === 'reattach') {
         try {
-          const [quote] = await getPosts({ uris: [quoteUri] })
+          const [quote] = await getPosts({uris: [quoteUri]})
           updatePostShadow(queryClient, post.uri, {
             embed: createMaybeDetachedQuoteEmbed({
               post,
@@ -244,7 +244,7 @@ export function useToggleQuoteDetachmentMutation() {
         }
       }
     },
-    onError(_, { post, action }) {
+    onError(_, {post, action}) {
       if (action === 'detach' && prevEmbed.current) {
         // detach failed, add the embed back
         if (
@@ -274,11 +274,11 @@ export function useToggleQuotepostEnabledMutation() {
       postUri: string
       action: 'enable' | 'disable'
     }) => {
-      await upsertPostgate({ agent, postUri: postUri }, async prev => {
+      await upsertPostgate({agent, postUri: postUri}, async prev => {
         if (prev) {
           if (action === 'disable') {
             return mergePostgateRecords(prev, {
-              embeddingRules: [{ $type: 'app.bsky.feed.postgate#disableRule' }],
+              embeddingRules: [{$type: 'app.bsky.feed.postgate#disableRule'}],
             })
           } else if (action === 'enable') {
             return {
@@ -290,7 +290,7 @@ export function useToggleQuotepostEnabledMutation() {
           if (action === 'disable') {
             return createPostgateRecord({
               post: postUri,
-              embeddingRules: [{ $type: 'app.bsky.feed.postgate#disableRule' }],
+              embeddingRules: [{$type: 'app.bsky.feed.postgate#disableRule'}],
             })
           }
         }

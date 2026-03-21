@@ -25,14 +25,17 @@ export class TestPds {
     const port = config.port || (await getPort())
     const url = `http://localhost:${port}`
 
-    const blobstoreLoc = path.join(os.tmpdir(), randomStr(8, 'base32'))
-    const dataDirectory = path.join(os.tmpdir(), randomStr(8, 'base32'))
+    const blobstoreLoc =
+      config.blobstoreDiskLocation || path.join(os.tmpdir(), randomStr(8, 'base32'))
+    const dataDirectory =
+      config.dataDirectory || path.join(os.tmpdir(), randomStr(8, 'base32'))
     await fs.mkdir(dataDirectory, { recursive: true })
+    await fs.mkdir(blobstoreLoc, { recursive: true })
 
     const env: pds.ServerEnvironment = {
       devMode: true,
       port,
-      dataDirectory: dataDirectory,
+      dataDirectory,
       blobstoreDiskLocation: blobstoreLoc,
       recoveryDidKey: recoveryKey,
       adminPassword: ADMIN_PASSWORD,

@@ -1,0 +1,239 @@
+<svelte:head>
+	<title>Trust and Safety • PARA</title>
+	<meta
+		name="description"
+		content="How PARA handles identity, moderation, verification, privacy, and account control."
+	/>
+</svelte:head>
+
+<div class="docs-page trust-page">
+	<section class="trust-hero">
+		<div class="trust-hero-copy">
+			<p class="docs-hero-kicker">Trust and safety</p>
+			<h1>Protected speech needs real safety infrastructure.</h1>
+			<p class="trust-lead">
+				PARA depends on a difficult balance: anonymity where thought needs protection,
+				validation where civic participation needs legitimacy, and enough moderation and account
+				control that public politics does not collapse into chaos.
+			</p>
+			<p>
+				This page sits outside the docs shell on purpose. Trust and safety is not just another
+				subsection of reference material. It is a first-order product surface that shapes how
+				identity, participation, and governance can work at all.
+			</p>
+		</div>
+
+		<div class="trust-pillar-grid">
+			<div class="trust-pillar">
+				<h3>Identity</h3>
+				<p>Profiles, political self-placement, and public-versus-private participation controls.</p>
+			</div>
+			<div class="trust-pillar">
+				<h3>Moderation</h3>
+				<p>Labelers, blocked and muted surfaces, adult-content settings, and interaction defaults.</p>
+			</div>
+			<div class="trust-pillar">
+				<h3>Verification</h3>
+				<p>Manual trust today, stricter identity validation later, without collapsing into public exposure.</p>
+			</div>
+			<div class="trust-pillar">
+				<h3>Control</h3>
+				<p>Settings, account switching, contact import, bookmarks, and other user-control surfaces.</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Identity surfaces</p>
+			<h2>Political identity is broader than a username.</h2>
+			<p>
+				The profile route already acts as a civic identity surface. It resolves handles and DIDs,
+				applies moderation, and exposes PARA-specific tabs for votes, RAQ, highlights, and other
+				participation modes when they exist.
+			</p>
+		</div>
+
+		<div class="docs-meta-grid">
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Primary routes</span>
+				<div class="docs-meta-value"><code>/profile/:name</code>, <code>/settings/political-affiliation</code></div>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Publicness model</span>
+				<div class="docs-meta-value">Votes, RAQ, and highlights currently use local public/private toggles in profile state.</div>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Current caveat</span>
+				<div class="docs-meta-value">Political affiliation is still device-local personalization, not a canonical network identity record.</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Moderation and safety</p>
+			<h2>Safety is already part of the product model, not a support afterthought.</h2>
+			<p>
+				The moderation hub already includes moderation preferences, adult-content state,
+				labelers, muted and blocked surfaces, and default post-interaction settings. Those are
+				not cosmetic controls. They determine how public participation behaves.
+			</p>
+		</div>
+
+		<div class="docs-split-grid">
+			<div class="docs-note-panel">
+				<h3>Active surfaces</h3>
+				<ul>
+					<li><code>/moderation</code> centralizes moderation preferences and content settings.</li>
+					<li><code>/moderation/interaction-settings</code> controls default reply and embed behavior.</li>
+					<li>Blocked, muted, and label-preference surfaces already shape who can interact and how.</li>
+				</ul>
+			</div>
+			<div class="docs-note-panel">
+				<h3>Why it matters</h3>
+				<p>
+					The trust model already reaches into the post model itself through threadgate and
+					postgate defaults. In other words, safety preferences are part of civic participation,
+					not separate from it.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Verification</p>
+			<h2>Verification is modest today and much stricter in the long-term direction.</h2>
+			<p>
+				The currently implemented verification settings are deliberately small in scope. Today
+				the surface is mostly about whether verification badges are shown. The larger design
+				goal is one-person civic participation with privacy, not easy multi-account identity
+				play.
+			</p>
+		</div>
+
+		<div class="docs-split-grid">
+			<div class="docs-section-card">
+				<p class="docs-section-kicker">Current state</p>
+				<h3>Manual and intentionally narrow</h3>
+				<p>
+					The existing route at <code>/moderation/verification-settings</code> is honest about
+					current scope: badge visibility and basic trust signaling, not a finished civic
+					verification stack.
+				</p>
+			</div>
+			<div class="docs-section-card">
+				<p class="docs-section-kicker">Future state</p>
+				<h3>Private proof, not public exposure</h3>
+				<p>
+					The intended direction is official-ID validation, duplicate-use prevention across
+					accounts, and privacy-preserving proofs for participation instead of exposing the raw
+					credential or the person behind it.
+				</p>
+			</div>
+		</div>
+
+		<div class="docs-callout">
+			<p>
+				Current product stance: verification is manual where needed. Longer term, PARA is aiming
+				toward stronger official validation and zero-knowledge-style participation proofs rather
+				than cosmetic badge theater.
+			</p>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Privacy roadmap</p>
+			<h2>The privacy goal is unlinkable participation, not weak pseudonymity.</h2>
+			<p>
+				A small verified sample can still deanonymize users if the network only knows how to
+				prove identity against a narrow pool. That is why the long-term trust model assumes much
+				broader validation coverage than a typical badge system.
+			</p>
+		</div>
+
+		<div class="docs-meta-grid">
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Planned proof model</span>
+				<p class="docs-meta-value">Zero-knowledge-style validation of official ID plus single-account-use enforcement.</p>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Permission spaces</span>
+				<p class="docs-meta-value">Country, state, city, and community eligibility should be provable without exposing raw documents.</p>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Identity rule</span>
+				<p class="docs-meta-value">One validated civic identity per person, with optional pseudonymous public presentation.</p>
+			</div>
+		</div>
+
+		<div class="docs-note-panel">
+			<h3>Mexico-specific direction</h3>
+			<p>
+				One explicit line of thought is official validation against Mexican civic identity
+				infrastructure so participation spaces can be proven without turning the full identity
+				graph into public network data. The design goal is civic legitimacy without forced public
+				exposure.
+			</p>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Account control</p>
+			<h2>Settings, saved content, and distribution still belong in the same trust model.</h2>
+			<p>
+				The main settings screen is the user-control hub. Around it sit support surfaces such as
+				contact discovery, account switching, and bookmarks. They are less distinctive than RAQ
+				or cabildeo, but they still determine how safely and confidently users can operate.
+			</p>
+		</div>
+
+		<div class="docs-meta-grid">
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Primary routes</span>
+				<div class="docs-meta-value"><code>/settings</code>, <code>/settings/find-contacts</code>, <code>/saved</code></div>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Platform split</span>
+				<div class="docs-meta-value">Contact import is native-only; bookmarks remain the standard saved-post surface.</div>
+			</div>
+			<div class="docs-meta-card">
+				<span class="docs-meta-label">Distribution support</span>
+				<div class="docs-meta-value"><code>/starter-pack/*</code> and <code>/find-contacts</code> make network growth more portable and controlled.</div>
+			</div>
+		</div>
+
+		<div class="docs-callout">
+			<p>
+				Bookmarks and highlights should stay distinct in the product story. Bookmarks are saved
+				posts. Highlights are a separate political reading layer with their own state and route
+				family.
+			</p>
+		</div>
+	</section>
+
+	<section class="trust-band">
+		<div class="trust-band-header">
+			<p class="docs-section-kicker">Read next</p>
+			<h2>Trust and safety should connect product, thesis, and protocol.</h2>
+		</div>
+
+		<div class="docs-link-grid">
+			<a class="docs-link-card" href="/about">
+				<strong>About</strong>
+				<span>Return to the broader political thesis and democratic-friction argument.</span>
+			</a>
+			<a class="docs-link-card" href="/docs/product">
+				<strong>Product</strong>
+				<span>See how communities, voting, RAQ, and civic participation work together.</span>
+			</a>
+			<a class="docs-link-card" href="/docs/schemas">
+				<strong>Schema reference</strong>
+				<span>Browse the schema reference and the technical notes behind the product.</span>
+			</a>
+		</div>
+	</section>
+</div>

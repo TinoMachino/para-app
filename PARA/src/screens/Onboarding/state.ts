@@ -1,6 +1,6 @@
-import { createContext, useContext, useMemo } from 'react'
+import {createContext, useContext, useMemo} from 'react'
 
-import { logger } from '#/logger'
+import {logger} from '#/logger'
 import {
   type AvatarColor,
   type Emoji,
@@ -43,34 +43,34 @@ export type OnboardingState = {
 
 export type OnboardingAction =
   | {
-    type: 'next'
-  }
-  | {
-    type: 'prev'
-  }
-  | {
-    type: 'skip-contacts'
-  }
-  | {
-    type: 'finish'
-  }
-  | {
-    type: 'setInterestsStepResults'
-    selectedInterests: string[]
-  }
-  | {
-    type: 'setProfileStepResults'
-    isCreatedAvatar: boolean
-    image: OnboardingState['profileStepResults']['image'] | undefined
-    imageUri: string | undefined
-    imageMime: string
-    creatorState:
-    | {
-      emoji: Emoji
-      backgroundColor: AvatarColor
+      type: 'next'
     }
-    | undefined
-  }
+  | {
+      type: 'prev'
+    }
+  | {
+      type: 'skip-contacts'
+    }
+  | {
+      type: 'finish'
+    }
+  | {
+      type: 'setInterestsStepResults'
+      selectedInterests: string[]
+    }
+  | {
+      type: 'setProfileStepResults'
+      isCreatedAvatar: boolean
+      image: OnboardingState['profileStepResults']['image'] | undefined
+      imageUri: string | undefined
+      imageMime: string
+      creatorState:
+        | {
+            emoji: Emoji
+            backgroundColor: AvatarColor
+          }
+        | undefined
+    }
 
 export function createInitialOnboardingState(
   {
@@ -79,7 +79,7 @@ export function createInitialOnboardingState(
   }: {
     starterPacksStepEnabled: boolean
     findContactsStepEnabled: boolean
-  } = { starterPacksStepEnabled: true, findContactsStepEnabled: false },
+  } = {starterPacksStepEnabled: true, findContactsStepEnabled: false},
 ): OnboardingState {
   const screens: OnboardingState['screens'] = {
     profile: true,
@@ -117,7 +117,7 @@ export function reducer(
   s: OnboardingState,
   a: OnboardingAction,
 ): OnboardingState {
-  let next = { ...s }
+  let next = {...s}
 
   const stepOrder = getStepOrder(s)
 
@@ -196,7 +196,7 @@ export function reducer(
   })
 
   if (s.activeStep !== state.activeStep) {
-    logger.debug(`onboarding: step changed`, { activeStep: state.activeStep })
+    logger.debug(`onboarding: step changed`, {activeStep: state.activeStep})
   }
 
   return state
@@ -229,7 +229,7 @@ export function useOnboardingInternalState() {
     )
   }
 
-  const { state, dispatch } = ctx
+  const {state, dispatch} = ctx
 
   return {
     state: useMemo(() => {

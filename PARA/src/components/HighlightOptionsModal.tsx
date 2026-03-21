@@ -2,7 +2,7 @@
  * HighlightOptionsModal - React Native Modal for highlight color/tag selection
  * Uses standard Modal (NOT Dialog.Outer/BottomSheet) to avoid Reanimated crashes
  */
-import {memo, useCallback, useState} from 'react'
+import {memo, useCallback, useEffect, useState} from 'react'
 import {
   KeyboardAvoidingView,
   Modal,
@@ -13,9 +13,8 @@ import {
   View,
 } from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
-import type React from 'react'
+import {Trans} from '@lingui/react/macro'
 
 import {
   HIGHLIGHT_COLORS,
@@ -54,6 +53,13 @@ let HighlightOptionsModal = ({
   )
   const [tag, setTag] = useState(existingTag ?? '')
   const [isPublic, setIsPublic] = useState(existingIsPublic ?? false)
+
+  useEffect(() => {
+    if (!visible) return
+    setSelectedColor(existingColor ?? HIGHLIGHT_COLORS.yellow)
+    setTag(existingTag ?? '')
+    setIsPublic(existingIsPublic ?? false)
+  }, [existingColor, existingIsPublic, existingTag, visible])
 
   const handleSave = useCallback(() => {
     onSave(selectedColor, isPublic, tag.trim() || undefined)

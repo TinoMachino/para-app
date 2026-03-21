@@ -57,19 +57,38 @@ export_env() {
 # Exports postgres environment variables
 export_pg_env() {
   # Based on creds in compose.yaml
-  export PGPORT=5433
   export PGHOST=localhost
   export PGUSER=pg
   export PGPASSWORD=password
   export PGDATABASE=postgres
-  export DB_POSTGRES_URL="postgresql://pg:password@127.0.0.1:5433/postgres"
-  export DB_TEST_POSTGRES_URL="${DB_POSTGRES_URL}"
+  export DB_POSTGRES_URL="postgresql://pg:password@127.0.0.1:5432/postgres"
+  export DB_TEST_POSTGRES_URL="postgresql://pg:password@127.0.0.1:5433/postgres"
 }
 
 # Exports redis environment variables
 export_redis_env() {
-  export REDIS_HOST="127.0.0.1:6380"
-  export REDIS_TEST_HOST="${REDIS_HOST}"
+  export REDIS_HOST="127.0.0.1:6379"
+  export REDIS_TEST_HOST="127.0.0.1:6380"
+}
+
+select_runtime_pg_env() {
+  local services=$1
+  if [[ $services == *"db_test"* ]]; then
+    export PGPORT=5433
+  else
+    export PGPORT=5432
+  fi
+}
+
+select_runtime_urls() {
+  local services=$1
+  local postgres_url_env_var=`[[ $services == *"db_test"* ]] && echo "DB_TEST_POSTGRES_URL" || echo "DB_POSTGRES_URL"`
+  local redis_host_env_var=`[[ $services == *"redis_test"* ]] && echo "REDIS_TEST_HOST" || echo "REDIS_HOST"`
+
+  select_runtime_pg_env "${services}"
+
+  postgres_url="${!postgres_url_env_var}"
+  redis_host="${!redis_host_env_var}"
 }
 
 pg_clear() {
@@ -95,11 +114,9 @@ main_native() {
   export_env
 
   local services=${SERVICES}
+  select_runtime_urls "${services}"
   local postgres_url_env_var=`[[ $services == *"db_test"* ]] && echo "DB_TEST_POSTGRES_URL" || echo "DB_POSTGRES_URL"`
   local redis_host_env_var=`[[ $services == *"redis_test"* ]] && echo "REDIS_TEST_HOST" || echo "REDIS_HOST"`
-
-  postgres_url="${!postgres_url_env_var}"
-  redis_host="${!redis_host_env_var}"
 
   if [ -n "${postgres_url}" ]; then
     echo "Using ${postgres_url_env_var} (${postgres_url}) to connect to postgres."
@@ -162,7 +179,9 @@ main_docker() {
     local services=$@
     echo # newline
     if $started_container; then
-      docker compose --file $compose_file rm --force --stop --volumes ${services}
+      if [[ $services == *"db_test"* ]] || [[ $services == *"redis_test"* ]]; then
+        docker compose --file $compose_file rm --force --stop --volumes ${services}
+      fi
     fi
   }
 
@@ -192,7 +211,11 @@ main_docker() {
   # if any are missing/unhealthy, recreate all services
   if $needs_recreate; then
     started_container=true
-    docker compose --file $compose_file rm --force --stop --volumes ${services} >/dev/null 2>&1 || true
+    if [[ $services == *"db_test"* ]] || [[ $services == *"redis_test"* ]]; then
+      docker compose --file $compose_file rm --force --stop --volumes ${services} >/dev/null 2>&1 || true
+    else
+      docker compose --file $compose_file rm --force --stop ${services} >/dev/null 2>&1 || true
+    fi
     docker compose --file $compose_file up --wait --force-recreate ${services}
   else
     echo "all services ${services} are already running"
@@ -203,6 +226,9 @@ main_docker() {
 
   # setup environment variables and run args
   export_env
+  select_runtime_urls "${services}"
+  DB_POSTGRES_URL="${postgres_url}" \
+  REDIS_HOST="${redis_host}" \
   "$@"
   # save return code for later
   code=$?

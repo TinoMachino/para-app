@@ -1,7 +1,6 @@
 import {memo} from 'react'
 import {View} from 'react-native'
 import {Trans} from '@lingui/react/macro'
-import type React from 'react'
 
 import {type OpenQuestion as OpenQuestionData} from '#/lib/mock-data'
 import {UserAvatar} from '#/view/com/util/UserAvatar'

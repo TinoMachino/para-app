@@ -13,6 +13,8 @@ import {dateDiff, useGetTimeAgo} from '#/lib/hooks/useTimeAgo'
 import {logger} from '#/logger'
 import {useIsBirthdateUpdateAllowed} from '#/state/birthdate'
 import {useSessionApi} from '#/state/session'
+import {DeactivateAccountDialog} from '#/screens/Settings/components/DeactivateAccountDialog'
+import {DeleteAccountDialog} from '#/screens/Settings/components/DeleteAccountDialog'
 import {atoms as a, useBreakpoints, useTheme, web} from '#/alf'
 import {Admonition} from '#/components/Admonition'
 import {AgeAssuranceAppealDialog} from '#/components/ageAssurance/AgeAssuranceAppealDialog'
@@ -37,7 +39,7 @@ import {
   isLegacyBirthdateBug,
   useAgeAssuranceRegionConfig,
 } from '#/ageAssurance/util'
-import {IS_NATIVE,IS_WEB} from '#/env'
+import {IS_NATIVE, IS_WEB} from '#/env'
 import {useDeviceGeolocationApi} from '#/geolocation'
 
 const textStyles = [a.text_md, a.leading_snug]
@@ -48,6 +50,8 @@ export function NoAccessScreen() {
   const {gtPhone} = useBreakpoints()
   const insets = useSafeAreaInsets()
   const birthdateControl = useDialogControl()
+  const deactivateAccountControl = useDialogControl()
+  const deleteAccountControl = useDialogControl()
   const {data} = useAgeAssuranceDataContext()
   const region = useAgeAssuranceRegionConfig()
   const isBirthdateUpdateAllowed = useIsBirthdateUpdateAllowed()
@@ -237,17 +241,37 @@ export function NoAccessScreen() {
               </View>
             )}
 
-            <View style={[a.pt_lg, a.gap_xl]}>
+            <View style={[a.pt_lg, a.gap_xl, {maxWidth: 280}]}>
               <Logo width={120} textFill={t.atoms.text.color} />
-              <Text style={[a.text_sm, a.italic, t.atoms.text_contrast_medium]}>
+              <Text
+                style={[
+                  a.text_sm,
+                  a.italic,
+                  a.leading_snug,
+                  t.atoms.text_contrast_medium,
+                ]}>
                 <Trans>
                   To log out,{' '}
                   <SimpleInlineLinkText
                     label={_(msg`Click here to log out`)}
                     {...createStaticClick(() => {
                       onPressLogout()
-                    })}>
+                    })}
+                    style={[a.italic]}>
                     click here
+                  </SimpleInlineLinkText>
+                  . Or if you’d prefer, you can{' '}
+                  <SimpleInlineLinkText
+                    label={_(msg`Click here to delete your account`)}
+                    {...createStaticClick(() => {
+                      ax.metric(
+                        'ageAssurance:noAccessScreen:openDeleteAccountDialog',
+                        {},
+                      )
+                      deleteAccountControl.open()
+                    })}
+                    style={[a.italic]}>
+                    delete your account
                   </SimpleInlineLinkText>
                   .
                 </Trans>
@@ -258,6 +282,11 @@ export function NoAccessScreen() {
       </View>
 
       <BirthDateSettingsDialog control={birthdateControl} />
+      <DeactivateAccountDialog control={deactivateAccountControl} />
+      <DeleteAccountDialog
+        control={deleteAccountControl}
+        deactivateDialogControl={deactivateAccountControl}
+      />
 
       {/*
        * While this blocking overlay is up, other dialogs in the shell

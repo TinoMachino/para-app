@@ -5,8 +5,8 @@ import {
   AppBskyGraphStarterpack,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Plural, Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
@@ -21,7 +21,6 @@ import {
   useListMembershipAddMutation,
   useListMembershipRemoveMutation,
 } from '#/state/queries/list-memberships'
-import * as Toast from '#/view/com/util/Toast'
 import {atoms as a, useTheme} from '#/alf'
 import {AvatarStack} from '#/components/AvatarStack'
 import {Button, ButtonIcon, ButtonText} from '#/components/Button'
@@ -31,6 +30,7 @@ import {PlusLarge_Stroke2_Corner0_Rounded as PlusIcon} from '#/components/icons/
 import {StarterPack} from '#/components/icons/StarterPack'
 import {TimesLarge_Stroke2_Corner0_Rounded as XIcon} from '#/components/icons/Times'
 import {Loader} from '#/components/Loader'
+import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
 import {IS_WEB} from '#/env'
 import * as bsky from '#/types/bsky'
@@ -268,7 +268,9 @@ function StarterPackItem({
       }, 1e3)
     },
     onError: () => {
-      Toast.show(_(msg`Failed to add to starter pack`), 'xmark')
+      Toast.show(_(msg`Failed to add to starter pack`), {
+        type: 'error',
+      })
       setIsPendingRefresh(false)
     },
   })
@@ -287,7 +289,9 @@ function StarterPackItem({
       }, 1e3)
     },
     onError: () => {
-      Toast.show(_(msg`Failed to remove from starter pack`), 'xmark')
+      Toast.show(_(msg`Failed to remove from starter pack`), {
+        type: 'error',
+      })
       setIsPendingRefresh(false)
     },
   })

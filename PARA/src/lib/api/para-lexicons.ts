@@ -19,6 +19,7 @@ export const PARA_IDENTITY_COLLECTION = 'com.para.identity'
 export const PARA_POST_META_COLLECTION = 'com.para.social.postMeta'
 export const PARA_COMMUNITY_GOVERNANCE_COLLECTION =
   'com.para.community.governance'
+export const PARA_HIGHLIGHT_COLLECTION = 'com.para.highlight.annotation'
 
 export interface ParaPostRecord {
   text: string
@@ -86,6 +87,21 @@ export interface ParaIdentityRecord {
   verifiedAt?: string
 }
 
+export interface ParaHighlightRecord {
+  subjectUri: string
+  subjectCid?: string
+  text: string
+  start: number
+  end: number
+  color: string
+  tag?: string
+  community?: string
+  state?: string
+  party?: string
+  visibility: 'public' | 'private'
+  createdAt: string
+}
+
 export type CommunityGovernanceCapability =
   | 'appoint_deputies'
   | 'edit_role_descriptions'
@@ -138,6 +154,9 @@ export interface CommunityGovernanceMetadata {
   escalationPath?: string
   publicContact?: string
   lastPublishedAt?: string
+  state?: string
+  matterFlairIds?: string[]
+  policyFlairIds?: string[]
 }
 
 export interface CommunityGovernanceHistoryEntry {

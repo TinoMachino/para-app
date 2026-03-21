@@ -1,5 +1,8 @@
-import React, {
+import {
+  createContext,
+  type ReactNode,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useMemo,
@@ -10,14 +13,14 @@ import {useWindowDimensions} from 'react-native'
 
 import {IS_NATIVE, IS_WEB} from '#/env'
 
-const Context = React.createContext<{
+const Context = createContext<{
   activeViewId: string | null
   setActiveView: (viewId: string) => void
   sendViewPosition: (viewId: string, y: number) => void
 } | null>(null)
 Context.displayName = 'ActiveVideoWebContext'
 
-export function Provider({children}: {children: React.ReactNode}) {
+export function Provider({children}: {children: ReactNode}) {
   if (!IS_WEB) {
     throw new Error('ActiveVideoWebContext may only be used on web.')
   }
@@ -94,7 +97,7 @@ export function Provider({children}: {children: React.ReactNode}) {
 }
 
 export function useActiveVideoWeb() {
-  const context = React.useContext(Context)
+  const context = useContext(Context)
   if (!context) {
     throw new Error(
       'useActiveVideoWeb must be used within a ActiveVideoWebProvider',

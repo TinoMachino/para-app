@@ -24,6 +24,7 @@ export type CommonNavigatorParams = {
   PostThread: {name: string; rkey: string}
   PostLikedBy: {name: string; rkey: string}
   PostRepostedBy: {name: string; rkey: string}
+  PostHighlights: {name: string; rkey: string}
   PostQuotes: {name: string; rkey: string}
   ProfileFeed: {
     name: string
@@ -107,6 +108,7 @@ export type CommonNavigatorParams = {
   DiscourseAnalysis: undefined
   VSScreenV2: {entities?: string[]; matter?: string}
   AgentChat: {agentId: string}
+  CommunityAgentProfile: {agentId: string; communityName?: string}
   RAQ: undefined
   RAQAssessment: undefined
   ProposedRAQList: undefined
@@ -122,8 +124,8 @@ export type CommonNavigatorParams = {
   Map: undefined
   Compass: undefined
   CabildeoList: {communityId?: string; communityName?: string} | undefined
-  CabildeoDetail: {index: number}
-  DelegateVote: {cabildeoIndex: number}
+  CabildeoDetail: {cabildeoUri: string}
+  DelegateVote: {cabildeoUri: string}
   CreateCabildeo: undefined
   CreatePosition: {cabildeoUri: string; optionIndex?: number}
 }

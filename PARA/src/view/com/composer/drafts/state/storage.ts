@@ -2,9 +2,9 @@
  * Native file system storage for draft media.
  * Media is stored by localRefPath key (unique identifier stored in server draft).
  */
-import { Directory, File, Paths } from 'expo-file-system'
+import {Directory, File, Paths} from 'expo-file-system'
 
-import { logger } from './logger'
+import {logger} from './logger'
 
 const MEDIA_DIR = 'bsky-draft-media'
 
@@ -130,7 +130,7 @@ function populateCacheInternal(): Promise<void> {
       }
       cachePopulated = true
     } catch (e) {
-      logger.warn('Failed to populate media cache', { error: e })
+      logger.warn('Failed to populate media cache', {error: e})
     }
     resolve()
   })

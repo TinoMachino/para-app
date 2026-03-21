@@ -1,5 +1,5 @@
-import type React from 'react'
+import type {ReactNode} from 'react'
 
-export function GestureActionView({children}: {children: React.ReactNode}) {
+export function GestureActionView({children}: {children: ReactNode}) {
   return children
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useImperativeHandle} from 'react'
+import {forwardRef} from 'react'
 import {findNodeHandle, View} from 'react-native'
 
 import {List} from '#/view/com/util/List'
@@ -18,7 +18,7 @@ interface Props {
 // Mock Data
 import {PROFILE_VOTES as MOCK_VOTES} from '#/lib/mock-data'
 
-export const ProfileVotesSection = React.forwardRef<SectionRef, Props>(
+export const ProfileVotesSection = forwardRef<SectionRef, Props>(
   function ProfileVotesSection(
     {headerHeight, scrollElRef, setScrollViewTag, isFocused},
     ref,

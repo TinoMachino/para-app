@@ -1,7 +1,7 @@
 import {Alert} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 

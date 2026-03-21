@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useRef } from 'react'
-import { View } from 'react-native'
-import { useAnimatedRef } from 'react-native-reanimated'
+import {useCallback, useMemo, useRef} from 'react'
+import {View} from 'react-native'
+import {useAnimatedRef} from 'react-native-reanimated'
 import {
   AppBskyGraphDefs,
   AtUri,
@@ -8,44 +8,44 @@ import {
   type ModerationOpts,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
-import { useFocusEffect, useIsFocused } from '@react-navigation/native'
-import { useQueryClient } from '@tanstack/react-query'
+import {useFocusEffect, useIsFocused} from '@react-navigation/native'
+import {useQueryClient} from '@tanstack/react-query'
 
-import { useOpenComposer } from '#/lib/hooks/useOpenComposer'
-import { useSetTitle } from '#/lib/hooks/useSetTitle'
-import { ComposeIcon2 } from '#/lib/icons'
+import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
+import {useSetTitle} from '#/lib/hooks/useSetTitle'
+import {ComposeIcon2} from '#/lib/icons'
 import {
   type CommonNavigatorParams,
   type NativeStackScreenProps,
 } from '#/lib/routes/types'
-import { cleanError } from '#/lib/strings/errors'
-import { useModerationOpts } from '#/state/preferences/moderation-opts'
-import { useListQuery } from '#/state/queries/list'
-import { RQKEY as FEED_RQKEY } from '#/state/queries/post-feed'
+import {cleanError} from '#/lib/strings/errors'
+import {useModerationOpts} from '#/state/preferences/moderation-opts'
+import {useListQuery} from '#/state/queries/list'
+import {RQKEY as FEED_RQKEY} from '#/state/queries/post-feed'
 import {
   usePreferencesQuery,
   type UsePreferencesQueryResponse,
 } from '#/state/queries/preferences'
-import { useResolveUriQuery } from '#/state/queries/resolve-uri'
-import { truncateAndInvalidate } from '#/state/queries/util'
-import { useSession } from '#/state/session'
-import { useSetMinimalShellMode } from '#/state/shell'
-import { PagerWithHeader } from '#/view/com/pager/PagerWithHeader'
-import { FAB } from '#/view/com/util/fab/FAB'
-import { type ListRef } from '#/view/com/util/List'
-import { ListHiddenScreen } from '#/screens/List/ListHiddenScreen'
-import { atoms as a, platform } from '#/alf'
-import { useDialogControl } from '#/components/Dialog'
-import { ListAddRemoveUsersDialog } from '#/components/dialogs/lists/ListAddRemoveUsersDialog'
+import {useResolveUriQuery} from '#/state/queries/resolve-uri'
+import {truncateAndInvalidate} from '#/state/queries/util'
+import {useSession} from '#/state/session'
+import {useSetMinimalShellMode} from '#/state/shell'
+import {PagerWithHeader} from '#/view/com/pager/PagerWithHeader'
+import {FAB} from '#/view/com/util/fab/FAB'
+import {type ListRef} from '#/view/com/util/List'
+import {ListHiddenScreen} from '#/screens/List/ListHiddenScreen'
+import {atoms as a, platform} from '#/alf'
+import {useDialogControl} from '#/components/Dialog'
+import {ListAddRemoveUsersDialog} from '#/components/dialogs/lists/ListAddRemoveUsersDialog'
 import * as Layout from '#/components/Layout'
-import { Loader } from '#/components/Loader'
+import {Loader} from '#/components/Loader'
 import * as Hider from '#/components/moderation/Hider'
-import { AboutSection } from './AboutSection'
-import { ErrorScreen } from './components/ErrorScreen'
-import { Header } from './components/Header'
-import { FeedSection } from './FeedSection'
+import {AboutSection} from './AboutSection'
+import {ErrorScreen} from './components/ErrorScreen'
+import {Header} from './components/Header'
+import {FeedSection} from './FeedSection'
 
 interface SectionRef {
   scrollToTop: () => void
@@ -61,13 +61,13 @@ export function ProfileListScreen(props: Props) {
 }
 
 function ProfileListScreenInner(props: Props) {
-  const { _ } = useLingui()
-  const { name: handleOrDid, rkey } = props.route.params
-  const { data: resolvedUri, error: resolveError } = useResolveUriQuery(
+  const {_} = useLingui()
+  const {name: handleOrDid, rkey} = props.route.params
+  const {data: resolvedUri, error: resolveError} = useResolveUriQuery(
     AtUri.make(handleOrDid, 'app.bsky.graph.list', rkey).toString(),
   )
-  const { data: preferences } = usePreferencesQuery()
-  const { data: list, error: listError } = useListQuery(resolvedUri?.uri)
+  const {data: preferences} = usePreferencesQuery()
+  const {data: list, error: listError} = useListQuery(resolvedUri?.uri)
   const moderationOpts = useModerationOpts()
 
   if (resolveError) {
@@ -150,12 +150,12 @@ function ProfileListScreenLoaded({
   moderationOpts: ModerationOpts
   preferences: UsePreferencesQueryResponse
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const queryClient = useQueryClient()
-  const { openComposer } = useOpenComposer()
+  const {openComposer} = useOpenComposer()
   const setMinimalShellMode = useSetMinimalShellMode()
-  const { currentAccount } = useSession()
-  const { rkey } = route.params
+  const {currentAccount} = useSession()
+  const {rkey} = route.params
   const feedSectionRef = useRef<SectionRef>(null)
   const aboutSectionRef = useRef<SectionRef>(null)
   const isCurateList = list.purpose === AppBskyGraphDefs.CURATELIST
@@ -212,7 +212,7 @@ function ProfileListScreenLoaded({
               isHeaderReady={true}
               renderHeader={renderHeader}
               onCurrentPageSelected={onCurrentPageSelected}>
-              {({ headerHeight, scrollElRef, isFocused }) => (
+              {({headerHeight, scrollElRef, isFocused}) => (
                 <FeedSection
                   ref={feedSectionRef}
                   feed={`list|${uri}`}
@@ -223,7 +223,7 @@ function ProfileListScreenLoaded({
                   onPressAddUser={addUserDialogControl.open}
                 />
               )}
-              {({ headerHeight, scrollElRef }) => (
+              {({headerHeight, scrollElRef}) => (
                 <AboutSection
                   ref={aboutSectionRef}
                   scrollElRef={scrollElRef as ListRef}
@@ -235,12 +235,12 @@ function ProfileListScreenLoaded({
             </PagerWithHeader>
             <FAB
               testID="composeFAB"
-              onPress={() => openComposer({ logContext: 'Fab' })}
+              onPress={() => openComposer({logContext: 'Fab'})}
               icon={
                 <ComposeIcon2
                   strokeWidth={1.5}
                   size={29}
-                  style={{ color: 'white' }}
+                  style={{color: 'white'}}
                 />
               }
               accessibilityRole="button"
@@ -273,12 +273,12 @@ function ProfileListScreenLoaded({
           />
           <FAB
             testID="composeFAB"
-            onPress={() => openComposer({ logContext: 'Fab' })}
+            onPress={() => openComposer({logContext: 'Fab'})}
             icon={
               <ComposeIcon2
                 strokeWidth={1.5}
                 size={29}
-                style={{ color: 'white' }}
+                style={{color: 'white'}}
               />
             }
             accessibilityRole="button"

@@ -1,8 +1,8 @@
 import {memo, useCallback} from 'react'
 import {View} from 'react-native'
 import {msg, plural} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {useHaptics} from '#/lib/haptics'
 import {useRequireAuth} from '#/state/session'
@@ -40,6 +40,8 @@ let QuoteButton = ({
   big,
   embeddingDisabled,
 }: Props): React.ReactNode => {
+  const isHighlighted = isReposted
+  const highlightCount = repostCount
   const t = useTheme()
   const {_} = useLingui()
   const requireAuth = useRequireAuth()
@@ -61,16 +63,16 @@ let QuoteButton = ({
     <>
       <PostControlButton
         testID="highlightBtn"
-        active={isReposted}
+        active={isHighlighted}
         activeColor={t.palette.positive_500}
         big={big}
         onPress={onPress}
         onLongPress={onLongPress}
         label={
-          isReposted
+          isHighlighted
             ? _(
                 msg({
-                  message: `Remove highlight (${plural(repostCount || 0, {
+                  message: `Remove highlight (${plural(highlightCount || 0, {
                     one: '# highlight',
                     other: '# highlights',
                   })})`,
@@ -80,7 +82,7 @@ let QuoteButton = ({
               )
             : _(
                 msg({
-                  message: `Highlight (${plural(repostCount || 0, {
+                  message: `Highlight (${plural(highlightCount || 0, {
                     one: '# highlight',
                     other: '# highlights',
                   })})`,
@@ -90,9 +92,9 @@ let QuoteButton = ({
               )
         }>
         <PostControlButtonIcon icon={QuoteIcon} />
-        {typeof repostCount !== 'undefined' && repostCount > 0 && (
+        {typeof highlightCount !== 'undefined' && highlightCount > 0 && (
           <PostControlButtonText testID="highlightCount">
-            {formatPostStatCount(repostCount)}
+            {formatPostStatCount(highlightCount)}
           </PostControlButtonText>
         )}
       </PostControlButton>
@@ -101,7 +103,6 @@ let QuoteButton = ({
         nativeOptions={{preventExpansion: true}}>
         <Dialog.Handle />
         <QuoteButtonDialogInner
-          isReposted={isReposted}
           onQuote={onQuote}
           onHighlight={onHighlight}
           onRemoveAllHighlights={onRemoveAllHighlights}
@@ -116,14 +117,12 @@ QuoteButton = memo(QuoteButton)
 export {QuoteButton}
 
 let QuoteButtonDialogInner = ({
-  isReposted,
   onQuote,
   onHighlight,
   onRemoveAllHighlights,
   hasHighlights,
   embeddingDisabled,
 }: {
-  isReposted: boolean
   onQuote: () => void
   onHighlight: () => void
   onRemoveAllHighlights: () => void

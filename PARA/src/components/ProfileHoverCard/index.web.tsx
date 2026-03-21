@@ -1,4 +1,5 @@
-import React, {useCallback} from 'react'
+import * as React from 'react'
+import {useCallback, useReducer, useRef} from 'react'
 import {View} from 'react-native'
 import {
   type AppBskyActorDefs,
@@ -62,7 +63,7 @@ const floatingMiddlewares = [
 
 export function ProfileHoverCard(props: ProfileHoverCardProps) {
   const prefetchProfileQuery = usePrefetchProfileQuery()
-  const prefetchedProfile = React.useRef(false)
+  const prefetchedProfile = useRef(false)
   const onPointerMove = () => {
     if (!prefetchedProfile.current) {
       prefetchedProfile.current = true
@@ -117,7 +118,7 @@ export function ProfileHoverCardInner(props: ProfileHoverCardProps) {
     middleware: floatingMiddlewares,
   })
 
-  const [currentState, dispatch] = React.useReducer(
+  const [currentState, dispatch] = useReducer(
     // Tip: console.log(state, action) when debugging.
     (state: State, action: Action): State => {
       // Pressing within a card should always hide it.

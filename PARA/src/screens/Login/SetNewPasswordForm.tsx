@@ -1,8 +1,8 @@
 import {useState} from 'react'
 import {ActivityIndicator, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {logEvent} from '#/lib/statsig/statsig'
 import {isNetworkError} from '#/lib/strings/errors'

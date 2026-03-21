@@ -2,11 +2,11 @@
  * Do not import runtime code into this file
  */
 
-import { type Platform } from 'react-native'
+import {type Platform} from 'react-native'
 
-import { type NotificationReason } from '#/lib/hooks/useNotificationHandler'
-import { type FeedDescriptor } from '#/state/queries/post-feed'
-import { type LiveEventFeedMetricContext } from '#/features/liveEvents/types'
+import {type NotificationReason} from '#/lib/hooks/useNotificationHandler'
+import {type FeedDescriptor} from '#/state/queries/post-feed'
+import {type LiveEventFeedMetricContext} from '#/features/liveEvents/types'
 
 export type Events = {
   // App events
@@ -20,21 +20,21 @@ export type Events = {
 
   'account:loggedIn': {
     logContext:
-    | 'LoginForm'
-    | 'SwitchAccount'
-    | 'ChooseAccountForm'
-    | 'Settings'
-    | 'Notification'
+      | 'LoginForm'
+      | 'SwitchAccount'
+      | 'ChooseAccountForm'
+      | 'Settings'
+      | 'Notification'
     withPassword: boolean
   }
   'account:loggedOut': {
     logContext:
-    | 'SwitchAccount'
-    | 'Settings'
-    | 'SignupQueued'
-    | 'Deactivated'
-    | 'Takendown'
-    | 'AgeAssuranceNoAccessScreen'
+      | 'SwitchAccount'
+      | 'Settings'
+      | 'SignupQueued'
+      | 'Deactivated'
+      | 'Takendown'
+      | 'AgeAssuranceNoAccessScreen'
     scope: 'current' | 'every'
   }
   'notifications:openApp': {
@@ -85,9 +85,9 @@ export type Events = {
     activeStep: number
     backgroundCount: number
   }
-  'signup:handleTaken': { typeahead?: boolean }
-  'signup:handleAvailable': { typeahead?: boolean }
-  'signup:handleSuggestionSelected': { method: string }
+  'signup:handleTaken': {typeahead?: boolean}
+  'signup:handleAvailable': {typeahead?: boolean}
+  'signup:handleSuggestionSelected': {method: string}
   'signin:hostingProviderPressed': {
     hostingProviderDidChange: boolean
   }
@@ -237,14 +237,14 @@ export type Events = {
 
   'composer:open': {
     logContext:
-    | 'Fab'
-    | 'PostReply'
-    | 'QuotePost'
-    | 'ProfileFeed'
-    | 'Deeplink'
-    | 'Other'
-    | 'ComposerPrompt'
-    | 'Navigation'
+      | 'Fab'
+      | 'PostReply'
+      | 'QuotePost'
+      | 'ProfileFeed'
+      | 'Deeplink'
+      | 'Other'
+      | 'ComposerPrompt'
+      | 'Navigation'
     isReply: boolean
     hasQuote: boolean
     hasDraft: boolean
@@ -402,16 +402,16 @@ export type Events = {
     uri: string
     authorDid: string
     logContext:
-    | 'FeedItem'
-    | 'PostThreadItem'
-    | 'Post'
-    | 'ImmersiveVideo'
-    | 'SearchResults'
-    | 'Bookmarks'
-    | 'Notifications'
-    | 'Hashtag'
-    | 'Topic'
-    | 'PostQuotes'
+      | 'FeedItem'
+      | 'PostThreadItem'
+      | 'Post'
+      | 'ImmersiveVideo'
+      | 'SearchResults'
+      | 'Bookmarks'
+      | 'Notifications'
+      | 'Hashtag'
+      | 'Topic'
+      | 'PostQuotes'
     feedDescriptor?: string
     position?: number
   }
@@ -425,21 +425,21 @@ export type Events = {
     followerClout: number | undefined
     position?: number
     logContext:
-    | 'RecommendedFollowsItem'
-    | 'PostThreadItem'
-    | 'ProfileCard'
-    | 'ProfileHeader'
-    | 'ProfileHeaderSuggestedFollows'
-    | 'ProfileMenu'
-    | 'ProfileHoverCard'
-    | 'AvatarButton'
-    | 'StarterPackProfilesList'
-    | 'FeedInterstitial'
-    | 'PostOnboardingFindFollows'
-    | 'ImmersiveVideo'
-    | 'ExploreSuggestedAccounts'
-    | 'OnboardingSuggestedAccounts'
-    | 'FindContacts'
+      | 'RecommendedFollowsItem'
+      | 'PostThreadItem'
+      | 'ProfileCard'
+      | 'ProfileHeader'
+      | 'ProfileHeaderSuggestedFollows'
+      | 'ProfileMenu'
+      | 'ProfileHoverCard'
+      | 'AvatarButton'
+      | 'StarterPackProfilesList'
+      | 'FeedInterstitial'
+      | 'PostOnboardingFindFollows'
+      | 'ImmersiveVideo'
+      | 'ExploreSuggestedAccounts'
+      | 'OnboardingSuggestedAccounts'
+      | 'FindContacts'
   }
   'profile:followers:view': {
     contextProfileDid: string
@@ -470,11 +470,11 @@ export type Events = {
   'profile:unblock': {}
   'suggestedUser:follow': {
     logContext:
-    | 'Explore'
-    | 'InterstitialDiscover'
-    | 'InterstitialProfile'
-    | 'Profile'
-    | 'Onboarding'
+      | 'Explore'
+      | 'InterstitialDiscover'
+      | 'InterstitialProfile'
+      | 'Profile'
+      | 'Onboarding'
     location: 'Card' | 'Profile' | 'FollowAll'
     recId?: number | string
     position: number
@@ -483,10 +483,10 @@ export type Events = {
   }
   'suggestedUser:press': {
     logContext:
-    | 'Explore'
-    | 'InterstitialDiscover'
-    | 'InterstitialProfile'
-    | 'Onboarding'
+      | 'Explore'
+      | 'InterstitialDiscover'
+      | 'InterstitialProfile'
+      | 'Onboarding'
     recId?: number | string
     position: number
     suggestedDid: string
@@ -494,12 +494,12 @@ export type Events = {
   }
   'suggestedUser:seen': {
     logContext:
-    | 'Explore'
-    | 'InterstitialDiscover'
-    | 'InterstitialProfile'
-    | 'Profile'
-    | 'Onboarding'
-    | 'ProgressGuide'
+      | 'Explore'
+      | 'InterstitialDiscover'
+      | 'InterstitialProfile'
+      | 'Profile'
+      | 'Onboarding'
+      | 'ProgressGuide'
     recId?: number | string
     position: number
     suggestedDid: string
@@ -507,11 +507,11 @@ export type Events = {
   }
   'suggestedUser:seeMore': {
     logContext:
-    | 'Explore'
-    | 'InterstitialDiscover'
-    | 'InterstitialProfile'
-    | 'Profile'
-    | 'Onboarding'
+      | 'Explore'
+      | 'InterstitialDiscover'
+      | 'InterstitialProfile'
+      | 'Profile'
+      | 'Onboarding'
   }
   'suggestedUser:dismiss': {
     logContext: 'InterstitialDiscover' | 'InterstitialProfile'
@@ -521,32 +521,32 @@ export type Events = {
   }
   'profile:unfollow': {
     logContext:
-    | 'RecommendedFollowsItem'
-    | 'PostThreadItem'
-    | 'ProfileCard'
-    | 'ProfileHeader'
-    | 'ProfileHeaderSuggestedFollows'
-    | 'ProfileMenu'
-    | 'ProfileHoverCard'
-    | 'Chat'
-    | 'AvatarButton'
-    | 'StarterPackProfilesList'
-    | 'FeedInterstitial'
-    | 'PostOnboardingFindFollows'
-    | 'ImmersiveVideo'
-    | 'ExploreSuggestedAccounts'
-    | 'OnboardingSuggestedAccounts'
-    | 'FindContacts'
+      | 'RecommendedFollowsItem'
+      | 'PostThreadItem'
+      | 'ProfileCard'
+      | 'ProfileHeader'
+      | 'ProfileHeaderSuggestedFollows'
+      | 'ProfileMenu'
+      | 'ProfileHoverCard'
+      | 'Chat'
+      | 'AvatarButton'
+      | 'StarterPackProfilesList'
+      | 'FeedInterstitial'
+      | 'PostOnboardingFindFollows'
+      | 'ImmersiveVideo'
+      | 'ExploreSuggestedAccounts'
+      | 'OnboardingSuggestedAccounts'
+      | 'FindContacts'
   }
   'chat:create': {
     logContext: 'ProfileHeader' | 'NewChatDialog' | 'SendViaChatDialog'
   }
   'chat:open': {
     logContext:
-    | 'ProfileHeader'
-    | 'NewChatDialog'
-    | 'ChatsList'
-    | 'SendViaChatDialog'
+      | 'ProfileHeader'
+      | 'NewChatDialog'
+      | 'ChatsList'
+      | 'SendViaChatDialog'
   }
   'starterPack:addUser': {
     starterPack?: string
@@ -593,9 +593,9 @@ export type Events = {
 
   'test:all:always': {}
   'test:all:sometimes': {}
-  'test:all:boosted_by_gate1': { reason: 'base' | 'gate1' }
-  'test:all:boosted_by_gate2': { reason: 'base' | 'gate2' }
-  'test:all:boosted_by_both': { reason: 'base' | 'gate1' | 'gate2' }
+  'test:all:boosted_by_gate1': {reason: 'base' | 'gate1'}
+  'test:all:boosted_by_gate2': {reason: 'base' | 'gate2'}
+  'test:all:boosted_by_both': {reason: 'base' | 'gate1' | 'gate2'}
   'test:gate1:always': {}
   'test:gate1:sometimes': {}
   'test:gate2:always': {}
@@ -629,12 +629,12 @@ export type Events = {
 
   'explore:module:seen': {
     module:
-    | 'trendingTopics'
-    | 'trendingVideos'
-    | 'suggestedAccounts'
-    | 'suggestedFeeds'
-    | 'suggestedStarterPacks'
-    | `feed:${FeedDescriptor}`
+      | 'trendingTopics'
+      | 'trendingVideos'
+      | 'suggestedAccounts'
+      | 'suggestedFeeds'
+      | 'suggestedStarterPacks'
+      | `feed:${FeedDescriptor}`
   }
   'explore:module:searchButtonPress': {
     module: 'suggestedAccounts' | 'suggestedFeeds'
@@ -697,20 +697,84 @@ export type Events = {
   'reportDialog:failure': {}
 
   translate: {
-    sourceLanguages: string[]
-    targetLanguage: string
+    os: Platform['OS']
+    /**
+     * The languages the content might be in, such as the user-supplied
+     * language codes on posts. Currently only available on posts.
+     */
+    possibleSourceLanguages: string[] | undefined
+    /**
+     * This is the user's configured primary language, which is always defined.
+     */
+    expectedTargetLanguage: string
+    /**
+     * The length of the text being translated. We assume shorter texts are
+     * more likely to have inaccurate translations.
+     */
     textLength: number
+    googleTranslate: boolean
   }
   'translate:result': {
-    method: 'on-device' | 'google-translate' | 'fallback-alert'
+    success: boolean
     os: Platform['OS']
-    sourceLanguage: string | null
-    targetLanguage: string
+    /**
+     * The languages the content might be in, such as the user-supplied
+     * language codes on posts. Currently only available on posts.
+     */
+    possibleSourceLanguages: string[] | undefined
+    /**
+     * The language we expected the content to be in. This could be based on
+     * user selection or on our confidence in the detected language. This is
+     * nullable because we may not always have an expected source language.
+     */
+    expectedSourceLanguage: string | null
+    /**
+     * This is the user's configured primary language, which is always defined.
+     */
+    expectedTargetLanguage: string
+    /**
+     * The language the translation result was actually in. This is nullable
+     * because the translation could have failed, in which case we won't have a
+     * result source language.
+     */
+    resultSourceLanguage: string | null
+    /**
+     * The language the translation result was translated into. This should be
+     * the same as `expectedTargetLanguage`, but we include it for completeness
+     * and in case there are any edge cases where they differ. This is nullable
+     * because if the translation failed, we won't have a result target
+     * language.
+     */
+    resultTargetLanguage: string | null
+    /**
+     * The length of the text being translated. We assume shorter texts are
+     * more likely to have inaccurate translations.
+     */
+    textLength: number
   }
   'translate:override': {
     os: Platform['OS']
-    sourceLanguage: string
-    targetLanguage: string
+    /**
+     * The languages the content might be in, such as the user-supplied
+     * language codes on posts. Currently only available on posts.
+     */
+    possibleSourceLanguages: string[] | undefined
+    /**
+     * The language the user has indicated the content is actually in, which
+     * may be different from the expected source language if the user is
+     * overriding the auto-detected language. This is the language the user
+     * wants to translate from after overriding.
+     */
+    expectedSourceLanguage: string
+    /**
+     * This is the user's configured primary language, which is always defined.
+     */
+    expectedTargetLanguage: string
+    /**
+     * The language the translation result was actually in, which the user now
+     * wishes to override.
+     */
+    resultSourceLanguage: string
   }
 
   'postMenu:openMuteWordsDialog': {
@@ -749,22 +813,22 @@ export type Events = {
   'verification:badge:click': {}
   'verification:learn-more': {
     location:
-    | 'initialAnnouncementeNux'
-    | 'verificationsDialog'
-    | 'verifierDialog'
-    | 'verificationSettings'
+      | 'initialAnnouncementeNux'
+      | 'verificationsDialog'
+      | 'verifierDialog'
+      | 'verificationSettings'
   }
   'verification:settings:hideBadges': {}
   'verification:settings:unHideBadges': {}
 
-  'live:create': { duration: number }
+  'live:create': {duration: number}
   'live:edit': {}
   'live:remove': {}
-  'live:card:open': { subject: string; from: 'post' | 'profile' }
-  'live:card:watch': { subject: string }
-  'live:card:openProfile': { subject: string }
-  'live:view:profile': { subject: string }
-  'live:view:post': { subject: string; feed?: string }
+  'live:card:open': {subject: string; from: 'post' | 'profile'}
+  'live:card:watch': {subject: string}
+  'live:card:openProfile': {subject: string}
+  'live:view:profile': {subject: string}
+  'live:view:post': {subject: string; feed?: string}
 
   'post:share': {
     uri: string

@@ -10,8 +10,8 @@ import {
 import {Dimensions, View} from 'react-native'
 import * as Linking from 'expo-linking'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {retry} from '#/lib/async/retry'
 import {wait} from '#/lib/async/wait'

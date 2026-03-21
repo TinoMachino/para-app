@@ -8,11 +8,18 @@ const ACCOUNTS = [
   {handle: 'bob.test', password: PASSWORD, party: 'PAN', community: 'PAN'},
 ]
 
+function withCommunityLabel(text, community) {
+  return `${text} (p/${community})`
+}
+
 const POSTS = [
   {
     visibility: 'private',
     account: 'alice.test',
-    text: '[Seed] Official transit policy rollout for CDMX budget review.',
+    text: withCommunityLabel(
+      '[Seed] Official transit policy rollout for CDMX budget review.',
+      'Morena',
+    ),
     flairs: ['||#TransportePublico'],
     tags: ['||#TransportePublico'],
     postType: 'policy',
@@ -24,7 +31,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'alice.test',
-    text: '[Seed] Community inflation report from neighborhood assemblies this week.',
+    text: withCommunityLabel(
+      '[Seed] Community inflation report from neighborhood assemblies this week.',
+      'Morena',
+    ),
     flairs: ['|#Inflacion'],
     tags: ['|#Inflacion'],
     postType: 'matter',
@@ -35,7 +45,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'alice.test',
-    text: '[Seed] Meme draft about how every transit debate ends in another committee.',
+    text: withCommunityLabel(
+      '[Seed] Meme draft about how every transit debate ends in another committee.',
+      'Morena',
+    ),
     flairs: ['|#Pobreza'],
     tags: ['|#Pobreza', '#Meme'],
     postType: 'meme',
@@ -46,7 +59,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'bob.test',
-    text: '[Seed] RAQ note clarifying the democracy thread before voting closes.',
+    text: withCommunityLabel(
+      '[Seed] RAQ note clarifying the democracy thread before voting closes.',
+      'PAN',
+    ),
     flairs: ['|#Democracia'],
     tags: ['|#Democracia', '|#!RAQ'],
     postType: 'raq',
@@ -56,7 +72,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'bob.test',
-    text: '[Seed] Open question on whether the energy industry should be scoped as a local matter first.',
+    text: withCommunityLabel(
+      '[Seed] Open question on whether the energy industry should be scoped as a local matter first.',
+      'PAN',
+    ),
     flairs: ['|#IndustriaEnergetica'],
     tags: ['|#IndustriaEnergetica', '|#?OpenQuestion'],
     postType: 'open_question',
@@ -66,7 +85,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'bob.test',
-    text: '[Seed] Meta post about badge rollout, moderation labels, and community posting rules.',
+    text: withCommunityLabel(
+      '[Seed] Meta post about badge rollout, moderation labels, and community posting rules.',
+      'PAN',
+    ),
     flairs: ['|#Tecnologia'],
     tags: ['|#Tecnologia', '#META'],
     postType: 'meta',
@@ -76,7 +98,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'alice.test',
-    text: '[Seed] Competition entry for the tourism messaging sprint.',
+    text: withCommunityLabel(
+      '[Seed] Competition entry for the tourism messaging sprint.',
+      'Morena',
+    ),
     flairs: ['|#Turismo'],
     tags: ['|#Turismo', '#Competition'],
     postType: 'competition',
@@ -86,7 +111,10 @@ const POSTS = [
   {
     visibility: 'private',
     account: 'alice.test',
-    text: '[Seed] Fake article simulation about a sudden crime-policy turnaround.',
+    text: withCommunityLabel(
+      '[Seed] Fake article simulation about a sudden crime-policy turnaround.',
+      'Morena',
+    ),
     flairs: ['|#Delincuencia'],
     tags: ['|#Delincuencia', '#FakeArticle'],
     postType: 'fake_article',
@@ -96,7 +124,10 @@ const POSTS = [
   {
     visibility: 'public',
     account: 'alice.test',
-    text: '[Seed] Public mirror for community badge testing: official transit policy post.',
+    text: withCommunityLabel(
+      '[Seed] Public mirror for community badge testing: official transit policy post.',
+      'Morena',
+    ),
     tags: ['||#TransportePublico'],
     party: 'Morena',
     community: 'Morena',
@@ -104,7 +135,10 @@ const POSTS = [
   {
     visibility: 'public',
     account: 'alice.test',
-    text: '[Seed] Public mirror for community badge testing: inflation matter post.',
+    text: withCommunityLabel(
+      '[Seed] Public mirror for community badge testing: inflation matter post.',
+      'Morena',
+    ),
     tags: ['|#Inflacion'],
     party: 'Morena',
     community: 'Morena',
@@ -112,7 +146,10 @@ const POSTS = [
   {
     visibility: 'public',
     account: 'bob.test',
-    text: '[Seed] Public mirror for community badge testing: poverty matter post.',
+    text: withCommunityLabel(
+      '[Seed] Public mirror for community badge testing: poverty matter post.',
+      'PAN',
+    ),
     tags: ['|#Pobreza'],
     party: 'PAN',
     community: 'PAN',
@@ -120,7 +157,10 @@ const POSTS = [
   {
     visibility: 'public',
     account: 'bob.test',
-    text: '[Seed] Public mirror for community badge testing: official schools policy post.',
+    text: withCommunityLabel(
+      '[Seed] Public mirror for community badge testing: official schools policy post.',
+      'PAN',
+    ),
     tags: ['||#EscuelasPublicas'],
     party: 'PAN',
     community: 'PAN',

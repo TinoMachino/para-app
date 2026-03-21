@@ -1,8 +1,8 @@
-import React from 'react'
+import {useMemo} from 'react'
 import {type StyleProp, Text as RNText, type TextStyle} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
 import {type NavigationProp} from '#/lib/routes/types'
@@ -62,13 +62,13 @@ export function RichTextTag({
       optimisticUpsert?.find(
         m => m.value === tag && m.targets.includes('tag'),
       )) &&
-    !optimisticRemove?.find(m => m?.value === tag),
+      !optimisticRemove?.find(m => m?.value === tag),
   )
 
   /*
    * Mute word records that exactly match the tag in question.
    */
-  const removeableMuteWords = React.useMemo(() => {
+  const removeableMuteWords = useMemo(() => {
     return (
       preferences?.moderationPrefs.mutedWords?.filter(word => {
         return word.value === tag

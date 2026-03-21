@@ -1,4 +1,4 @@
-import { type Geolocation } from '#/geolocation'
+import {type Geolocation} from '#/geolocation'
 
 export type BaseMetadata = {
   deviceId: string

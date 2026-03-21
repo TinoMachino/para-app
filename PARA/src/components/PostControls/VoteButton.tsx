@@ -1,4 +1,4 @@
-import React from 'react'
+import {memo} from 'react'
 import {Platform, type StyleProp, View, type ViewStyle} from 'react-native'
 import {msg, plural} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -24,7 +24,7 @@ type Props = {
   style?: StyleProp<ViewStyle>
 }
 
-export const RedditVoteButton = React.memo(function RedditVoteButton({
+export const RedditVoteButton = memo(function RedditVoteButton({
   score,
   currentVote,
   big,

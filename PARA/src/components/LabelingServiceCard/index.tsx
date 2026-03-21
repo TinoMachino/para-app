@@ -1,9 +1,9 @@
+import {type ComponentType, type PropsWithChildren} from 'react'
 import {View} from 'react-native'
 import {type AppBskyLabelerDefs} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
-import {Plural, Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
-import type React from 'react'
+import {Plural, Trans} from '@lingui/react/macro'
 
 import {getLabelingServiceTitle} from '#/lib/moderation'
 import {sanitizeHandle} from '#/lib/strings/handles'
@@ -20,10 +20,7 @@ type LabelingServiceProps = {
   labeler: AppBskyLabelerDefs.LabelerViewDetailed
 }
 
-export function Outer({
-  children,
-  style,
-}: React.PropsWithChildren<ViewStyleProp>) {
+export function Outer({children, style}: PropsWithChildren<ViewStyleProp>) {
   return (
     <View
       style={[
@@ -101,7 +98,7 @@ export function LikeCount({likeCount}: {likeCount: number}) {
   )
 }
 
-export function Content({children}: React.PropsWithChildren<{}>) {
+export function Content({children}: PropsWithChildren<{}>) {
   const t = useTheme()
 
   return (
@@ -185,9 +182,9 @@ export function Loader({
   component: Component,
 }: {
   did: string
-  loading?: React.ComponentType<{}>
-  error?: React.ComponentType<{error: string}>
-  component: React.ComponentType<{
+  loading?: ComponentType<{}>
+  error?: ComponentType<{error: string}>
+  component: ComponentType<{
     labeler: AppBskyLabelerDefs.LabelerViewDetailed
   }>
 }) {

@@ -1,43 +1,43 @@
-import React from 'react'
-import { Pressable, View } from 'react-native'
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
+import {useEffect, useState} from 'react'
+import {Pressable, View} from 'react-native'
+import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {
   AppBskyGraphDefs,
   AppBskyGraphStarterpack,
   AtUri,
   type ModerationOpts,
 } from '@atproto/api'
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { JOINED_THIS_WEEK } from '#/lib/constants'
-import { useWebMediaQueries } from '#/lib/hooks/useWebMediaQueries'
-import { logEvent } from '#/lib/statsig/statsig'
-import { createStarterPackGooglePlayUri } from '#/lib/strings/starter-pack'
-import { useModerationOpts } from '#/state/preferences/moderation-opts'
-import { useStarterPackQuery } from '#/state/queries/starter-packs'
+import {JOINED_THIS_WEEK} from '#/lib/constants'
+import {useWebMediaQueries} from '#/lib/hooks/useWebMediaQueries'
+import {logEvent} from '#/lib/statsig/statsig'
+import {createStarterPackGooglePlayUri} from '#/lib/strings/starter-pack'
+import {useModerationOpts} from '#/state/preferences/moderation-opts'
+import {useStarterPackQuery} from '#/state/queries/starter-packs'
 import {
   useActiveStarterPack,
   useSetActiveStarterPack,
 } from '#/state/shell/starter-pack'
-import { LoggedOutScreenState } from '#/view/com/auth/LoggedOut'
-import { formatCount } from '#/view/com/util/numeric/format'
-import { Logo } from '#/view/icons/Logo'
-import { atoms as a, useTheme } from '#/alf'
-import { Button, ButtonText } from '#/components/Button'
-import { useDialogControl } from '#/components/Dialog'
+import {LoggedOutScreenState} from '#/view/com/auth/LoggedOut'
+import {formatCount} from '#/view/com/util/numeric/format'
+import {Logo} from '#/view/icons/Logo'
+import {atoms as a, useTheme} from '#/alf'
+import {Button, ButtonText} from '#/components/Button'
+import {useDialogControl} from '#/components/Dialog'
 import * as FeedCard from '#/components/FeedCard'
-import { useRichText } from '#/components/hooks/useRichText'
+import {useRichText} from '#/components/hooks/useRichText'
 import * as Layout from '#/components/Layout'
-import { LinearGradientBackground } from '#/components/LinearGradientBackground'
-import { ListMaybePlaceholder } from '#/components/Lists'
-import { Default as ProfileCard } from '#/components/ProfileCard'
+import {LinearGradientBackground} from '#/components/LinearGradientBackground'
+import {ListMaybePlaceholder} from '#/components/Lists'
+import {Default as ProfileCard} from '#/components/ProfileCard'
 import * as Prompt from '#/components/Prompt'
-import { RichText } from '#/components/RichText'
-import { Text } from '#/components/Typography'
-import { IS_WEB, IS_WEB_MOBILE_ANDROID } from '#/env'
+import {RichText} from '#/components/RichText'
+import {Text} from '#/components/Typography'
+import {IS_WEB, IS_WEB_MOBILE_ANDROID} from '#/env'
 import * as bsky from '#/types/bsky'
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -75,7 +75,7 @@ export function LandingScreen({
     AppBskyGraphDefs.validateStarterPackView(starterPack) &&
     AppBskyGraphStarterpack.validateRecord(starterPack.record)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isErrorStarterPack || (starterPack && !isValid)) {
       setScreenState(LoggedOutScreenState.S_LoginOrCreateAccount)
     }
@@ -118,17 +118,16 @@ function LandingScreenLoaded({
   setScreenState: (state: LoggedOutScreenState) => void
   moderationOpts: ModerationOpts
 }) {
-  const { creator, listItemsSample, feeds } = starterPack
-  const { _, i18n } = useLingui()
+  const {creator, listItemsSample, feeds} = starterPack
+  const {_, i18n} = useLingui()
   const t = useTheme()
   const activeStarterPack = useActiveStarterPack()
   const setActiveStarterPack = useSetActiveStarterPack()
-  const { isTabletOrDesktop } = useWebMediaQueries()
+  const {isTabletOrDesktop} = useWebMediaQueries()
   const androidDialogControl = useDialogControl()
   const [descriptionRt] = useRichText(record.description || '')
 
-  const [appClipOverlayVisible, setAppClipOverlayVisible] =
-    React.useState(false)
+  const [appClipOverlayVisible, setAppClipOverlayVisible] = useState(false)
 
   const listItemsCount = starterPack.list?.listItemCount ?? 0
 
@@ -187,7 +186,7 @@ function LandingScreenLoaded({
               a.text_4xl,
               a.text_center,
               a.leading_tight,
-              { color: 'white' },
+              {color: 'white'},
             ]}>
             {record.name}
           </Text>
@@ -196,7 +195,7 @@ function LandingScreenLoaded({
               a.text_center,
               a.font_semi_bold,
               a.text_md,
-              { color: 'white' },
+              {color: 'white'},
             ]}>
             Starter pack by {`@${creator.handle}`}
           </Text>
@@ -266,7 +265,7 @@ function LandingScreenLoaded({
                           a.px_md,
                           (!isTabletOrDesktop || i !== 0) && a.border_t,
                           t.atoms.border_contrast_low,
-                          { pointerEvents: 'none' },
+                          {pointerEvents: 'none'},
                         ]}>
                         <ProfileCard
                           profile={item.subject}
@@ -285,7 +284,7 @@ function LandingScreenLoaded({
 
                 <View
                   style={[
-                    { pointerEvents: 'none' },
+                    {pointerEvents: 'none'},
                     isTabletOrDesktop && [
                       a.border,
                       a.rounded_md,
@@ -394,18 +393,18 @@ export function AppClipOverlay({
       entering={FadeIn}
       exiting={FadeOut}
       onPress={() => setIsVisible(false)}>
-      <View style={[a.flex_1, a.px_lg, { marginTop: 250 }]}>
+      <View style={[a.flex_1, a.px_lg, {marginTop: 250}]}>
         {/* Webkit needs this to have a zindex of 2? */}
-        <View style={[a.gap_md, { zIndex: 2 }]}>
+        <View style={[a.gap_md, {zIndex: 2}]}>
           <Text
             style={[
               a.font_semi_bold,
               a.text_4xl,
-              { lineHeight: 40, color: 'white' },
+              {lineHeight: 40, color: 'white'},
             ]}>
             Download PARA to get started!
           </Text>
-          <Text style={[a.text_lg, { color: 'white' }]}>
+          <Text style={[a.text_lg, {color: 'white'}]}>
             We'll remember the starter pack you chose and use it when you create
             an account in the app.
           </Text>

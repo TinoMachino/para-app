@@ -40,43 +40,67 @@ export function useGetSuggestedUsersQuery(props: QueryProps) {
     queryFn: async () => {
       const contentLangs = getContentLanguages().join(',')
       const userInterests = aggregateUserInterests(preferences)
+      const limit = props.limit || 10
 
       const interests =
         props.overrideInterests && props.overrideInterests.length > 0
           ? props.overrideInterests.join(',')
           : userInterests
 
+      try {
+        const {data} = await agent.app.bsky.unspecced.getSuggestedUsers(
+          {
+            category: props.category ?? undefined,
+            limit,
+          },
+          {
+            headers: {
+              ...createBskyTopicsHeader(interests),
+              'Accept-Language': contentLangs,
+            },
+          },
+        )
+        // FALLBACK: if no results for the default feed, try again without
+        // interests specified.
+        if (!props.category && data.actors.length === 0) {
+          logger.error(
+            `Did not get any suggested users, falling back - interests: ${interests}`,
+          )
+          const {data: fallbackData} =
+            await agent.app.bsky.unspecced.getSuggestedUsers(
+              {
+                limit,
+              },
+              {
+                headers: {
+                  'Accept-Language': contentLangs,
+                },
+              },
+            )
+          return fallbackData
+        }
+
+        return data
+      } catch (error) {
+        logger.warn(
+          'Suggested users request failed, retrying without filters',
+          {
+            category: props.category ?? 'all',
+            error,
+          },
+        )
+      }
+
       const {data} = await agent.app.bsky.unspecced.getSuggestedUsers(
         {
-          category: props.category ?? undefined,
-          limit: props.limit || 10,
+          limit,
         },
         {
           headers: {
-            ...createBskyTopicsHeader(interests),
             'Accept-Language': contentLangs,
           },
         },
       )
-      // FALLBACK: if no results for 'all', try again with no interests specified
-      if (!props.category && data.actors.length === 0) {
-        logger.error(
-          `Did not get any suggested users, falling back - interests: ${interests}`,
-        )
-        const {data: fallbackData} =
-          await agent.app.bsky.unspecced.getSuggestedUsers(
-            {
-              category: props.category ?? undefined,
-              limit: props.limit || 10,
-            },
-            {
-              headers: {
-                'Accept-Language': contentLangs,
-              },
-            },
-          )
-        return fallbackData
-      }
 
       return data
     },

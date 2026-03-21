@@ -1,15 +1,15 @@
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { atoms as a } from '#/alf'
-import { Button, ButtonText } from '#/components/Button'
+import {atoms as a} from '#/alf'
+import {Button, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
 import * as Prompt from '#/components/Prompt'
-import { useAnalytics } from '#/analytics'
-import { DraftsListDialog } from './DraftsListDialog'
-import { useSaveDraftMutation } from './state/queries'
-import { type DraftSummary } from './state/schema'
+import {useAnalytics} from '#/analytics'
+import {DraftsListDialog} from './DraftsListDialog'
+import {useSaveDraftMutation} from './state/queries'
+import {type DraftSummary} from './state/schema'
 
 export function DraftsButton({
   onSelectDraft,
@@ -28,11 +28,11 @@ export function DraftsButton({
   isEditingDraft: boolean
   textLength: number
 }) {
-  const { _ } = useLingui()
+  const {_} = useLingui()
   const ax = useAnalytics()
   const draftsDialogControl = Dialog.useDialogControl()
   const savePromptControl = Prompt.usePromptControl()
-  const { isPending: isSaving } = useSaveDraftMutation()
+  const {isPending: isSaving} = useSaveDraftMutation()
 
   const handlePress = () => {
     if (isEmpty || !isDirty) {
@@ -68,10 +68,10 @@ export function DraftsButton({
         color="primary"
         shape="default"
         size="small"
-        style={[a.rounded_full, a.py_sm, a.px_md, a.mx_xs]}
+        style={[a.py_sm, a.px_md, a.mx_xs]}
         disabled={isSaving}
         onPress={handlePress}>
-        <ButtonText style={[a.text_md]}>
+        <ButtonText style={[a.text_md]} maxFontSizeMultiplier={2}>
           <Trans>Drafts</Trans>
         </ButtonText>
       </Button>
@@ -98,7 +98,8 @@ export function DraftsButton({
               </Trans>
             ) : (
               <Trans>
-                Would you like to save this as a draft before viewing your drafts?
+                Would you like to save this as a draft before viewing your
+                drafts?
               </Trans>
             )}
           </Prompt.DescriptionText>

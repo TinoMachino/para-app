@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import {useState} from 'react'
 import {LayoutAnimation, StyleSheet, TouchableOpacity, View} from 'react-native'
 
 import {useGlobalFilter} from '#/state/shell/global-filter'

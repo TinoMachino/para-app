@@ -5,7 +5,7 @@ import Animated, {
   type SharedValue,
   useAnimatedStyle,
 } from 'react-native-reanimated'
-import type React from 'react'
+import type {ReactNode} from 'react'
 
 import {usePagerHeaderContext} from '#/view/com/pager/PagerHeaderContext'
 import {IS_IOS} from '#/env'
@@ -14,7 +14,7 @@ export function GrowableAvatar({
   children,
   style,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   style?: StyleProp<ViewStyle>
 }) {
   const pagerContext = usePagerHeaderContext()
@@ -39,7 +39,7 @@ function GrowableAvatarInner({
   style,
 }: {
   scrollY: SharedValue<number>
-  children: React.ReactNode
+  children: ReactNode
   style?: StyleProp<ViewStyle>
 }) {
   const animatedStyle = useAnimatedStyle(() => ({

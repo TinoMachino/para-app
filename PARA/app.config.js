@@ -270,7 +270,7 @@ module.exports = function (_config) {
               buildReactNativeFromSource: true,
             },
             android: {
-              compileSdkVersion: 35,
+              compileSdkVersion: 36,
               targetSdkVersion: 35,
               buildToolsVersion: '35.0.0',
               buildReactNativeFromSource: IS_PRODUCTION,
@@ -312,6 +312,8 @@ module.exports = function (_config) {
             fonts: [
               './assets/fonts/inter/InterVariable.woff2',
               './assets/fonts/inter/InterVariable-Italic.woff2',
+              './assets/fonts/Cinzel/Cinzel-VariableFont_wght.ttf',
+              './assets/fonts/Cinzel/static/Cinzel-SemiBold.ttf',
               // Android only
               './assets/fonts/inter/Inter-Regular.otf',
               './assets/fonts/inter/Inter-Italic.otf',
@@ -330,7 +332,7 @@ module.exports = function (_config) {
             ios: {
               enableFullScreenImage_legacy: true, // iOS only
               backgroundColor: '#A8CCFF', // primary_200
-              image: './assets/splash/splash.png',
+              image: './assets/splash/splash-light.png',
               resizeMode: 'cover',
               dark: {
                 enableFullScreenImage_legacy: true, // iOS only
@@ -369,7 +371,7 @@ module.exports = function (_config) {
             },
 
             /**
-             * Bluesky+ core set
+             * PARA+ core set
              */
             core_aurora: {
               ios: './assets/app-icons/ios_icon_core_aurora.png',
@@ -444,7 +446,7 @@ module.exports = function (_config) {
                         'group.com.parasocial.app',
                       ],
                     },
-                  }
+                  },
                 ],
               },
             },

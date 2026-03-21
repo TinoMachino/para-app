@@ -10,13 +10,13 @@ export type NotificationType =
 
 export type FeedNotification =
   | (FeedNotificationBase & {
-    type: StarterPackNotificationType
-    subject?: AppBskyGraphDefs.StarterPackViewBasic
-  })
+      type: StarterPackNotificationType
+      subject?: AppBskyGraphDefs.StarterPackViewBasic
+    })
   | (FeedNotificationBase & {
-    type: OtherNotificationType
-    subject?: AppBskyFeedDefs.PostView
-  })
+      type: OtherNotificationType
+      subject?: AppBskyFeedDefs.PostView
+    })
 
 export interface FeedPage {
   cursor: string | undefined

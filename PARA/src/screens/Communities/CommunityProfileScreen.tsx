@@ -16,11 +16,15 @@ import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation, useRoute} from '@react-navigation/native'
 
-import {buildMockCommunityGovernance} from '#/lib/community-governance'
+import {type CommunityGovernanceView} from '#/lib/community-governance'
 import {useInitialNumToRender} from '#/lib/hooks/useInitialNumToRender'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {getPostBadges} from '#/lib/post-flairs'
 import {type NavigationProp} from '#/lib/routes/types'
+import {
+  buildCommunitySearchQuery,
+  formatCommunityName,
+} from '#/lib/strings/community-names'
 import {cleanError} from '#/lib/strings/errors'
 import {useCommunityGovernanceQuery} from '#/state/queries/community-governance'
 import {useSearchPostsQuery} from '#/state/queries/search-posts'
@@ -44,6 +48,20 @@ type CommunityProfileParams = {
   communityName: string
 }
 
+const EMPTY_GOVERNANCE: CommunityGovernanceView = {
+  source: 'network',
+  community: '',
+  communityId: undefined,
+  slug: '',
+  createdAt: '',
+  updatedAt: '',
+  moderators: [],
+  officials: [],
+  deputies: [],
+  metadata: undefined,
+  editHistory: [],
+}
+
 export function CommunityProfileScreen() {
   if (
     Platform.OS === 'android' &&
@@ -65,13 +83,33 @@ export function CommunityProfileScreen() {
   const communityId =
     route.params?.communityId || route.params?._communityId || '1'
   const {communityName = 'Community'} = route.params || {}
-  const {data: fetchedGovernance} = useCommunityGovernanceQuery({
+  const agentDisplayName = 'Agente Xavier Exul'
+  const formattedCommunity = useMemo(
+    () => formatCommunityName(communityName),
+    [communityName],
+  )
+  const {
+    data: fetchedGovernance,
+    isLoading: isGovernanceLoading,
+    isError: isGovernanceError,
+    refetch: refetchGovernance,
+  } = useCommunityGovernanceQuery({
     communityName,
     communityId,
   })
-  const governance =
-    fetchedGovernance ||
-    buildMockCommunityGovernance(communityName, communityId)
+  const governance = fetchedGovernance || EMPTY_GOVERNANCE
+  const communitySearchQuery = useMemo(
+    () =>
+      buildCommunitySearchQuery(communityName, fetchedGovernance?.community),
+    [communityName, fetchedGovernance?.community],
+  )
+  const governanceCommunity = fetchedGovernance?.community
+  const displayCommunityName = governanceCommunity
+    ? formatCommunityName(governanceCommunity).displayName
+    : formattedCommunity.displayName
+  const plainCommunityName = governanceCommunity
+    ? formatCommunityName(governanceCommunity).plainName
+    : formattedCommunity.plainName
 
   const {
     data,
@@ -83,7 +121,7 @@ export function CommunityProfileScreen() {
     refetch,
     fetchNextPage,
     hasNextPage,
-  } = useSearchPostsQuery({query: communityName, sort: 'latest'})
+  } = useSearchPostsQuery({query: communitySearchQuery, sort: 'latest'})
 
   const posts = useMemo(() => {
     return data?.pages.flatMap(page => page.posts) || []
@@ -110,9 +148,9 @@ export function CommunityProfileScreen() {
 
   const onRefresh = useCallback(async () => {
     setIsPTR(true)
-    await refetch()
+    await Promise.all([refetch(), refetchGovernance()])
     setIsPTR(false)
-  }, [refetch])
+  }, [refetch, refetchGovernance])
   const onPullToRefresh = useCallback(() => {
     void onRefresh()
   }, [onRefresh])
@@ -125,12 +163,22 @@ export function CommunityProfileScreen() {
   const communityStats = useMemo(() => {
     let policyPosts = 0
     let matterPosts = 0
+    let raqPosts = 0
     const badgeHolders = new Set<string>()
     const visiblePosters = new Set<string>()
 
     for (const post of posts) {
       visiblePosters.add(post.author.did)
       const badges = getPostBadges(post.record as any)
+      if (
+        badges.some(
+          badge =>
+            badge.key === 'postType:raq' ||
+            badge.key === 'postType:open_question',
+        )
+      ) {
+        raqPosts += 1
+      }
       if (badges.some(badge => badge.kind === 'policy')) {
         policyPosts += 1
         badgeHolders.add(post.author.did)
@@ -144,17 +192,13 @@ export function CommunityProfileScreen() {
     return {
       policyPosts,
       matterPosts,
+      raqPosts,
       badgeHolders: badgeHolders.size,
       visiblePosters: visiblePosters.size,
     }
   }, [posts])
 
-  const stats = {
-    posts: posts.length,
-    members: 3486,
-    online: 253,
-    created: '2020-01-15',
-  }
+  const createdAt = fetchedGovernance?.createdAt || governance.createdAt
 
   const onPressDocuments = () => {
     navigation.navigate('MemesAndDocuments', {mode: 'Documents'})
@@ -197,7 +241,14 @@ export function CommunityProfileScreen() {
   }
 
   const onPressChat = () => {
-    navigation.navigate('AgentChat', {agentId: 'Agente Xavier Exul'})
+    navigation.navigate('AgentChat', {agentId: agentDisplayName})
+  }
+
+  const onPressAgentProfile = () => {
+    navigation.navigate('CommunityAgentProfile', {
+      agentId: agentDisplayName,
+      communityName,
+    })
   }
 
   const rules = [
@@ -240,17 +291,17 @@ export function CommunityProfileScreen() {
                   ]}>
                   <Text
                     style={[styles.avatarText, {color: t.palette.primary_500}]}>
-                    {communityName.charAt(0).toUpperCase()}
+                    {plainCommunityName.charAt(0).toUpperCase()}
                   </Text>
                 </View>
 
                 <View style={styles.heroTopInfo}>
                   {/* Community Name */}
                   <Text style={styles.communityNameCompact}>
-                    p/{communityName}
+                    {displayCommunityName}
                   </Text>
                   <Text style={styles.communitySubtitle}>
-                    Moderation, representation, and digital delegation overview.
+                    Community governance, representation, and civic activity.
                   </Text>
                 </View>
 
@@ -294,14 +345,15 @@ export function CommunityProfileScreen() {
               {/* Member Stats Row */}
               <View style={styles.memberStatsRow}>
                 <Text style={styles.memberStatsText}>
-                  {stats.members.toLocaleString()} miembros,{' '}
-                  {stats.online.toLocaleString()} en línea,{' '}
-                  {communityStats.visiblePosters.toLocaleString()} figura
-                  publica, {stats.posts.toLocaleString()} posts
+                  {posts.length.toLocaleString()} indexed posts,{' '}
+                  {communityStats.visiblePosters.toLocaleString()} visible
+                  posters, {communityStats.policyPosts.toLocaleString()} policy
+                  posts, {communityStats.matterPosts.toLocaleString()} matter
+                  posts
                 </Text>
               </View>
 
-              {/* Voter Stats Row */}
+              {/* Activity Stats Row */}
               <View style={styles.voterStatsRow}>
                 <View
                   style={{
@@ -316,18 +368,24 @@ export function CommunityProfileScreen() {
                       accessibilityRole="button"
                       onPress={onPressRAQ}>
                       <Text style={styles.voterStatsText}>
-                        12 |?!#RAQappends
+                        {communityStats.raqPosts.toLocaleString()} RAQ posts
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       accessibilityRole="button"
-                      onPress={onPressCabildeo}>
-                      <Text style={styles.voterStatsText}>9 |#|cabildeos</Text>
+                      onPress={onPressVoters}>
+                      <Text style={styles.voterStatsText}>
+                        {communityStats.badgeHolders.toLocaleString()} badge
+                        holders
+                      </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       accessibilityRole="button"
-                      onPress={onPressVoters}>
-                      <Text style={styles.voterStatsText}>763 |voters</Text>
+                      onPress={onPressBadges}>
+                      <Text style={styles.voterStatsText}>
+                        {governance.deputies.length.toLocaleString()} deputy
+                        roles
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -346,7 +404,7 @@ export function CommunityProfileScreen() {
               {
                 backgroundColor:
                   t.scheme === 'dark'
-                    ? 'rgba(88, 85, 214, 0.18)'
+                    ? t.palette.contrast_25
                     : 'rgba(67, 56, 202, 0.06)',
                 paddingVertical: 10,
                 paddingHorizontal: 16,
@@ -391,7 +449,7 @@ export function CommunityProfileScreen() {
                   {
                     backgroundColor:
                       t.scheme === 'dark'
-                        ? 'rgba(255, 255, 255, 0.08)'
+                        ? t.palette.contrast_50
                         : 'rgba(67, 56, 202, 0.08)',
                     width: 28,
                     height: 28,
@@ -417,7 +475,9 @@ export function CommunityProfileScreen() {
                       styles.aiDelegateActionPrimary,
                       {
                         backgroundColor: isFollowingAgent
-                          ? t.palette.primary_100
+                          ? t.scheme === 'dark'
+                            ? t.palette.contrast_50
+                            : t.palette.primary_100
                           : t.palette.primary_500,
                         paddingVertical: 8,
                       },
@@ -427,7 +487,9 @@ export function CommunityProfileScreen() {
                         styles.aiDelegateActionPrimaryText,
                         {
                           color: isFollowingAgent
-                            ? t.palette.primary_700
+                            ? t.scheme === 'dark'
+                              ? t.palette.primary_100
+                              : t.palette.primary_700
                             : '#fff',
                           fontSize: 13,
                         },
@@ -440,7 +502,13 @@ export function CommunityProfileScreen() {
                     onPress={onPressChat}
                     style={[
                       styles.aiDelegateActionSecondary,
-                      {borderColor: t.palette.primary_200, paddingVertical: 8},
+                      {
+                        borderColor:
+                          t.scheme === 'dark'
+                            ? t.palette.contrast_100
+                            : t.palette.primary_200,
+                        paddingVertical: 8,
+                      },
                     ]}>
                     <ChatIcon
                       style={{color: t.palette.primary_500}}
@@ -455,6 +523,31 @@ export function CommunityProfileScreen() {
                     </Text>
                   </TouchableOpacity>
                 </View>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={onPressAgentProfile}
+                  style={[
+                    styles.aiDelegateActionSecondary,
+                    styles.aiDelegateActionWide,
+                    {
+                      borderColor:
+                        t.scheme === 'dark'
+                          ? t.palette.contrast_100
+                          : t.palette.primary_200,
+                    },
+                  ]}>
+                  <MacintoshIcon
+                    style={{color: t.palette.primary_500}}
+                    size="xs"
+                  />
+                  <Text
+                    style={[
+                      styles.aiDelegateActionSecondaryText,
+                      {color: t.palette.primary_500, fontSize: 13},
+                    ]}>
+                    View profile
+                  </Text>
+                </TouchableOpacity>
               </View>
             ) : null}
           </TouchableOpacity>
@@ -604,7 +697,8 @@ export function CommunityProfileScreen() {
                       {
                         key: 'cabildeo',
                         title: 'Cabildeo',
-                        subtitle: 'Open scoped deliberations for this party',
+                        subtitle:
+                          'Open scoped deliberations for this community',
                         icon: '|#|',
                         onPress: onPressCabildeo,
                         bg: t.palette.primary_100,
@@ -688,10 +782,31 @@ export function CommunityProfileScreen() {
                       </TouchableOpacity>
                     </View>
                     <Text style={[styles.aboutHelperText, pal.textLight]}>
-                      {governance.source === 'mock'
-                        ? 'This community has not published governance yet. The badge directory shows a structured fallback until a moderator publishes the first record.'
-                        : `Published governance currently lists ${governance.moderators.length} moderators, ${governance.officials.length} official representatives, and ${governance.deputies.length} deputy roles.`}
+                      {isGovernanceLoading
+                        ? 'Loading published governance record...'
+                        : isGovernanceError
+                          ? 'Could not load governance right now. You can retry and continue browsing other sections.'
+                          : fetchedGovernance
+                            ? `Published governance currently lists ${governance.moderators.length} moderators, ${governance.officials.length} official representatives, and ${governance.deputies.length} deputy roles.`
+                            : 'This community has not published a governance record yet.'}
                     </Text>
+                    {isGovernanceError ? (
+                      <TouchableOpacity
+                        accessibilityRole="button"
+                        onPress={() => void refetchGovernance()}
+                        style={[
+                          styles.badgesSectionButton,
+                          {borderColor: t.palette.contrast_100},
+                        ]}>
+                        <Text
+                          style={[
+                            styles.badgesSectionButtonText,
+                            {color: t.palette.primary_500},
+                          ]}>
+                          Retry governance
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
                     <View style={styles.badgesCardsRow}>
                       <TouchableOpacity
                         accessibilityRole="button"
@@ -738,28 +853,34 @@ export function CommunityProfileScreen() {
                     </View>
                   </View>
                   <Text style={[styles.aboutText, pal.text]}>
-                    Welcome to {communityName}! This is a vibrant community
-                    dedicated to meaningful discussions and connections.
+                    {plainCommunityName} is a community space for governance,
+                    public coordination, and structured participation.
                   </Text>
-                  <View style={styles.aboutInfo}>
-                    <Text style={[styles.aboutLabel, pal.textLight]}>
-                      Created:
-                    </Text>
-                    <Text style={[styles.aboutValue, pal.text]}>
-                      {new Date(stats.created).toLocaleDateString()}
-                    </Text>
-                  </View>
+                  {createdAt ? (
+                    <View style={styles.aboutInfo}>
+                      <Text style={[styles.aboutLabel, pal.textLight]}>
+                        Created:
+                      </Text>
+                      <Text style={[styles.aboutValue, pal.text]}>
+                        {new Date(createdAt).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  ) : null}
                   <View style={styles.aboutInfo}>
                     <Text style={[styles.aboutLabel, pal.textLight]}>
                       Moderators:
                     </Text>
                     <Text style={[styles.aboutValue, pal.text]}>
-                      {governance.moderators
-                        .map(
-                          member =>
-                            member.displayName || member.handle || member.did,
-                        )
-                        .join(', ')}
+                      {governance.moderators.length
+                        ? governance.moderators
+                            .map(
+                              member =>
+                                member.displayName ||
+                                member.handle ||
+                                member.did,
+                            )
+                            .join(', ')
+                        : 'Not published yet'}
                     </Text>
                   </View>
                 </View>
@@ -1051,6 +1172,7 @@ const styles = StyleSheet.create({
   aiDelegateActions: {
     flexDirection: 'row',
     gap: 10,
+    flexWrap: 'wrap',
   },
   aiDelegateActionPrimary: {
     flex: 1,
@@ -1076,6 +1198,9 @@ const styles = StyleSheet.create({
   aiDelegateActionSecondaryText: {
     fontSize: 14,
     fontWeight: '700',
+  },
+  aiDelegateActionWide: {
+    width: '100%',
   },
   // Old hero styles removed (communityName, memberCount, joinButton, etc.)
   statsBar: {

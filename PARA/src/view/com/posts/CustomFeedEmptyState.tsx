@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import {useCallback, useEffect, useRef} from 'react'
 import {StyleSheet, View} from 'react-native'
 import {
   FontAwesomeIcon,
@@ -22,7 +22,7 @@ import {Text} from '../util/text/Text'
 export function CustomFeedEmptyState() {
   const feedFeedback = useFeedFeedbackContext()
   const {currentAccount} = useSession()
-  const hasLoggedDiscoverEmptyErrorRef = React.useRef(false)
+  const hasLoggedDiscoverEmptyErrorRef = useRef(false)
 
   useEffect(() => {
     // Log the empty feed error event
@@ -43,12 +43,11 @@ export function CustomFeedEmptyState() {
   const palInverted = usePalette('inverted')
   const navigation = useNavigation<NavigationProp>()
 
-  const onPressFindAccounts = React.useCallback(() => {
+  const onPressFindAccounts = useCallback(() => {
     if (IS_WEB) {
       navigation.navigate('Search', {})
     } else {
       navigation.navigate('SearchTab')
-      navigation.popToTop()
     }
   }, [navigation])
 

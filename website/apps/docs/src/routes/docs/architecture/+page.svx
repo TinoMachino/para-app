@@ -1,0 +1,34 @@
+<svelte:head>
+	<title>Backend Architecture • PARA Docs</title>
+</svelte:head>
+
+<section class="docs-hero-card">
+	<p class="docs-hero-kicker">Architecture</p>
+	# Backend architecture
+
+	watx is a TypeScript atproto-style backend repo. For this site, it is the source of truth for backend framing, especially around lexicons, service boundaries, and runtime vocabulary.
+</section>
+
+## Core frame
+
+- **Lexicons:** `com.atproto.*`, `app.bsky.*`, and `com.para.*` form the schema surface
+- **PDS:** personal data hosting and repo storage concerns live in the PDS layer
+- **AppView:** application-specific API surfaces and read models live in the appview/service layer
+- **Shared packages:** identity, repo, xrpc, and related helpers define the platform vocabulary underneath PARA
+
+## Para-specific layer
+
+The `com.para.*` lexicons extend that stack with Para-specific records and views:
+
+- post records with flairs and post types
+- community governance views
+- actor influence and status models
+- public status records
+
+## Product relationship
+
+PARA exposes routes for messages, communities, representatives, moderation, verification, RAQ, and civic participation. The docs should present those as product surfaces built on top of the watx schema and service layers.
+
+## Supporting context
+
+If Germ matters for implementation, it should appear only as supporting context inside architecture notes like this one. It should not become a top-level docs destination or compete with the Para/watx structure.

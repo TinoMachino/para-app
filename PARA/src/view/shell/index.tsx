@@ -50,8 +50,6 @@ import {updateActiveViewAsync} from '../../../modules/expo-bluesky-swiss-army/sr
 import {Composer} from './Composer'
 import {DrawerContent} from './Drawer'
 
-const CLOSED_DRAWER_SWIPE_EDGE_WIDTH = 16
-
 function ShellInner() {
   const winDim = useWindowDimensions()
   const insets = useSafeAreaInsets()
@@ -190,9 +188,7 @@ function DrawerLayout({children}: {children: React.ReactNode}) {
       open={isDrawerOpen}
       onOpen={onOpenDrawer}
       onClose={onCloseDrawer}
-      swipeEdgeWidth={
-        isDrawerOpen ? winDim.width : CLOSED_DRAWER_SWIPE_EDGE_WIDTH
-      }
+      swipeEdgeWidth={winDim.width}
       swipeMinVelocity={100}
       swipeMinDistance={10}
       drawerType={IS_IOS ? 'slide' : 'front'}

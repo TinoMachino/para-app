@@ -1,4 +1,6 @@
-import React, {
+import {
+  Fragment,
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -214,7 +216,7 @@ export const ComposePost = ({
   logContext,
   cancelRef,
 }: Props & {
-  cancelRef?: React.RefObject<CancelRef | null>
+  cancelRef?: RefObject<CancelRef | null>
 }) => {
   const {currentAccount} = useSession()
   const agent = useAgent()
@@ -362,7 +364,7 @@ export const ComposePost = ({
     [classificationPost.id],
   )
 
-  const selectVideo = React.useCallback(
+  const selectVideo = useCallback(
     (postId: string, asset: ImagePickerAsset) => {
       const abortController = new AbortController()
       composerDispatch({
@@ -548,7 +550,7 @@ export const ComposePost = ({
     [_, agent, currentDid, composerDispatch],
   )
 
-  const handleSelectDraft = React.useCallback(
+  const handleSelectDraft = useCallback(
     async (draftSummary: DraftSummary) => {
       logger.debug('loading draft for editing', {
         draftId: draftSummary.id,
@@ -657,7 +659,7 @@ export const ComposePost = ({
   }, [composerState, saveDraft, composerDispatch, onClose, _, ax])
 
   // Handle discard action - fires metric and closes composer
-  const handleDiscard = React.useCallback(() => {
+  const handleDiscard = useCallback(() => {
     const posts = thread.posts
     const hasContent = posts.some(
       post =>
@@ -777,7 +779,7 @@ export const ComposePost = ({
     )
   }, [thread.posts])
 
-  const onPressPublish = React.useCallback(async () => {
+  const onPressPublish = useCallback(async () => {
     if (isPublishing) {
       return
     }
@@ -1054,7 +1056,7 @@ export const ComposePost = ({
     onPressPublish()
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (publishOnUpload) {
       let erroredVideos = 0
       let uploadingVideos = 0
@@ -1100,8 +1102,7 @@ export const ComposePost = ({
     if (rect) {
       openEmojiPicker?.({
         ...rect,
-        nextFocusRef:
-          textInput as unknown as React.MutableRefObject<HTMLElement>,
+        nextFocusRef: textInput as unknown as MutableRefObject<HTMLElement>,
       })
     }
   }, [openEmojiPicker])
@@ -1233,7 +1234,7 @@ export const ComposePost = ({
             onLayout={onScrollViewLayout}>
             {replyTo ? <ComposerReplyTo replyTo={replyTo} /> : undefined}
             {thread.posts.map((post, index) => (
-              <React.Fragment key={post.id + (composerState.draftId ?? '')}>
+              <Fragment key={post.id + (composerState.draftId ?? '')}>
                 <ComposerPost
                   post={post}
                   dispatch={composerDispatch}
@@ -1253,7 +1254,7 @@ export const ComposePost = ({
                 {isWebFooterSticky && post.id === activePost.id && (
                   <View style={styles.stickyFooterWeb}>{footer}</View>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </Animated.ScrollView>
           {!isWebFooterSticky && footer}
@@ -1315,7 +1316,7 @@ export const ComposePost = ({
   )
 }
 
-let ComposerPost = React.memo(function ComposerPost({
+let ComposerPost = memo(function ComposerPost({
   post,
   dispatch,
   textInput,
@@ -1333,7 +1334,7 @@ let ComposerPost = React.memo(function ComposerPost({
 }: {
   post: PostDraft
   dispatch: (action: ComposerAction) => void
-  textInput: React.Ref<TextInputRef>
+  textInput: Ref<TextInputRef>
   isActive: boolean
   isReply: boolean
   isFirstPost: boolean
@@ -1541,8 +1542,8 @@ function ComposerTopBar({
   onCancel: () => void
   onPublish: () => void
   topBarAnimatedStyle: StyleProp<ViewStyle>
-  children?: React.ReactNode
-  draftsButton?: React.ReactNode
+  children?: ReactNode
+  draftsButton?: ReactNode
 }) {
   const pal = usePalette('default')
   const {_} = useLingui()
@@ -1568,7 +1569,7 @@ function ComposerTopBar({
           accessibilityHint={_(
             msg`Closes post composer and discards post draft`,
           )}>
-          <ButtonText style={[a.text_md]}>
+          <ButtonText style={[a.text_md]} maxFontSizeMultiplier={2}>
             <Trans>Cancel</Trans>
           </ButtonText>
         </Button>
@@ -1625,7 +1626,7 @@ function ComposerTopBar({
             hoverStyle={{backgroundColor: '#1F2937'}}
             onPress={onPublish}
             disabled={!canPost || isPublishQueued}>
-            <ButtonText style={[a.text_md]}>
+            <ButtonText style={[a.text_md]} maxFontSizeMultiplier={2}>
               {isReply ? (
                 <Trans context="action">Reply</Trans>
               ) : isThread ? (
@@ -1933,7 +1934,7 @@ function ComposerPills({
                   isPrivate ? _(msg`Post privately`) : _(msg`Post publicly`)
                 }
                 accessibilityHint={_(
-                  msg`Toggles between private to Para and public to Bluesky`,
+                  msg`Toggles between private to PARA and public on the network`,
                 )}
                 style={({pressed}) => [
                   a.flex_row,
@@ -2087,9 +2088,9 @@ function ComposerFooter({
   onSelectLanguage?: (language: string) => void
   openGallery?: () => void
 }) {
-  const [shouldOpenGallery, setShouldOpenGallery] = React.useState(false)
+  const [shouldOpenGallery, setShouldOpenGallery] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (openGallery) {
       openGallery()
       setShouldOpenGallery(true)
@@ -2590,7 +2591,7 @@ function ToolbarWrapper({
   children,
 }: {
   style: StyleProp<ViewStyle>
-  children: React.ReactNode
+  children: ReactNode
 }) {
   if (IS_WEB) return children
   return (

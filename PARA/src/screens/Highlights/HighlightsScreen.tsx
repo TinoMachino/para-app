@@ -13,13 +13,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {AtUri} from '@atproto/api'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {useFocusEffect, useNavigation} from '@react-navigation/native'
 
 import {NINTHS_COMMUNITIES} from '#/lib/communities'
-import {MOCK_HIGHLIGHTS} from '#/lib/mock-highlights'
+import {type Highlight} from '#/lib/mock-data'
 import {type NavigationProp} from '#/lib/routes/types'
 import {
   deleteHighlight,
@@ -27,7 +26,7 @@ import {
   saveHighlight,
 } from '#/state/highlights/highlightStorage'
 import {useHighlightVoteMutation} from '#/state/mutations/highlights'
-import {usePostFeedQuery} from '#/state/queries/post-feed'
+import {useHighlightsQuery} from '#/state/queries/highlights'
 import {useBaseFilter} from '#/state/shell/base-filter'
 import {Text} from '#/view/com/util/text/Text'
 import {atoms as a, useTheme} from '#/alf'
@@ -73,8 +72,6 @@ const getContrastingTextColor = (hexColor: string): string => {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance > 0.5 ? '#333333' : '#FFFFFF'
 }
-
-type Highlight = (typeof MOCK_HIGHLIGHTS)[0]
 
 function FeedSection({
   title,
@@ -359,79 +356,12 @@ export function HighlightsScreen() {
     }, []),
   )
 
-  // Fetch highlights from 'bob.test' (Local Dev)
   const {
-    data,
+    data: highlights = [],
     isLoading: _isLoading,
-    isError,
+    isError: _isError,
     refetch,
-  } = usePostFeedQuery('author|bob.test|posts_with_replies', undefined, {
-    enabled: true,
-  })
-
-  // Parse fetched data and merge with MOCK_HIGHLIGHTS
-  const highlights = useMemo(() => {
-    // Always start with mock data as the base
-    const base: Highlight[] = [...MOCK_HIGHLIGHTS]
-
-    if (data?.pages && data.pages.length > 0 && !isError) {
-      for (const page of data.pages) {
-        for (const slice of page.slices) {
-          for (const item of slice.items) {
-            const post = item.post
-            const record = item.record as any
-            const text = (record.text as string) || ''
-
-            // Parse hashtags for metadata
-            let community = 'Unknown'
-            let state = undefined
-            let color = '#888888'
-
-            const tags = text.match(/#\w+/g) || []
-
-            for (const tag of tags) {
-              const cleanTag = tag.substring(1)
-              const matchingComm = Object.values(NINTHS_COMMUNITIES).find(
-                c =>
-                  c.name.replace(/\s+/g, '').toLowerCase() ===
-                  cleanTag.toLowerCase(),
-              )
-
-              if (matchingComm) {
-                community = matchingComm.name
-                color = matchingComm.color
-              } else {
-                state = cleanTag
-              }
-            }
-
-            base.push({
-              id: post.uri,
-              text: text,
-              postAuthor: post.author.handle,
-              authorName: post.author.displayName || post.author.handle,
-              avatarUrl: post.author.avatar || 'https://i.pravatar.cc/150',
-              postPreview: '',
-              color: color as any,
-              community,
-              state: state || 'Unknown',
-              createdAt: new Date(post.indexedAt).getTime(),
-              upvotes: post.likeCount || 0,
-              downvotes: 0,
-              saves: post.repostCount || 0,
-              isVerified: !!post.author.viewer?.followedBy,
-              isTrending: (post.likeCount || 0) > 0,
-              viewerHasUpvoted: !!post.viewer?.like,
-              viewerHasDownvoted: false,
-              viewerHasSaved: !!post.viewer?.repost,
-            })
-          }
-        }
-      }
-    }
-
-    return base
-  }, [data, isError])
+  } = useHighlightsQuery()
 
   const {mutate: voteHighlight} = useHighlightVoteMutation()
 
@@ -495,21 +425,6 @@ export function HighlightsScreen() {
 
   const handleCardPress = useCallback(
     (id: string) => {
-      // For real AT Protocol posts, navigate to the full PostThread view
-      // with comments, replies, etc.
-      if (id.startsWith('at://')) {
-        try {
-          const urip = new AtUri(id)
-          _navigation.navigate('PostThread', {
-            name: urip.hostname,
-            rkey: urip.rkey,
-          })
-          return
-        } catch (e) {
-          console.error('Failed to parse AT URI:', e)
-        }
-      }
-      // Fallback for mock data highlighting
       _navigation.navigate('SeeHighlightDetails', {highlightId: id})
     },
     [_navigation],

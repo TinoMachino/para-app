@@ -1,4 +1,4 @@
-import React, {useEffect, useImperativeHandle} from 'react'
+import {forwardRef} from 'react'
 import {findNodeHandle, View} from 'react-native'
 
 import {List} from '#/view/com/util/List'
@@ -18,7 +18,7 @@ interface Props {
 // Mock Data
 import {PROFILE_RAQ_HISTORY as MOCK_RAQ} from '#/lib/mock-data'
 
-export const ProfileRAQSection = React.forwardRef<SectionRef, Props>(
+export const ProfileRAQSection = forwardRef<SectionRef, Props>(
   function ProfileRAQSection(
     {headerHeight, scrollElRef, setScrollViewTag, isFocused},
     ref,

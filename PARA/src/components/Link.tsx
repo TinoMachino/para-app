@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import {type PropsWithChildren, useCallback, useMemo} from 'react'
 import {type GestureResponderEvent, Linking} from 'react-native'
 import {sanitizeUrl} from '@braintree/sanitize-url'
 import {
@@ -117,7 +117,7 @@ export function useLink({
   const {linkWarningDialogControl} = useGlobalDialogsControlContext()
   const openLink = useOpenLink()
 
-  const onPress = React.useCallback(
+  const onPress = useCallback(
     (e: GestureResponderEvent) => {
       const exitEarlyIfFalse = outerOnPress?.(e)
 
@@ -125,9 +125,9 @@ export function useLink({
 
       const requiresWarning = Boolean(
         !disableMismatchWarning &&
-        displayText &&
-        isExternal &&
-        linkRequiresWarning(href, displayText),
+          displayText &&
+          isExternal &&
+          linkRequiresWarning(href, displayText),
       )
 
       if (IS_WEB) {
@@ -217,12 +217,12 @@ export function useLink({
     ],
   )
 
-  const handleLongPress = React.useCallback(() => {
+  const handleLongPress = useCallback(() => {
     const requiresWarning = Boolean(
       !disableMismatchWarning &&
-      displayText &&
-      isExternal &&
-      linkRequiresWarning(href, displayText),
+        displayText &&
+        isExternal &&
+        linkRequiresWarning(href, displayText),
     )
 
     if (requiresWarning) {
@@ -242,7 +242,7 @@ export function useLink({
     linkWarningDialogControl,
   ])
 
-  const onLongPress = React.useCallback(
+  const onLongPress = useCallback(
     (e: GestureResponderEvent) => {
       const exitEarlyIfFalse = outerOnLongPress?.(e)
       if (exitEarlyIfFalse === false) return
@@ -318,7 +318,7 @@ export function Link({
   )
 }
 
-export type InlineLinkProps = React.PropsWithChildren<
+export type InlineLinkProps = PropsWithChildren<
   BaseLinkProps &
     TextStyleProp &
     Pick<TextProps, 'selectable' | 'numberOfLines' | 'emoji'> &

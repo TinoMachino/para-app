@@ -1,0 +1,76 @@
+diff --git a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
+index 481cbfa..3e5b510 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderGoogleMapView.mm
+@@ -5,6 +5,8 @@
+ //  Created by Salah Ghanim on 23.11.24.
+ //  Copyright © 2024 react-native-maps. All rights reserved.
+ //
++#ifdef RCT_NEW_ARCH_ENABLED
++
+ #include "RNMapsDefines.h"
+ 
+ #if HAVE_GOOGLE_MAPS == 0
+@@ -75,3 +77,5 @@ + (ComponentDescriptorProvider)componentDescriptorProvider
+ }
+ 
+ #endif
++
++#endif
+diff --git a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
+index d7a9a33..029bd28 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/FabricPlaceholders/PlaceHolderPolygonView.mm
+@@ -5,6 +5,8 @@
+ //  Created by Salah Ghanim on 23.11.24.
+ //  Copyright © 2024 react-native-maps. All rights reserved.
+ //
++#ifdef RCT_NEW_ARCH_ENABLED
++
+ #include "RNMapsDefines.h"
+ 
+ #if HAVE_GOOGLE_MAPS == 0
+@@ -50,3 +52,5 @@ + (ComponentDescriptorProvider)componentDescriptorProvider
+ }
+ 
+ #endif
++
++#endif
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm b/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
+index 447520d..596d61f 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsMapView.mm
+@@ -6,6 +6,8 @@
+ //  Copyright © 2024 react-native-maps. All rights reserved.
+ //
+ 
++#ifdef RCT_NEW_ARCH_ENABLED
++
+ #import "RNMapsMapView.h"
+ #import "AIRMap.h"
+ #import "AIRMapMarker.h"
+@@ -637,3 +639,5 @@ - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &
+ {
+     return RNMapsMapView.class;
+ }
++
++#endif
+diff --git a/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm b/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
+index be7e91d..6643f55 100644
+--- a/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
++++ b/node_modules/react-native-maps/ios/AirMaps/RNMapsMarkerView.mm
+@@ -6,6 +6,8 @@
+ //  Copyright © 2024 react-native-maps. All rights reserved.
+ //
+ 
++#ifdef RCT_NEW_ARCH_ENABLED
++
+ #import "RNMapsMarkerView.h"
+ #import "AIRMap.h"
+ #import "AIRMapMarker.h"
+@@ -438,3 +440,5 @@ - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &
+ {
+     return RNMapsMarkerView.class;
+ }
++
++#endif

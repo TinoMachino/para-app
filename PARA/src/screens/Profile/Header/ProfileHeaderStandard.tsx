@@ -12,8 +12,7 @@ import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
 import {useHaptics} from '#/lib/haptics'
-import {sanitizeDisplayName} from '#/lib/strings/display-names'
-import {sanitizeHandle} from '#/lib/strings/handles'
+import {formatUserDisplayName} from '#/lib/strings/profile-names'
 import {logger} from '#/logger'
 import {type Shadow, useProfileShadow} from '#/state/cache/profile-shadow'
 import {
@@ -37,6 +36,7 @@ import * as Prompt from '#/components/Prompt'
 import {RichText} from '#/components/RichText'
 import * as Toast from '#/components/Toast'
 import {Text} from '#/components/Typography'
+import {useSimpleVerificationState} from '#/components/verification'
 import {VerificationCheckButton} from '#/components/verification/VerificationCheckButton'
 import {IS_IOS} from '#/env'
 import {useActorStatus} from '#/features/liveNow'
@@ -71,6 +71,7 @@ let ProfileHeaderStandard = ({
     () => moderateProfile(profile, moderationOpts),
     [profile, moderationOpts],
   )
+  const verification = useSimpleVerificationState({profile})
   const [, queueUnblock] = useProfileBlockMutationQueue(profile)
   const unblockPromptControl = Prompt.usePromptControl()
   const [showSuggestedFollows, setShowSuggestedFollows] = useState(false)
@@ -145,10 +146,12 @@ let ProfileHeaderStandard = ({
                   a.font_bold,
                   a.leading_tight,
                 ]}>
-                {sanitizeDisplayName(
-                  profile.displayName || sanitizeHandle(profile.handle),
-                  moderation.ui('displayName'),
-                )}
+                {formatUserDisplayName({
+                  displayName: profile.displayName,
+                  handle: profile.handle,
+                  isFigure: verification.isVerified,
+                  moderation: moderation.ui('displayName'),
+                })}
                 <View style={[a.pl_xs, {marginTop: platform({ios: 2})}]}>
                   <VerificationCheckButton profile={profile} size="lg" />
                 </View>
@@ -243,6 +246,13 @@ export function HeaderStandardButtons({
   const [, queueUnblock] = useProfileBlockMutationQueue(profile)
   const editProfileControl = useDialogControl()
   const unblockPromptControl = Prompt.usePromptControl()
+  const verification = useSimpleVerificationState({profile})
+  const formattedDisplayName = formatUserDisplayName({
+    displayName: profile.displayName,
+    handle: profile.handle,
+    isFigure: verification.isVerified,
+    moderation: moderation.ui('displayName'),
+  })
 
   const isMe = currentAccount?.did === profile.did
 
@@ -252,14 +262,7 @@ export function HeaderStandardButtons({
       try {
         await queueFollow()
         onFollow?.()
-        Toast.show(
-          _(
-            msg`Following ${sanitizeDisplayName(
-              profile.displayName || profile.handle,
-              moderation.ui('displayName'),
-            )}`,
-          ),
-        )
+        Toast.show(_(msg`Following ${formattedDisplayName}`))
       } catch (err) {
         const e = err as Error
         if (e?.name !== 'AbortError') {
@@ -278,15 +281,9 @@ export function HeaderStandardButtons({
       try {
         await queueUnfollow()
         onUnfollow?.()
-        Toast.show(
-          _(
-            msg`No longer following ${sanitizeDisplayName(
-              profile.displayName || profile.handle,
-              moderation.ui('displayName'),
-            )}`,
-          ),
-          {type: 'default'},
-        )
+        Toast.show(_(msg`No longer following ${formattedDisplayName}`), {
+          type: 'default',
+        })
       } catch (err) {
         const e = err as Error
         if (e?.name !== 'AbortError') {

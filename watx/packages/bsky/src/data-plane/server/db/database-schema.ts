@@ -14,6 +14,7 @@ import * as duplicateRecord from './tables/duplicate-record'
 import * as feedGenerator from './tables/feed-generator'
 import * as feedItem from './tables/feed-item'
 import * as follow from './tables/follow'
+import * as highlight from './tables/highlight'
 import * as label from './tables/label'
 import * as labeler from './tables/labeler'
 import * as like from './tables/like'
@@ -95,6 +96,7 @@ export type DatabaseSchemaType = duplicateRecord.PartialDB &
   paraPostMeta.PartialDB &
   paraStatus.PartialDB &
   paraProfileStats.PartialDB &
+  highlight.PartialDB &
   cabildeo.PartialDB
 
 export type DatabaseSchema = Kysely<DatabaseSchemaType>

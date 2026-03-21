@@ -1,0 +1,30 @@
+[
+  {
+    "id": "com.para.post",
+    "title": "com.para.post",
+    "summary": "Primary Para post record with rich text, replies, embeds, flairs, and post type metadata.",
+    "status": "stable",
+    "tags": ["records", "posts", "feeds"]
+  },
+  {
+    "id": "com.para.community.defs",
+    "title": "com.para.community.defs",
+    "summary": "Shared community governance views for moderators, officials, deputies, summaries, and history.",
+    "status": "experimental",
+    "tags": ["communities", "governance", "views"]
+  },
+  {
+    "id": "com.para.actor.defs",
+    "title": "com.para.actor.defs",
+    "summary": "Actor-facing status and profile-stat definitions for influence, contributions, community activity, and public status.",
+    "status": "experimental",
+    "tags": ["actors", "status", "profiles"]
+  },
+  {
+    "id": "com.para.status",
+    "title": "com.para.status",
+    "summary": "Literal-self status record for the current public status, party, and community label of a Para account.",
+    "status": "stable",
+    "tags": ["actors", "status", "records"]
+  }
+]

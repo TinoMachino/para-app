@@ -1,4 +1,4 @@
-import { type StyleProp, View, type ViewStyle } from 'react-native'
+import {type StyleProp, View, type ViewStyle} from 'react-native'
 import {
   type $Typed,
   AppBskyFeedDefs,
@@ -6,29 +6,29 @@ import {
   AtUri,
 } from '@atproto/api'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Plural, Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { sanitizeHandle } from '#/lib/strings/handles'
+import {sanitizeHandle} from '#/lib/strings/handles'
 import {
   type FeedSourceInfo,
   hydrateFeedGenerator,
   hydrateList,
   useFeedSourceInfoQuery,
 } from '#/state/queries/feed'
-import { FeedLoadingPlaceholder } from '#/view/com/util/LoadingPlaceholder'
-import { UserAvatar } from '#/view/com/util/UserAvatar'
-import { atoms as a, useTheme } from '#/alf'
-import { Link } from '#/components/Link'
-import { RichText } from '#/components/RichText'
-import { Text } from '#/components/Typography'
-import { MissingFeed } from './MissingFeed'
+import {FeedLoadingPlaceholder} from '#/view/com/util/LoadingPlaceholder'
+import {UserAvatar} from '#/view/com/util/UserAvatar'
+import {atoms as a, useTheme} from '#/alf'
+import {Link} from '#/components/Link'
+import {RichText} from '#/components/RichText'
+import {Text} from '#/components/Typography'
+import {MissingFeed} from './MissingFeed'
 
 type FeedSourceCardProps = {
   feedUri: string
   feedData?:
-  | $Typed<AppBskyFeedDefs.GeneratorView>
-  | $Typed<AppBskyGraphDefs.ListView>
+    | $Typed<AppBskyFeedDefs.GeneratorView>
+    | $Typed<AppBskyGraphDefs.ListView>
   style?: StyleProp<ViewStyle>
   showSaveBtn?: boolean
   showDescription?: boolean
@@ -61,7 +61,7 @@ export function FeedSourceCardWithoutData({
   feedUri,
   ...props
 }: Omit<FeedSourceCardProps, 'feedData'>) {
-  const { data: feed, error } = useFeedSourceInfoQuery({
+  const {data: feed, error} = useFeedSourceInfoQuery({
     uri: feedUri,
   })
 
@@ -97,7 +97,7 @@ export function FeedSourceCardLoaded({
   error?: unknown
 }) {
   const t = useTheme()
-  const { _ } = useLingui()
+  const {_} = useLingui()
 
   /*
    * LOAD STATE
@@ -186,15 +186,15 @@ export function FeedSourceCardLoaded({
         label={
           feed.type === 'feed'
             ? _(
-              msg`${feed.displayName}, a feed by ${sanitizeHandle(feed.creatorHandle, '@')}, liked by ${feed.likeCount || 0}`,
-            )
+                msg`${feed.displayName}, a feed by ${sanitizeHandle(feed.creatorHandle, '@')}, liked by ${feed.likeCount || 0}`,
+              )
             : _(
-              msg`${feed.displayName}, a list by ${sanitizeHandle(feed.creatorHandle, '@')}`,
-            )
+                msg`${feed.displayName}, a list by ${sanitizeHandle(feed.creatorHandle, '@')}`,
+              )
         }
         to={{
           screen: feed.type === 'feed' ? 'ProfileFeed' : 'ProfileList',
-          params: { name: feed.creatorDid, rkey: new AtUri(feed.uri).rkey },
+          params: {name: feed.creatorDid, rkey: new AtUri(feed.uri).rkey},
         }}
         style={[
           a.flex_1,

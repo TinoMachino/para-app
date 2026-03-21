@@ -7,7 +7,6 @@ import {useNavigation} from '@react-navigation/native'
 import {HITSLOP_30} from '#/lib/constants'
 import {type NavigationProp} from '#/lib/routes/types'
 import {useSetDrawerOpen} from '#/state/shell'
-import {BlockDrawerGesture} from '#/view/shell/BlockDrawerGesture'
 import {
   atoms as a,
   platform,
@@ -157,7 +156,7 @@ export function MenuButton() {
 
   return gtMobile ? null : (
     <Slot>
-      <BlockDrawerGesture>
+      <View collapsable={false}>
         <Button
           label={_(msg`Open drawer menu`)}
           size="small"
@@ -172,7 +171,7 @@ export function MenuButton() {
           ]}>
           <ButtonIcon icon={Menu} size="lg" />
         </Button>
-      </BlockDrawerGesture>
+      </View>
     </Slot>
   )
 }
@@ -194,7 +193,8 @@ export function TitleText({
         style,
       ]}
       numberOfLines={2}
-      emoji>
+      emoji
+      maxFontSizeMultiplier={2}>
       {children}
     </Text>
   )

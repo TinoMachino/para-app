@@ -1,19 +1,19 @@
-import React from 'react'
-import { View } from 'react-native'
+import {useCallback, useState} from 'react'
+import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
-import { useLingui } from '@lingui/react'
 
-import { logger } from '#/logger'
-import { useAgent, useSessionApi } from '#/state/session'
-import { atoms as a, useBreakpoints, useTheme } from '#/alf'
-import { Button, ButtonIcon, ButtonText } from '#/components/Button'
-import { type DialogOuterProps } from '#/components/Dialog'
-import { Divider } from '#/components/Divider'
-import { CircleInfo_Stroke2_Corner0_Rounded as CircleInfo } from '#/components/icons/CircleInfo'
-import { Loader } from '#/components/Loader'
+import {logger} from '#/logger'
+import {useAgent, useSessionApi} from '#/state/session'
+import {atoms as a, useBreakpoints, useTheme} from '#/alf'
+import {Button, ButtonIcon, ButtonText} from '#/components/Button'
+import {type DialogOuterProps} from '#/components/Dialog'
+import {Divider} from '#/components/Divider'
+import {CircleInfo_Stroke2_Corner0_Rounded as CircleInfo} from '#/components/icons/CircleInfo'
+import {Loader} from '#/components/Loader'
 import * as Prompt from '#/components/Prompt'
-import { Text } from '#/components/Typography'
+import {Text} from '#/components/Typography'
 
 export function DeactivateAccountDialog({
   control,
@@ -33,14 +33,14 @@ function DeactivateAccountDialogInner({
   control: DialogOuterProps['control']
 }) {
   const t = useTheme()
-  const { gtMobile } = useBreakpoints()
-  const { _ } = useLingui()
+  const {gtMobile} = useBreakpoints()
+  const {_} = useLingui()
   const agent = useAgent()
-  const { logoutCurrentAccount } = useSessionApi()
-  const [pending, setPending] = React.useState(false)
-  const [error, setError] = React.useState<string | undefined>()
+  const {logoutCurrentAccount} = useSessionApi()
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | undefined>()
 
-  const handleDeactivate = React.useCallback(async () => {
+  const handleDeactivate = useCallback(async () => {
     try {
       setPending(true)
       await agent.com.atproto.server.deactivateAccount({})
@@ -92,8 +92,8 @@ function DeactivateAccountDialogInner({
             </Text>
             <Text style={[t.atoms.text_contrast_medium, a.leading_snug]}>
               <Trans>
-                If you're trying to change your handle or email, do so before you
-                deactivate.
+                If you're trying to change your handle or email, do so before
+                you deactivate.
               </Trans>
             </Text>
           </View>

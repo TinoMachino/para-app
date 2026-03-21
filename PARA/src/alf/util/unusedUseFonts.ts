@@ -9,6 +9,7 @@ import {useFonts} from 'expo-font'
  */
 export function DO_NOT_USE() {
   return useFonts({
+    'Cinzel-SemiBold': require('../../../assets/fonts/Cinzel/static/Cinzel-SemiBold.ttf'),
     InterVariable: require('../../../assets/fonts/inter/InterVariable.woff2'),
     'InterVariable-Italic': require('../../../assets/fonts/inter/InterVariable-Italic.woff2'),
   })

@@ -2,7 +2,6 @@
  * React Context for managing highlight mode state
  */
 import {createContext, useCallback, useContext, useState} from 'react'
-import type React from 'react'
 
 import {type HighlightModeState, type PendingHighlight} from './highlightTypes'
 

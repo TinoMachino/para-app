@@ -1,7 +1,7 @@
 import {Pressable, TouchableOpacity, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
-import {Trans} from '@lingui/react/macro'
 import {useLingui} from '@lingui/react'
+import {Trans} from '@lingui/react/macro'
 
 import {POST_TYPES, type PostType} from '#/lib/tags'
 import {atoms as a, useTheme, web} from '#/alf'
