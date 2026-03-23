@@ -501,7 +501,7 @@ export function BaseScreen() {
                     style={[styles.dataCard, cardBgColor]}
                     onPress={() =>
                       navigation.navigate('VSScreenV2', {
-                        entities: ['PRI', 'DERECHA'],
+                        entities: ['p/Jalisco', 'p/CDMX'],
                       })
                     }>
                     <Text style={[styles.dataCardTitle, t.atoms.text]}>VS</Text>

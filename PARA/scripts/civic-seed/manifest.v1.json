@@ -449,6 +449,90 @@
   ],
   "cabildeos": [
     {
+      "alias": "jalisco-cdmx-logistics-voting",
+      "actor": "official_jalisco",
+      "rkey": "seed-cabildeo-jalisco-cdmx-logistics-voting",
+      "title": "Corredor logistico Jalisco-CDMX: carga ferroviaria o autopista inteligente",
+      "description": "Debate interestatal sobre tiempos de traslado, seguridad vial y costo por tonelada en la ruta occidente-centro.",
+      "community": "p/Jalisco",
+      "communities": ["p/CDMX"],
+      "flairs": ["||#Policy", "|#Matter"],
+      "region": "Jalisco",
+      "geoRestricted": false,
+      "minQuorum": 35,
+      "phase": "voting",
+      "phaseDeadline": "2026-03-25T00:00:00.000Z",
+      "createdAt": "2026-03-18T09:00:00.000Z",
+      "options": [
+        {"label": "Carga ferroviaria dedicada", "description": "Priorizar nodos de carga y ampliacion ferroviaria."},
+        {"label": "Autopista inteligente", "description": "Carriles gestionados con sensores y peaje variable."},
+        {"label": "Modelo dual", "description": "Ferrocarril para carga pesada y autopista para ultima milla."}
+      ]
+    },
+    {
+      "alias": "cdmx-jalisco-housing-open",
+      "actor": "official_cdmx",
+      "rkey": "seed-cabildeo-cdmx-jalisco-housing-open",
+      "title": "CDMX vivienda cerca del transporte: renta protegida o incentivos a densificacion",
+      "description": "Comparativa metropolitana sobre vivienda asequible, captura de plusvalia y acceso al transporte masivo.",
+      "community": "p/CDMX",
+      "communities": ["p/Jalisco"],
+      "flairs": ["||#Policy", "|#Matter"],
+      "region": "CDMX",
+      "geoRestricted": false,
+      "minQuorum": 45,
+      "phase": "open",
+      "phaseDeadline": "2026-03-29T00:00:00.000Z",
+      "createdAt": "2026-03-17T11:30:00.000Z",
+      "options": [
+        {"label": "Renta protegida por corredor", "description": "Topes graduales de renta cerca del transporte masivo."},
+        {"label": "Incentivos a densificacion", "description": "Mayor altura y mezcla de usos con cuotas de vivienda asequible."},
+        {"label": "Banco publico de suelo", "description": "Adquisicion publica de suelo para desarrollo orientado al transporte."}
+      ]
+    },
+    {
+      "alias": "jalisco-cdmx-water-governance-deliberating",
+      "actor": "mod_jalisco",
+      "rkey": "seed-cabildeo-jalisco-cdmx-water-governance-deliberating",
+      "title": "Gobernanza del agua Jalisco-CDMX: organismo mixto o coordinacion por cuenca",
+      "description": "Debate compartido sobre trazabilidad de inversiones, coordinacion hidrica y reglas de emergencia interestatal.",
+      "community": "p/Jalisco",
+      "communities": ["p/CDMX"],
+      "flairs": ["||#Policy", "|#Matter"],
+      "region": "Jalisco",
+      "geoRestricted": false,
+      "minQuorum": 40,
+      "phase": "deliberating",
+      "phaseDeadline": "2026-03-27T00:00:00.000Z",
+      "createdAt": "2026-03-19T09:30:00.000Z",
+      "options": [
+        {"label": "Organismo mixto interestatal", "description": "Mesa ejecutiva con presupuesto compartido y reportes mensuales."},
+        {"label": "Coordinacion por cuenca", "description": "Acuerdos tecnicos por cuenca con metas de extraccion y recarga."},
+        {"label": "Esquema escalonado", "description": "Coordinacion por cuenca con facultades extraordinarias en sequia severa."}
+      ]
+    },
+    {
+      "alias": "cdmx-jalisco-air-mobility-voting",
+      "actor": "mod_cdmx",
+      "rkey": "seed-cabildeo-cdmx-jalisco-air-mobility-voting",
+      "title": "Corredores limpios CDMX-Jalisco: electrificacion del transporte pesado o regulacion por emisiones",
+      "description": "Comparativa sobre impacto logistico, costo fiscal y velocidad de reduccion de contaminantes en rutas de alta carga.",
+      "community": "p/CDMX",
+      "communities": ["p/Jalisco"],
+      "flairs": ["||#Policy", "|#Matter"],
+      "region": "CDMX",
+      "geoRestricted": false,
+      "minQuorum": 45,
+      "phase": "voting",
+      "phaseDeadline": "2026-03-30T00:00:00.000Z",
+      "createdAt": "2026-03-20T10:15:00.000Z",
+      "options": [
+        {"label": "Electrificacion del transporte pesado", "description": "Subsidios y despliegue de infraestructura de carga."},
+        {"label": "Regulacion por emisiones", "description": "Limites obligatorios con verificacion trimestral."},
+        {"label": "Modelo combinado", "description": "Electrificacion prioritaria con piso regulatorio nacional."}
+      ]
+    },
+    {
       "alias": "jalisco-water-voting",
       "actor": "mod_jalisco",
       "rkey": "seed-cabildeo-jalisco-water-voting",
@@ -598,6 +682,116 @@
   "positions": [
     {
       "actor": "active_participant",
+      "rkey": "seed-position-jalisco-cdmx-logistics-001",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "stance": "for",
+      "optionIndex": 2,
+      "text": "El modelo dual reduce cuellos de botella y reparte mejor la inversion entre carga pesada y distribucion urbana.",
+      "compassQuadrant": "center-right",
+      "createdAt": "2026-03-18T10:00:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-position-jalisco-cdmx-logistics-002",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "stance": "amendment",
+      "optionIndex": 2,
+      "text": "El modelo dual debe incluir metas de seguridad vial y tablero publico de siniestralidad por tramo.",
+      "compassQuadrant": "center-left",
+      "createdAt": "2026-03-18T10:30:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-position-jalisco-cdmx-logistics-003",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "stance": "against",
+      "optionIndex": 1,
+      "text": "Una autopista inteligente sola concentra riesgo financiero y puede agravar emisiones si no cambia la logistica de fondo.",
+      "compassQuadrant": "lib-center",
+      "createdAt": "2026-03-18T11:00:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-position-cdmx-jalisco-housing-001",
+      "cabildeoAlias": "cdmx-jalisco-housing-open",
+      "stance": "for",
+      "optionIndex": 1,
+      "text": "La densificacion con cuotas claras de vivienda asequible acelera oferta en corredores con transporte existente.",
+      "compassQuadrant": "center-left",
+      "createdAt": "2026-03-17T12:15:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-position-cdmx-jalisco-housing-002",
+      "cabildeoAlias": "cdmx-jalisco-housing-open",
+      "stance": "amendment",
+      "optionIndex": 2,
+      "text": "El banco publico de suelo debe priorizar suelo infrautilizado y publicar criterios de adquisicion por colonia.",
+      "compassQuadrant": "lib-left",
+      "createdAt": "2026-03-17T13:05:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-position-jalisco-cdmx-water-governance-001",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "stance": "for",
+      "optionIndex": 1,
+      "text": "La coordinacion por cuenca genera metas tecnicas comparables y reduce opacidad en extracciones extraordinarias.",
+      "compassQuadrant": "center-left",
+      "createdAt": "2026-03-19T11:00:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-position-jalisco-cdmx-water-governance-002",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "stance": "amendment",
+      "optionIndex": 2,
+      "text": "El esquema escalonado debe publicar reglas automáticas de emergencia y auditoria de pipas por territorio.",
+      "compassQuadrant": "lib-center",
+      "createdAt": "2026-03-19T11:20:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-position-jalisco-cdmx-water-governance-003",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "stance": "against",
+      "optionIndex": 0,
+      "text": "Un organismo mixto sin reglas de transparencia duras puede duplicar burocracia y diluir responsabilidad política.",
+      "compassQuadrant": "center-right",
+      "createdAt": "2026-03-19T11:40:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-position-cdmx-jalisco-air-mobility-001",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "stance": "for",
+      "optionIndex": 2,
+      "text": "El modelo combinado acelera resultados sin esperar reemplazo completo de flota pesada.",
+      "compassQuadrant": "center-left",
+      "createdAt": "2026-03-20T12:00:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-position-cdmx-jalisco-air-mobility-002",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "stance": "for",
+      "optionIndex": 1,
+      "text": "La regulacion por emisiones obliga a todos los actores y evita subsidios mal focalizados.",
+      "compassQuadrant": "lib-left",
+      "createdAt": "2026-03-20T12:10:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-position-cdmx-jalisco-air-mobility-003",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "stance": "amendment",
+      "optionIndex": 2,
+      "text": "El modelo combinado debe fijar corredores piloto, medicion abierta y penalizaciones por incumplimiento.",
+      "compassQuadrant": "center-right",
+      "createdAt": "2026-03-20T12:25:00.000Z"
+    },
+    {
+      "actor": "active_participant",
       "rkey": "seed-position-jalisco-water-001",
       "cabildeoAlias": "jalisco-water-voting",
       "stance": "for",
@@ -658,6 +852,94 @@
     }
   ],
   "votes": [
+    {
+      "actor": "active_participant",
+      "rkey": "seed-vote-jalisco-cdmx-logistics-001",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-18T12:00:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-vote-jalisco-cdmx-logistics-002",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-18T12:04:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-vote-jalisco-cdmx-logistics-003",
+      "cabildeoAlias": "jalisco-cdmx-logistics-voting",
+      "selectedOption": 1,
+      "isDirect": true,
+      "createdAt": "2026-03-18T12:08:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-vote-cdmx-jalisco-housing-001",
+      "cabildeoAlias": "cdmx-jalisco-housing-open",
+      "selectedOption": 1,
+      "isDirect": true,
+      "createdAt": "2026-03-17T14:00:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-vote-cdmx-jalisco-housing-002",
+      "cabildeoAlias": "cdmx-jalisco-housing-open",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-17T14:05:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-vote-jalisco-cdmx-water-governance-001",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "selectedOption": 1,
+      "isDirect": true,
+      "createdAt": "2026-03-19T13:00:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-vote-jalisco-cdmx-water-governance-002",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-19T13:05:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-vote-jalisco-cdmx-water-governance-003",
+      "cabildeoAlias": "jalisco-cdmx-water-governance-deliberating",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-19T13:10:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-vote-cdmx-jalisco-air-mobility-001",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-20T13:00:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-vote-cdmx-jalisco-air-mobility-002",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "selectedOption": 1,
+      "isDirect": true,
+      "createdAt": "2026-03-20T13:04:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-vote-cdmx-jalisco-air-mobility-003",
+      "cabildeoAlias": "cdmx-jalisco-air-mobility-voting",
+      "selectedOption": 2,
+      "isDirect": true,
+      "createdAt": "2026-03-20T13:08:00.000Z"
+    },
     {
       "actor": "active_participant",
       "rkey": "seed-vote-jalisco-water-001",
@@ -767,6 +1049,54 @@
       "tags": ["|#?OpenQuestion"],
       "createdAt": "2026-03-16T08:15:00.000Z",
       "langs": ["es"]
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-open-question-pan-001",
+      "text": "En p/PAN, se debe priorizar transparencia presupuestal o simplificacion regulatoria como bandera de corto plazo? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:20:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-open-question-morena-001",
+      "text": "Para p/Morena, como se mide mejor el impacto territorial de programas sociales sin perder control ciudadano? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:25:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-open-question-mc-001",
+      "text": "En p/MC, que pesa mas para movilidad urbana: rapidez de obra o cobertura metropolitana? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:30:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-open-question-pri-001",
+      "text": "Para p/PRI, conviene reconstruir estructura territorial o concentrarse en gestion legislativa visible? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:35:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-open-question-pvem-001",
+      "text": "En p/PVEM, que agenda moviliza mas apoyo real: calidad del aire o gestion integral del agua? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:40:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-open-question-libertarios-001",
+      "text": "Para p/Libertarios MX, donde deberia empezar una reforma visible: desregulacion urbana o competencia en servicios? |#?OpenQuestion",
+      "tags": ["|#?OpenQuestion"],
+      "createdAt": "2026-03-16T08:45:00.000Z",
+      "langs": ["es"]
     }
   ],
   "badgePosts": [
@@ -824,6 +1154,102 @@
       "text": "Analisis extendido para p/NuevoLeon: vivienda, movilidad y empleo en un mismo tablero operativo. Caso de texto largo para stress visual y lectura continua con terminos tecnicos y simbolos de consistencia operacional.",
       "tags": ["|#Policy", "|#Matter"],
       "createdAt": "2026-03-15T18:24:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "official_jalisco",
+      "rkey": "seed-badge-policy-pan-001",
+      "text": "Documento de trabajo en p/PAN sobre simplificacion administrativa, compras publicas abiertas y vigilancia legislativa.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:30:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-badge-matter-pan-001",
+      "text": "Reporte ciudadano en p/PAN: municipios piden reglas mas claras para seguridad local y coordinacion metropolitana.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:32:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "official_cdmx",
+      "rkey": "seed-badge-policy-morena-001",
+      "text": "Actualizacion en p/Morena sobre cobertura territorial de bienestar, padrones auditables y seguimiento comunitario.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:34:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-badge-matter-morena-001",
+      "text": "Bitacora en p/Morena: vecinos discuten tiempos de entrega, padrones y transparencia en ventanillas locales.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:36:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "mod_cdmx",
+      "rkey": "seed-badge-policy-mc-001",
+      "text": "Posicion de p/MC sobre ciudad de 15 minutos, transporte limpio y coordinacion entre alcaldias metropolitanas.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:38:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "deputy_applicant",
+      "rkey": "seed-badge-matter-mc-001",
+      "text": "Conversacion abierta en p/MC: vivienda joven, renta accesible y servicios de proximidad en zonas de crecimiento.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:40:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "mod_jalisco",
+      "rkey": "seed-badge-policy-pri-001",
+      "text": "Nota programatica en p/PRI sobre estructura territorial, operacion municipal y reconstruccion de capacidad institucional.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:42:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-badge-matter-pri-001",
+      "text": "Seguimiento en p/PRI: cuadros locales debaten gestion de agua, obra publica y prioridades de proximidad.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:44:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "mod_oaxaca",
+      "rkey": "seed-badge-policy-pvem-001",
+      "text": "Agenda de p/PVEM enfocada en calidad del aire, residuos y fiscalizacion ambiental con metas municipales.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:46:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant",
+      "rkey": "seed-badge-matter-pvem-001",
+      "text": "Comunidad de p/PVEM reporta presion vecinal por arbolado, agua urbana y zonas escolares con aire limpio.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:48:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "delegate_rep",
+      "rkey": "seed-badge-policy-libertarios-001",
+      "text": "Hoja de ruta en p/Libertarios MX para competencia regulatoria, simplificacion de permisos y libertad economica local.",
+      "tags": ["||#Policy"],
+      "createdAt": "2026-03-15T18:50:00.000Z",
+      "langs": ["es"]
+    },
+    {
+      "actor": "active_participant_2",
+      "rkey": "seed-badge-matter-libertarios-001",
+      "text": "Debate en p/Libertarios MX sobre exceso de tramites, costo de abrir negocio y tiempos reales de autorizacion municipal.",
+      "tags": ["|#Matter"],
+      "createdAt": "2026-03-15T18:52:00.000Z",
       "langs": ["es"]
     }
   ],

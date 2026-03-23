@@ -6,9 +6,11 @@ import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {FocusGuards, FocusScope} from 'radix-ui/internal'
 
+import {CINZEL_FONT_FAMILY, useCinzelFont} from '#/lib/hooks/useCinzelFont'
 import {logger} from '#/logger'
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
+import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, flatten, useBreakpoints, web} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
 import {TimesLarge_Stroke2_Corner0_Rounded as XIcon} from '#/components/icons/Times'
@@ -30,6 +32,7 @@ export function WelcomeModal({control}: WelcomeModalProps) {
   const {gtMobile} = useBreakpoints()
   const [isExiting, setIsExiting] = useState(false)
   const [signInLinkHovered, setSignInLinkHovered] = useState(false)
+  useCinzelFont()
 
   const fadeOutAndClose = (callback?: () => void) => {
     setIsExiting(true)
@@ -105,16 +108,8 @@ export function WelcomeModal({control}: WelcomeModalProps) {
                   a.p_0,
                 ]}>
                 <View style={[a.flex_row, a.align_center, a.gap_xs]}>
-                  <Logo width={26} />
-                  <Text
-                    style={[
-                      a.text_2xl,
-                      a.font_semi_bold,
-                      a.user_select_none,
-                      {color: '#354358', letterSpacing: -0.5},
-                    ]}>
-                    PARA
-                  </Text>
+                  <Logomark width={24} fill="#474652" />
+                  <Logotype width={94} fill="#354358" />
                 </View>
               </View>
               <View
@@ -158,7 +153,13 @@ export function WelcomeModal({control}: WelcomeModalProps) {
                     color="primary"
                     style={{
                       width: 200,
-                      backgroundColor: '#006AFF',
+                      backgroundColor: '#354358',
+                      borderColor: '#354358',
+                      borderWidth: 1,
+                    }}
+                    hoverStyle={{
+                      backgroundColor: '#263245',
+                      borderColor: '#263245',
                     }}>
                     <ButtonText>
                       <Trans>Create account</Trans>
@@ -200,6 +201,7 @@ export function WelcomeModal({control}: WelcomeModalProps) {
                           {
                             color: '#006AFF',
                             fontSize: undefined,
+                            fontFamily: CINZEL_FONT_FAMILY,
                           },
                           signInLinkHovered && a.underline,
                         ]}

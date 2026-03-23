@@ -7,7 +7,6 @@ import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
 import {useHaptics} from '#/lib/haptics'
-import {Logo} from '#/view/icons/Logo'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
@@ -67,9 +66,8 @@ export const SplashScreen = ({
         style={[a.flex_1]}>
         <View
           style={[a.justify_center, a.align_center, {gap: 6, paddingTop: 46}]}>
-          <Logo width={76} fill={styles.logoFill} style={styles.logoShadow} />
           <Logotype
-            width={91}
+            width={122}
             fill={styles.logoFill}
             style={styles.logoShadow}
           />

@@ -64,7 +64,11 @@ export class TestPds {
       termsOfServiceUrl: 'https://bsky.social/about/support/tos',
       privacyPolicyUrl: 'https://bsky.social/about/support/privacy-policy',
       supportUrl: 'https://blueskyweb.zendesk.com/hc/en-us',
-      ...config,
+    }
+    for (const [key, value] of Object.entries(config)) {
+      if (value !== undefined) {
+        ;(env as Record<string, unknown>)[key] = value
+      }
     }
     const cfg = pds.envToCfg(env)
     const secrets = pds.envToSecrets(env)
