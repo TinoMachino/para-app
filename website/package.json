@@ -9,6 +9,7 @@
 		"dev:landing": "pnpm --filter @parasocial/landing dev",
 		"build:site": "pnpm --filter @parasocial/site build",
 		"build:landing": "pnpm --filter @parasocial/landing build",
+		"deploy:site": "pnpm build:site && sh -c 'test -n \"$CLOUDFLARE_PAGES_PROJECT\" || { echo \"Set CLOUDFLARE_PAGES_PROJECT\"; exit 1; }; pnpm dlx wrangler@latest pages deploy apps/docs/build --project-name \"$CLOUDFLARE_PAGES_PROJECT\"'",
 		"build": "pnpm -r build",
 		"check": "pnpm -r check",
 		"lint": "pnpm -r lint",

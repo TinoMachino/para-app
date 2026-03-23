@@ -30,6 +30,17 @@ Root directory:
 Node / package manager:
 - `pnpm` from `website/package.json`
 
+### If you do not set Root directory
+
+If you leave the Pages root directory at the repo root, then the build command
+should include the folder change explicitly:
+
+- `cd website && pnpm build:site`
+
+The output directory would still be:
+
+- `apps/docs/build`
+
 ### Domain plan
 
 Primary production domain:
@@ -59,3 +70,25 @@ the nameservers are the part that should point to Cloudflare.
    - `/try-app`
 6. Add `paramx.social` as the custom domain.
 7. Add `www.paramx.social` and redirect it to the apex if desired.
+
+### Manual deploy command
+
+For direct uploads from your machine or CI, use:
+
+```bash
+cd website
+export CLOUDFLARE_PAGES_PROJECT=paramx-social
+pnpm deploy:site
+```
+
+That script:
+- builds `apps/docs`
+- uploads `apps/docs/build` with Wrangler Pages
+
+Required auth is whatever Wrangler uses in your environment, for example:
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+If you use Git integration in Pages, pushes to the connected branch remain the
+normal production deploy path. The manual deploy command is for explicit uploads
+when you want tighter control.
