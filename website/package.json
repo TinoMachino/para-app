@@ -7,6 +7,8 @@
 		"dev": "pnpm --filter @parasocial/site dev",
 		"dev:docs": "pnpm --filter @parasocial/site dev",
 		"dev:landing": "pnpm --filter @parasocial/landing dev",
+		"build:site": "pnpm --filter @parasocial/site build",
+		"build:landing": "pnpm --filter @parasocial/landing build",
 		"build": "pnpm -r build",
 		"check": "pnpm -r check",
 		"lint": "pnpm -r lint",
