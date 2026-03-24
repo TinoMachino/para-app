@@ -1,0 +1,36 @@
+diff --git a/node_modules/@teovilla/react-native-web-maps/dist/commonjs/components/polygon.js b/node_modules/@teovilla/react-native-web-maps/dist/commonjs/components/polygon.js
+index 93272e4..75cb85a 100644
+--- a/node_modules/@teovilla/react-native-web-maps/dist/commonjs/components/polygon.js
++++ b/node_modules/@teovilla/react-native-web-maps/dist/commonjs/components/polygon.js
+@@ -15,7 +15,12 @@ function Polygon(props) {
+       lat: c.latitude,
+       lng: c.longitude
+     })),
+-    onClick: e => (0, _mouseEvent.mapMouseEventToMapEvent)(e, null, map, 'polygon-press'),
++    onClick: e => {
++      const event = (0, _mouseEvent.mapMouseEventToMapEvent)(e, null, map, 'polygon-press');
++      if (props.onPress) {
++        props.onPress(event);
++      }
++    },
+     options: {
+       geodesic: props.geodesic,
+       clickable: props.tappable,
+diff --git a/node_modules/@teovilla/react-native-web-maps/dist/module/components/polygon.js b/node_modules/@teovilla/react-native-web-maps/dist/module/components/polygon.js
+index 2f81fe9..73bafde 100644
+--- a/node_modules/@teovilla/react-native-web-maps/dist/module/components/polygon.js
++++ b/node_modules/@teovilla/react-native-web-maps/dist/module/components/polygon.js
+@@ -8,7 +8,12 @@ export function Polygon(props) {
+       lat: c.latitude,
+       lng: c.longitude
+     })),
+-    onClick: e => mapMouseEventToMapEvent(e, null, map, 'polygon-press'),
++    onClick: e => {
++      const event = mapMouseEventToMapEvent(e, null, map, 'polygon-press');
++      if (props.onPress) {
++        props.onPress(event);
++      }
++    },
+     options: {
+       geodesic: props.geodesic,
+       clickable: props.tappable,
