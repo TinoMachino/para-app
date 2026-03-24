@@ -1,7 +1,7 @@
 import {UITextView} from 'react-native-uitextview'
 
 import {logger} from '#/logger'
-import {atoms, useAlf, useTheme, web} from '#/alf'
+import {atoms as a, type TextStyleProp, useAlf, useTheme, web} from '#/alf'
 import {
   childHasEmoji,
   normalizeTextStyles,
@@ -22,15 +22,24 @@ export function Text({
   selectable,
   title,
   dataSet,
+  numberOfLines,
   ...rest
 }: TextProps) {
   const {fonts, flags} = useAlf()
   const t = useTheme()
-  const s = normalizeTextStyles([atoms.text_sm, t.atoms.text, style], {
-    fontScale: fonts.scaleMultiplier,
-    fontFamily: fonts.family,
-    flags,
-  })
+  const s = normalizeTextStyles(
+    [
+      a.text_sm,
+      t.atoms.text,
+      web(numberOfLines === 1 && numberOfLinesClippingFix),
+      style,
+    ],
+    {
+      fontScale: fonts.scaleMultiplier,
+      fontFamily: fonts.family,
+      flags,
+    },
+  )
 
   if (__DEV__) {
     if (!emoji && childHasEmoji(children)) {
@@ -44,6 +53,7 @@ export function Text({
   const shared = {
     uiTextView: true,
     selectable,
+    numberOfLines,
     style: s,
     dataSet: Object.assign({tooltip: title}, dataSet || {}),
     ...rest,
@@ -82,10 +92,11 @@ export function P({style, ...rest}: TextProps) {
       role: 'paragraph',
     }) || {}
   return (
-    <Text
-      {...attr}
-      {...rest}
-      style={[atoms.text_md, atoms.leading_relaxed, style]}
-    />
+    <Text {...attr} {...rest} style={[a.text_md, a.leading_relaxed, style]} />
   )
 }
+
+const numberOfLinesClippingFix = {
+  overflowY: 'visible',
+  overflowX: 'clip',
+} satisfies React.CSSProperties as TextStyleProp

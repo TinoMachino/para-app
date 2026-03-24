@@ -40,10 +40,19 @@ class BottomSheetView(
 
   private val screenHeight: Float =
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+      // API 35+: edge-to-edge is mandatory, heightPixels is the full display.
       context.resources.displayMetrics.heightPixels.toFloat()
-    } else {
+    } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+      // API 30-34: use currentWindowMetrics when available.
       val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
       wm.currentWindowMetrics.bounds.height().toFloat()
+    } else {
+      // API < 30: currentWindowMetrics is unavailable, and heightPixels may exclude system bars.
+      val wm = context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+      val size = android.graphics.Point()
+      @Suppress("DEPRECATION")
+      wm.defaultDisplay.getRealSize(size)
+      size.y.toFloat()
     }
 
   private fun getNavigationBarHeight(): Int {

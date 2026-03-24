@@ -809,14 +809,22 @@ export const ComposePost = ({
       logger.info(`composer: posting...`)
 
       postUri = (
-        await apilib.post(agent, queryClient, {
-          thread,
-          // ... rest logic existing
-          replyTo: replyTo?.uri,
-          onStateChange: setPublishingStage,
-          langs: currentLanguages,
-          collection: isPrivate ? apilib.PARA_POST_COLLECTION : undefined,
-        })
+        await apilib.post(
+          agent,
+          queryClient,
+          {
+            thread,
+            replyTo: replyTo?.uri,
+            onStateChange: setPublishingStage,
+            langs: currentLanguages,
+            collection: isPrivate ? apilib.PARA_POST_COLLECTION : undefined,
+          },
+          {
+            highResolutionImages: ax.features.enabled(
+              ax.features.ImageUploadsHighResolution,
+            ),
+          },
+        )
       ).uris[0]
 
       // Sequential postMeta creation for Para posts (Section 7.1: client-side authority)
