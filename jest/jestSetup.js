@@ -84,6 +84,18 @@ jest.mock('expo-application', () => ({
 }))
 
 jest.mock('expo-modules-core', () => ({
+  createPermissionHook: jest.fn().mockImplementation(_config => {
+    return () => [
+      {
+        status: 'denied',
+        granted: false,
+        canAskAgain: false,
+        expires: 0,
+      },
+      jest.fn(),
+      jest.fn(),
+    ]
+  }),
   requireNativeModule: jest.fn().mockImplementation(moduleName => {
     if (moduleName === 'ExpoPlatformInfo') {
       return {

@@ -1,5 +1,7 @@
 import { RichText } from '@atproto/api'
+import { i18n } from '@lingui/core'
 
+import { messages as messagesEn } from '../../src/locale/locales/en/messages'
 import { parseEmbedPlayerFromUrl } from '#/lib/strings/embed-player'
 import {
   createStarterPackGooglePlayUri,
@@ -18,6 +20,10 @@ import {
   toShareUrl,
   toShortUrl,
 } from '../../src/lib/strings/url-helpers'
+
+beforeAll(() => {
+  i18n.loadAndActivate({ locale: 'en', messages: messagesEn })
+})
 
 describe('detectLinkables', () => {
   const inputs = [
@@ -232,7 +238,7 @@ describe('toNiceDomain', () => {
     'https://bsky.social',
     '#123123123',
   ]
-  const outputs = ['example.com', 'bsky.app', 'Bluesky Social', '#123123123']
+  const outputs = ['example.com', 'bsky.app', 'PARA Social', '#123123123']
 
   it("displays the url's host in a easily readable manner", () => {
     for (let i = 0; i < inputs.length; i++) {
