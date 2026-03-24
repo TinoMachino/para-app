@@ -13,7 +13,7 @@ import {useFocusEffect} from '@react-navigation/native'
 import {useGoogleTranslate} from '#/lib/hooks/useGoogleTranslate'
 import {logger} from '#/logger'
 import {useAnalytics} from '#/analytics'
-import {HAS_ON_DEVICE_TRANSLATION, IS_ANDROID, IS_IOS} from '#/env'
+import {IS_ANDROID, IS_IOS} from '#/env'
 import {
   type TranslationFunctionParams,
   type TranslationOptions,
@@ -123,6 +123,11 @@ async function attemptTranslation(
   }
 }
 
+async function isOnDeviceTranslationSupported() {
+  const {isTranslationSupported} = await import('@bsky.app/expo-translate-text')
+  return isTranslationSupported()
+}
+
 export function useTranslate({
   key,
   forceGoogleTranslate = false,
@@ -168,7 +173,10 @@ export function useTranslate({
         googleTranslate: shouldForceGoogleTranslate,
       })
 
-      if (shouldForceGoogleTranslate || !HAS_ON_DEVICE_TRANSLATION) {
+      if (
+        shouldForceGoogleTranslate ||
+        !(await isOnDeviceTranslationSupported())
+      ) {
         await googleTranslate(
           text,
           expectedTargetLanguage,

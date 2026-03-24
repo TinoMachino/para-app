@@ -12,13 +12,18 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
+import {useQueryClient} from '@tanstack/react-query'
 
 import {type NavigationProp} from '#/lib/routes/types'
 import {useModerationOpts} from '#/state/preferences/moderation-opts'
 import {useGetPopularFeedsQuery} from '#/state/queries/feed'
 import {type FeedDescriptor} from '#/state/queries/post-feed'
 import {useProfilesQuery} from '#/state/queries/profile'
-import {useSuggestedFollowsByActorWithDismiss} from '#/state/queries/suggested-follows'
+import {
+  type SuggestedFollowsByActorQueryData,
+  suggestedFollowsByActorQueryKey,
+  useSuggestedFollowsByActorQuery,
+} from '#/state/queries/suggested-follows'
 import {useSession} from '#/state/session'
 import * as userActionHistory from '#/state/userActionHistory'
 import {type SeenPost} from '#/state/userActionHistory'
@@ -215,12 +220,43 @@ export function SuggestedFollows({feed}: {feed: FeedDescriptor}) {
 }
 
 export function SuggestedFollowsProfile({did}: {did: string}) {
-  const {profiles, onDismiss, isLoading, error} =
-    useSuggestedFollowsByActorWithDismiss({did})
+  const {
+    isLoading: isSuggestionsLoading,
+    data,
+    error,
+  } = useSuggestedFollowsByActorQuery({
+    did,
+  })
+  const queryClient = useQueryClient()
+
+  const onDismiss = useCallback(
+    (dismissedDid: string) => {
+      queryClient.setQueryData(
+        suggestedFollowsByActorQueryKey(did),
+        (previous: SuggestedFollowsByActorQueryData | undefined) => {
+          if (!previous) return previous
+          return {
+            ...previous,
+            suggestions: previous.suggestions.filter(
+              s => s.did !== dismissedDid,
+            ),
+          }
+        },
+      )
+    },
+    [did, queryClient],
+  )
+
+  const profiles = useMemo(() => {
+    return (data?.suggestions ?? []).map(profile => ({
+      actor: profile,
+      recId: data?.recId,
+    }))
+  }, [data?.suggestions, data?.recId])
 
   return (
     <ProfileGrid
-      isSuggestionsLoading={isLoading}
+      isSuggestionsLoading={isSuggestionsLoading}
       profiles={profiles}
       error={error}
       viewContext="profile"

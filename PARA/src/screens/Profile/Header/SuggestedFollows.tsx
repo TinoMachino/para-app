@@ -1,7 +1,15 @@
+import {useCallback, useMemo} from 'react'
+import {useQueryClient} from '@tanstack/react-query'
+
 import {AccordionAnimation} from '#/lib/custom-animations/AccordionAnimation'
-import {useSuggestedFollowsByActorWithDismiss} from '#/state/queries/suggested-follows'
+import {
+  type SuggestedFollowsByActorQueryData,
+  suggestedFollowsByActorQueryKey,
+  useSuggestedFollowsByActorQuery,
+} from '#/state/queries/suggested-follows'
 import {ProfileGrid} from '#/components/FeedInterstitials'
 import {IS_ANDROID} from '#/env'
+import type * as bsky from '#/types/bsky'
 
 export function ProfileHeaderSuggestedFollows({
   isExpanded,
@@ -13,7 +21,7 @@ export function ProfileHeaderSuggestedFollows({
   onRequestHide: () => void
 }) {
   const {profiles, onDismiss, isLoading, error} =
-    useSuggestedFollowsByActorWithDismiss({did: actorDid})
+    useProfileHeaderSuggestions(actorDid)
 
   /* NOTE (caidanw):
    * Android does not work well with this feature yet.
@@ -36,4 +44,43 @@ export function ProfileHeaderSuggestedFollows({
       />
     </AccordionAnimation>
   )
+}
+
+function useProfileHeaderSuggestions(actorDid: string) {
+  const {isLoading, data, error} = useSuggestedFollowsByActorQuery({
+    did: actorDid,
+  })
+  const queryClient = useQueryClient()
+
+  const onDismiss = useCallback(
+    (dismissedDid: string) => {
+      queryClient.setQueryData(
+        suggestedFollowsByActorQueryKey(actorDid),
+        (previous: SuggestedFollowsByActorQueryData | undefined) => {
+          if (!previous) return previous
+          return {
+            ...previous,
+            suggestions: previous.suggestions.filter(
+              s => s.did !== dismissedDid,
+            ),
+          }
+        },
+      )
+    },
+    [actorDid, queryClient],
+  )
+
+  const profiles = useMemo(() => {
+    return (data?.suggestions ?? []).map(profile => ({
+      actor: profile as bsky.profile.AnyProfileView,
+      recId: data?.recId,
+    }))
+  }, [data?.suggestions, data?.recId])
+
+  return {
+    profiles,
+    onDismiss,
+    isLoading,
+    error,
+  }
 }

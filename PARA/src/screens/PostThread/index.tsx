@@ -45,7 +45,7 @@ import {atoms as a, native, platform, useBreakpoints, web} from '#/alf'
 import * as Layout from '#/components/Layout'
 import {ListFooter} from '#/components/Lists'
 
-const PARENT_CHUNK_SIZE = 5
+const PARENT_CHUNK_SIZE = 20
 const CHILDREN_CHUNK_SIZE = 50
 
 export function PostThread({uri}: {uri: string}) {

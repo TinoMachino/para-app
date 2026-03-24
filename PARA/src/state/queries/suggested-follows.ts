@@ -1,4 +1,3 @@
-import {useCallback, useMemo, useState} from 'react'
 import {
   type AppBskyActorDefs,
   type AppBskyActorGetSuggestions,
@@ -21,6 +20,11 @@ export const suggestedFollowsByActorQueryKey = (did: string) => [
   did,
 ]
 
+export type SuggestedFollowsByActorQueryData = {
+  suggestions: AppBskyGraphGetSuggestedFollowsByActor.OutputSchema['suggestions']
+  recId?: string
+}
+
 export function useSuggestedFollowsByActorQuery({
   did,
   enabled,
@@ -41,44 +45,13 @@ export function useSuggestedFollowsByActorQuery({
       const suggestions = res.data.suggestions.filter(
         profile => !profile.viewer?.following,
       )
-      return {suggestions, recId: res.data.recIdStr}
+      return {
+        suggestions,
+        recId: res.data.recIdStr,
+      } satisfies SuggestedFollowsByActorQueryData
     },
     enabled,
   })
-}
-
-export function useSuggestedFollowsByActorWithDismiss({
-  did,
-  enabled,
-  staleTime,
-}: {
-  did: string
-  enabled?: boolean
-  staleTime?: number
-}) {
-  const {data, isLoading, error} = useSuggestedFollowsByActorQuery({
-    did,
-    enabled,
-    staleTime,
-  })
-  const [dismissedDids, setDismissedDids] = useState<Set<string>>(new Set())
-
-  const onDismiss = useCallback((dismissedDid: string) => {
-    setDismissedDids(prev => new Set(prev).add(dismissedDid))
-  }, [])
-
-  const profiles = useMemo(() => {
-    return (data?.suggestions ?? [])
-      .filter(profile => !dismissedDids.has(profile.did))
-      .map(actor => ({actor, recId: data?.recId}))
-  }, [data?.recId, data?.suggestions, dismissedDids])
-
-  return {
-    profiles,
-    onDismiss,
-    isLoading,
-    error,
-  }
 }
 
 export function* findAllProfilesInQueryData(
