@@ -105,11 +105,15 @@ jest.mock('expo-localization', () => ({
   getLocales: () => [],
 }))
 
-jest.mock('statsig-react-native-expo', () => ({
-  Statsig: {
-    initialize() { },
-    initializeCalled() {
-      return false
+jest.mock(
+  'statsig-react-native-expo',
+  () => ({
+    Statsig: {
+      initialize() { },
+      initializeCalled() {
+        return false
+      },
     },
-  },
-}))
+  }),
+  { virtual: true },
+)
