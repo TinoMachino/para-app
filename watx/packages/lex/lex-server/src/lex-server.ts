@@ -16,6 +16,7 @@ import {
   getMain,
   isNsidString,
 } from '@atproto/lex-schema'
+import { LexServerError } from './errors.js'
 import { drainWebsocket } from './lib/drain-websocket.js'
 
 type Awaitable<T> = T | Promise<T>
@@ -883,22 +884,21 @@ export class LexRouter {
   private async handleError(
     request: Request,
     method: LexMethod,
-    error: unknown,
+    cause: unknown,
   ) {
+    if (isAbortReason(request.signal, cause)) {
+      return Response.json({ error: 'RequestAborted' }, { status: 499 })
+    }
+
+    const error = LexServerError.from(cause)
+
     // Only report unexpected processing errors
     const { onHandlerError } = this.options
-    if (onHandlerError && !isAbortReason(request.signal, error)) {
+    if (onHandlerError) {
       await onHandlerError({ error, request, method })
     }
 
-    if (error instanceof LexError) {
-      return error.toResponse()
-    }
-
-    return Response.json(
-      { error: 'InternalError', message: 'An internal error occurred' },
-      { status: 500 },
-    )
+    return error.toResponse()
   }
 
   /**

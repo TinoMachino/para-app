@@ -1,4 +1,8 @@
-import { Client as PlcClient } from '@did-plc/lib'
+import {
+  Client as PlcClient,
+  atprotoOp,
+  didForCreateOp,
+} from '@did-plc/lib'
 import getPort from 'get-port'
 import * as ui8 from 'uint8arrays'
 import { AtpAgent } from '@atproto/api'
@@ -28,27 +32,36 @@ export class TestBsky {
 
     const port = cfg.port || (await getPort())
     const url = `http://localhost:${port}`
-    const serverDid = await plcClient.createDid({
+
+    const op = await atprotoOp({
       signingKey: serviceKeypair.did(),
       rotationKeys: [serviceKeypair.did()],
       handle: 'bsky.test',
       pds: `http://localhost:${port}`,
+      prev: null,
       signer: serviceKeypair,
     })
+    const serverDid = await didForCreateOp(op)
 
-    const endpoint = `http://localhost:${port}`
+    try {
+      await plcClient.getDocument(serverDid)
+    } catch (err) {
+      await plcClient.sendOperation(serverDid, op)
 
-    await plcClient.updateData(serverDid, serviceKeypair, (x) => {
-      x.services['bsky_notif'] = {
-        type: 'BskyNotificationService',
-        endpoint,
-      }
-      x.services['bsky_appview'] = {
-        type: 'BskyAppView',
-        endpoint,
-      }
-      return x
-    })
+      const endpoint = `http://localhost:${port}`
+
+      await plcClient.updateData(serverDid, serviceKeypair, (x) => {
+        x.services['bsky_notif'] = {
+          type: 'BskyNotificationService',
+          endpoint,
+        }
+        x.services['bsky_appview'] = {
+          type: 'BskyAppView',
+          endpoint,
+        }
+        return x
+      })
+    }
 
     // shared across server, ingester, and indexer in order to share pool, avoid too many pg connections.
     const db = new bsky.Database({

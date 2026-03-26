@@ -23,7 +23,7 @@ import {
   ensureValidRecordKey,
 } from '@atproto/syntax'
 import { hasExplicitSlur } from '../handle/explicit-slurs'
-import * as lex from '../lexicon/lexicons'
+import * as lex from '../lexicons.js'
 import * as AppBskyActorProfile from '../lexicon/types/app/bsky/actor/profile'
 import * as AppBskyFeedGenerator from '../lexicon/types/app/bsky/feed/generator'
 import * as AppBskyFeedPost from '../lexicon/types/app/bsky/feed/post'

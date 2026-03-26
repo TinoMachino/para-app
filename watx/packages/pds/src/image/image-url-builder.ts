@@ -1,5 +1,5 @@
 import { BskyAppView } from '../bsky-app-view'
-import { ids } from '../lexicon/lexicons'
+import { ids } from '../lexicons.js'
 
 export class ImageUrlBuilder {
   constructor(

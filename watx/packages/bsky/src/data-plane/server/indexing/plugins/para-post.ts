@@ -7,6 +7,7 @@ import { DatabaseSchema, DatabaseSchemaType } from '../../db/database-schema'
 import { Notification } from '../../db/tables/notification'
 import { RecordProcessor } from '../processor'
 import { recomputeParaProfileStats } from './para-profile-stats'
+import { indexPostDiscourse, deletePostDiscourse } from '../discourse-indexing'
 
 interface ParaPostRecord {
   text: string
@@ -71,6 +72,8 @@ const insertFn = async (
     return null
   }
 
+  await indexPostDiscourse(db, uri, obj.text, timestamp)
+
   return {
     post: insertedPost,
     facets: [],
@@ -99,6 +102,7 @@ const deleteFn = async (
       .deleteFrom('para_post_meta')
       .where('postUri', '=', uri.toString())
       .executeTakeFirst(),
+    deletePostDiscourse(db, uri),
   ])
 
   return deleted

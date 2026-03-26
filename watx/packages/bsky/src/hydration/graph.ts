@@ -1,4 +1,5 @@
 import { DataPlaneClient } from '../data-plane/client'
+import { app } from '../lexicons.js'
 import { Record as BlockRecord } from '../lexicon/types/app/bsky/graph/block'
 import { Record as FollowRecord } from '../lexicon/types/app/bsky/graph/follow'
 import { Record as ListRecord } from '../lexicon/types/app/bsky/graph/list'
@@ -105,7 +106,11 @@ export class GraphHydrator {
     if (!uris.length) return new HydrationMap<List>()
     const res = await this.dataplane.getListRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<ListRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<ListRecord>(
+        app.bsky.graph.list.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<List>())
   }
@@ -118,6 +123,7 @@ export class GraphHydrator {
     const res = await this.dataplane.getListItemRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<ListItemRecord>(
+        app.bsky.graph.listitem.main,
         res.records[i],
         includeTakedowns,
       )
@@ -183,7 +189,11 @@ export class GraphHydrator {
     if (!uris.length) return new HydrationMap<Follow>()
     const res = await this.dataplane.getFollowRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<FollowRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<FollowRecord>(
+        app.bsky.graph.follow.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<Follow>())
   }
@@ -196,6 +206,7 @@ export class GraphHydrator {
     const res = await this.dataplane.getVerificationRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<VerificationRecord>(
+        app.bsky.graph.verification.main,
         res.records[i],
         includeTakedowns,
       )
@@ -210,7 +221,11 @@ export class GraphHydrator {
     if (!uris.length) return new HydrationMap<Block>()
     const res = await this.dataplane.getBlockRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<BlockRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<BlockRecord>(
+        app.bsky.graph.block.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<Block>())
   }
@@ -251,6 +266,7 @@ export class GraphHydrator {
     const res = await this.dataplane.getStarterPackRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<StarterPackRecord>(
+        app.bsky.graph.starterpack.main,
         res.records[i],
         includeTakedowns,
       )

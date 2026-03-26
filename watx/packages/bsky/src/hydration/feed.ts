@@ -1,5 +1,6 @@
 import { dedupeStrs } from '@atproto/common'
 import { DataPlaneClient } from '../data-plane/client'
+import { app } from '../lexicons.js'
 import { Record as FeedGenRecord } from '../lexicon/types/app/bsky/feed/generator'
 import { Record as LikeRecord } from '../lexicon/types/app/bsky/feed/like'
 import { Record as PostRecord } from '../lexicon/types/app/bsky/feed/post'
@@ -134,7 +135,11 @@ export class FeedHydrator {
           },
     )
     return need.reduce((acc, uri, i) => {
-      const record = parseRecord<PostRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<PostRecord>(
+        app.bsky.feed.post.main,
+        res.records[i],
+        includeTakedowns,
+      )
       const violatesThreadGate = res.meta[i].violatesThreadGate
       const violatesEmbeddingRules = res.meta[i].violatesEmbeddingRules
       const hasThreadGate = res.meta[i].hasThreadGate
@@ -272,6 +277,7 @@ export class FeedHydrator {
     const res = await this.dataplane.getFeedGeneratorRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<FeedGenRecord>(
+        app.bsky.feed.generator.main,
         res.records[i],
         includeTakedowns,
       )
@@ -327,6 +333,7 @@ export class FeedHydrator {
     const res = await this.dataplane.getThreadGateRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<ThreadgateRecord>(
+        app.bsky.feed.threadgate.main,
         res.records[i],
         includeTakedowns,
       )
@@ -350,6 +357,7 @@ export class FeedHydrator {
     const res = await this.dataplane.getPostgateRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<PostgateRecord>(
+        app.bsky.feed.postgate.main,
         res.records[i],
         includeTakedowns,
       )
@@ -361,7 +369,11 @@ export class FeedHydrator {
     if (!uris.length) return new HydrationMap<Like>()
     const res = await this.dataplane.getLikeRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<LikeRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<LikeRecord>(
+        app.bsky.feed.like.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<Like>())
   }
@@ -370,7 +382,11 @@ export class FeedHydrator {
     if (!uris.length) return new HydrationMap<Repost>()
     const res = await this.dataplane.getRepostRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<RepostRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<RepostRecord>(
+        app.bsky.feed.repost.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<Repost>())
   }

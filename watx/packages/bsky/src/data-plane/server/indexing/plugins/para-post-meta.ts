@@ -7,6 +7,7 @@ import { DatabaseSchema, DatabaseSchemaType } from '../../db/database-schema'
 import { Notification } from '../../db/tables/notification'
 import { RecordProcessor } from '../processor'
 import { recomputeParaProfileStats } from './para-profile-stats'
+import { updatePostDiscourseCommunity } from '../discourse-indexing'
 
 interface ParaPostMetaRecord {
   post: string
@@ -61,6 +62,10 @@ const insertFn = async (
     .onConflict((oc) => oc.doNothing())
     .returningAll()
     .executeTakeFirst()
+
+  if (inserted && obj.community) {
+    await updatePostDiscourseCommunity(db, obj.post, obj.community)
+  }
 
   return inserted ?? null
 }

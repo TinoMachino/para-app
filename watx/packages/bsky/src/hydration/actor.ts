@@ -1,6 +1,7 @@
 import { AppBskyNotificationDeclaration } from '@atproto/api'
 import { mapDefined } from '@atproto/common'
 import { DataPlaneClient } from '../data-plane/client'
+import { app, chat, com } from '../lexicons.js'
 import { Record as ProfileRecord } from '../lexicon/types/app/bsky/actor/profile'
 import { Record as StatusRecord } from '../lexicon/types/app/bsky/actor/status'
 import { Record as NotificationDeclarationRecord } from '../lexicon/types/app/bsky/notification/declaration'
@@ -11,6 +12,7 @@ import {
   HydrationMap,
   RecordInfo,
   isActivitySubscriptionEnabled,
+  parseDate,
   parseRecord,
   parseString,
   safeTakedownRef,
@@ -184,11 +186,16 @@ export class ActorHydrator {
       }
 
       const profile = actor.profile?.record
-        ? parseRecord<ProfileRecord>(actor.profile, includeTakedowns)
+        ? parseRecord<ProfileRecord>(
+            app.bsky.actor.profile.main,
+            actor.profile,
+            includeTakedowns,
+          )
         : undefined
 
       const status = actor.statusRecord
         ? parseRecord<StatusRecord>(
+            app.bsky.actor.status.main,
             actor.statusRecord,
             /*
              * Always true, we filter this out in the `Views.status()`. If we
@@ -199,7 +206,11 @@ export class ActorHydrator {
         : undefined
 
       const germ = actor.germRecord
-        ? parseRecord<GermDeclarationRecord>(actor.germRecord, includeTakedowns)
+        ? parseRecord<GermDeclarationRecord>(
+            com.germnetwork.declaration.main,
+            actor.germRecord,
+            includeTakedowns,
+          )
         : undefined
 
       const verifications = mapDefined(
@@ -215,7 +226,9 @@ export class ActorHydrator {
               uri: `at://${actorDid}/app.bsky.graph.verification/${verificationMeta.rkey}`,
               handle: verificationMeta.handle,
               displayName: verificationMeta.displayName,
-              createdAt: verificationMeta.sortedAt.toDate().toISOString(),
+              createdAt:
+                parseDate(verificationMeta.sortedAt)?.toISOString() ??
+                new Date(0).toISOString(),
             }
           }
           // Filter out the verification meta that doesn't contain all info.
@@ -255,7 +268,7 @@ export class ActorHydrator {
         isLabeler: actor.labeler ?? false,
         allowIncomingChatsFrom: actor.allowIncomingChatsFrom || undefined,
         upstreamStatus: actor.upstreamStatus || undefined,
-        createdAt: actor.createdAt?.toDate(),
+        createdAt: parseDate(actor.createdAt),
         priorityNotifications: actor.priorityNotifications,
         trustedVerifier: actor.trustedVerifier,
         verifications,
@@ -277,6 +290,7 @@ export class ActorHydrator {
     const res = await this.dataplane.getActorChatDeclarationRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<ChatDeclarationRecord>(
+        chat.bsky.actor.declaration.main,
         res.records[i],
         includeTakedowns,
       )
@@ -292,6 +306,7 @@ export class ActorHydrator {
     const res = await this.dataplane.getGermDeclarationRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<GermDeclarationRecord>(
+        com.germnetwork.declaration.main,
         res.records[i],
         includeTakedowns,
       )
@@ -307,6 +322,7 @@ export class ActorHydrator {
     const res = await this.dataplane.getNotificationDeclarationRecords({ uris })
     return uris.reduce((acc, uri, i) => {
       const record = parseRecord<NotificationDeclarationRecord>(
+        app.bsky.notification.declaration.main,
         res.records[i],
         includeTakedowns,
       )
@@ -318,7 +334,11 @@ export class ActorHydrator {
     if (!uris.length) return new HydrationMap<Status>()
     const res = await this.dataplane.getStatusRecords({ uris })
     return uris.reduce((acc, uri, i) => {
-      const record = parseRecord<StatusRecord>(res.records[i], includeTakedowns)
+      const record = parseRecord<StatusRecord>(
+        app.bsky.actor.status.main,
+        res.records[i],
+        includeTakedowns,
+      )
       return acc.set(uri, record ?? null)
     }, new HydrationMap<Status>())
   }

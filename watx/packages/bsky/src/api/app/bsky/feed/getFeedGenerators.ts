@@ -20,6 +20,9 @@ export default function (server: Server, ctx: AppContext) {
   )
   server.app.bsky.feed.getFeedGenerators({
     auth: ctx.authVerifier.standardOptional,
+    opts: {
+      paramsParseLoose: true,
+    },
     handler: async ({ params, auth, req }) => {
       const viewer = auth.credentials.iss
       const labelers = ctx.reqLabelers(req)

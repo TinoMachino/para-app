@@ -116,38 +116,62 @@ export class TestOzone {
   }
 
   async addAdminDid(did: string) {
-    await this.ctx.teamService(this.ctx.db).create({
-      did,
-      disabled: false,
-      handle: null,
-      displayName: null,
-      lastUpdatedBy: this.ctx.cfg.service.did,
-      role: 'tools.ozone.team.defs#roleAdmin',
-    })
+    try {
+      await this.ctx.teamService(this.ctx.db).create({
+        did,
+        disabled: false,
+        handle: null,
+        displayName: null,
+        lastUpdatedBy: this.ctx.cfg.service.did,
+        role: 'tools.ozone.team.defs#roleAdmin',
+      })
+    } catch (e: any) {
+      if (e.code === '23505') {
+        // already exists, just fall through to push to cfg
+      } else {
+        throw e
+      }
+    }
     this.ctx.cfg.access.admins.push(did)
   }
 
   async addModeratorDid(did: string) {
-    await this.ctx.teamService(this.ctx.db).create({
-      did,
-      disabled: false,
-      handle: null,
-      displayName: null,
-      lastUpdatedBy: this.ctx.cfg.service.did,
-      role: 'tools.ozone.team.defs#roleModerator',
-    })
+    try {
+      await this.ctx.teamService(this.ctx.db).create({
+        did,
+        disabled: false,
+        handle: null,
+        displayName: null,
+        lastUpdatedBy: this.ctx.cfg.service.did,
+        role: 'tools.ozone.team.defs#roleModerator',
+      })
+    } catch (e: any) {
+      if (e.code === '23505') {
+        // already exists
+      } else {
+        throw e
+      }
+    }
     this.ctx.cfg.access.moderators.push(did)
   }
 
   async addTriageDid(did: string) {
-    await this.ctx.teamService(this.ctx.db).create({
-      did,
-      disabled: false,
-      handle: null,
-      displayName: null,
-      lastUpdatedBy: this.ctx.cfg.service.did,
-      role: 'tools.ozone.team.defs#roleTriage',
-    })
+    try {
+      await this.ctx.teamService(this.ctx.db).create({
+        did,
+        disabled: false,
+        handle: null,
+        displayName: null,
+        lastUpdatedBy: this.ctx.cfg.service.did,
+        role: 'tools.ozone.team.defs#roleTriage',
+      })
+    } catch (e: any) {
+      if (e.code === '23505') {
+        // already exists
+      } else {
+        throw e
+      }
+    }
     this.ctx.cfg.access.triage.push(did)
   }
 

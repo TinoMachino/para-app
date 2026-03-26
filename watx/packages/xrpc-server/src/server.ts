@@ -205,7 +205,7 @@ export class Server {
         LexMethodOutput<M>
       >(
         this.createAuthVerifier(config),
-        this.createSchemaParamsVerifier(schema),
+        this.createSchemaParamsVerifier(schema, config.opts),
         this.createSchemaInputVerifier(schema, config.opts),
         this.createRouteRateLimiter(schema.nsid, config),
         config.handler,
@@ -227,7 +227,7 @@ export class Server {
         LexMethodOutput<M>
       >(
         this.createAuthVerifier(config),
-        this.createSchemaParamsVerifier(schema),
+        this.createSchemaParamsVerifier(schema, config.opts),
         this.createSchemaInputVerifier(schema, config.opts),
         this.createRouteRateLimiter(schema.nsid, config),
         config.handler,
@@ -399,7 +399,7 @@ export class Server {
   ): RequestHandler {
     return this.createHandlerInternal<A, P, I, O>(
       this.createAuthVerifier(cfg),
-      this.createLexiconParamsVerifier<P>(nsid, def),
+      this.createLexiconParamsVerifier<P>(nsid, def, cfg.opts),
       this.createLexiconInputVerifier<I>(nsid, def, cfg.opts),
       this.createRouteRateLimiter(nsid, cfg),
       cfg.handler,
@@ -569,8 +569,11 @@ export class Server {
   private createLexiconParamsVerifier<P extends Params = Params>(
     nsid: string,
     def: LexXrpcQuery | LexXrpcProcedure | LexXrpcSubscription,
+    opts?: RouteOptions,
   ) {
-    return createLexiconParamsVerifier<P>(nsid, def, this.lex)
+    return createLexiconParamsVerifier<P>(nsid, def, this.lex, {
+      parseLoose: opts?.paramsParseLoose,
+    })
   }
 
   private createLexiconInputVerifier<I extends Input = Input>(
@@ -602,8 +605,13 @@ export class Server {
 
   private createSchemaParamsVerifier<
     M extends l.Procedure | l.Query | l.Subscription,
-  >(ns: l.Main<M>): ParamsVerifierInternal<LexMethodParams<M>> {
-    return createSchemaParamsVerifier<M>(ns)
+  >(
+    ns: l.Main<M>,
+    opts?: RouteOptions,
+  ): ParamsVerifierInternal<LexMethodParams<M>> {
+    return createSchemaParamsVerifier<M>(ns, {
+      parseLoose: opts?.paramsParseLoose,
+    })
   }
 
   private createSchemaInputVerifier<M extends l.Procedure | l.Query>(

@@ -3,7 +3,12 @@ import { AddressInfo } from 'node:net'
 import { LexiconDoc } from '@atproto/lexicon'
 import { XrpcClient } from '@atproto/xrpc'
 import * as xrpcServer from '../src'
-import { closeServer, createServer } from './_util'
+import {
+  buildAddLexicons,
+  buildMethodLexicons,
+  closeServer,
+  createServer,
+} from './_util'
 
 const LEXICONS: LexiconDoc[] = [
   {
@@ -152,3 +157,81 @@ describe('Parameters', () => {
     ).rejects.toThrow('Error: arr must not have more than 2 elements')
   })
 })
+
+const LOOSE_PARAMS_LEXICONS = [
+  {
+    lexicon: 1,
+    id: 'io.example.looseParamsTest',
+    defs: {
+      main: {
+        type: 'query',
+        parameters: {
+          type: 'params',
+          required: ['str', 'arr'],
+          properties: {
+            str: { type: 'string' },
+            arr: { type: 'array', items: { type: 'string' } },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+        },
+      },
+    },
+  },
+] as const satisfies LexiconDoc[]
+
+for (const buildServer of [buildMethodLexicons, buildAddLexicons]) {
+  describe(`paramsParseLoose with ${buildServer.name}`, () => {
+    let s: http.Server
+    let url: string
+
+    beforeAll(async () => {
+      const server = await buildServer(LOOSE_PARAMS_LEXICONS, {
+        'io.example.looseParamsTest': {
+          opts: { paramsParseLoose: true },
+          handler: (ctx: xrpcServer.HandlerContext) => ({
+            encoding: 'application/json',
+            body: ctx.params,
+          }),
+        },
+      })
+      s = await createServer(server)
+      const { port } = s.address() as AddressInfo
+      url = `http://localhost:${port}`
+    })
+
+    afterAll(async () => {
+      await closeServer(s)
+    })
+
+    it('converts bracket[] syntax into repeated params', async () => {
+      const res = await fetch(
+        `${url}/xrpc/io.example.looseParamsTest?str=hello&arr[]=one&arr[]=two`,
+      )
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.str).toBe('hello')
+      expect(body.arr).toEqual(['one', 'two'])
+    })
+
+    it('converts bracket[n] syntax into repeated params', async () => {
+      const res = await fetch(
+        `${url}/xrpc/io.example.looseParamsTest?str=hello&arr[0]=one&arr[4]=two`,
+      )
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.str).toBe('hello')
+      expect(body.arr).toEqual(['one', 'two'])
+    })
+
+    it('leaves standard repeated params untouched', async () => {
+      const res = await fetch(
+        `${url}/xrpc/io.example.looseParamsTest?str=hello&arr=one&arr=two`,
+      )
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body.arr).toEqual(['one', 'two'])
+    })
+  })
+}

@@ -1412,6 +1412,69 @@ message GetTimelineResponse {
   string cursor = 2;
 }
 
+// - Returns aggregate discourse metrics for a community
+//     - `com.para.discourse.getSnapshot`
+message GetParaDiscourseSnapshotRequest {
+  string community = 1;
+  string timeframe = 2;
+}
+
+message ParaDiscourseSnapshot {
+  string community = 1;
+  string bucket = 2;
+  int32 post_count = 3;
+  int32 unique_authors = 4;
+  double avg_constructiveness = 5;
+  double semantic_volatility = 6;
+  double lexical_diversity = 7;
+  double polarization_delta = 8;
+  double echo_chamber_index = 9;
+  string top_keywords = 10; // JSON string
+  string sentiment_distribution = 11; // JSON string
+}
+
+message GetParaDiscourseSnapshotResponse {
+  repeated ParaDiscourseSnapshot snapshots = 1;
+}
+
+// - Returns emergent topic clusters for a community
+//     - `com.para.discourse.getTopics`
+message GetParaDiscourseTopicsRequest {
+  string community = 1;
+  string timeframe = 2;
+}
+
+message ParaTopicCluster {
+  string cluster_label = 1;
+  string keywords = 2; // JSON string
+  int32 post_count = 3;
+  int32 author_count = 4;
+  double avg_sentiment = 5;
+}
+
+message GetParaDiscourseTopicsResponse {
+  repeated ParaTopicCluster topics = 1;
+}
+
+// - Returns the sentiment breakdown for a community
+//     - `com.para.discourse.getSentiment`
+message GetParaDiscourseSentimentRequest {
+  string community = 1;
+  string timeframe = 2;
+}
+
+message ParaSentimentDistribution {
+  double anger = 1;
+  double fear = 2;
+  double trust = 3;
+  double uncertainty = 4;
+  double neutral = 5;
+}
+
+message GetParaDiscourseSentimentResponse {
+  ParaSentimentDistribution sentiment = 1;
+}
+
 message TimelineFeedItem {
   string uri = 1;
   string cid = 2;
@@ -1873,6 +1936,9 @@ service Service {
   rpc GetParaHighlight(GetParaHighlightRequest) returns (GetParaHighlightResponse);
   rpc GetTimeline(GetTimelineRequest) returns (GetTimelineResponse);
   rpc GetListFeed(GetListFeedRequest) returns (GetListFeedResponse);
+  rpc GetParaDiscourseSnapshot(GetParaDiscourseSnapshotRequest) returns (GetParaDiscourseSnapshotResponse);
+  rpc GetParaDiscourseTopics(GetParaDiscourseTopicsRequest) returns (GetParaDiscourseTopicsResponse);
+  rpc GetParaDiscourseSentiment(GetParaDiscourseSentimentRequest) returns (GetParaDiscourseSentimentResponse);
 
   // Threads
   rpc GetThread(GetThreadRequest) returns (GetThreadResponse);

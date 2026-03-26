@@ -227,6 +227,9 @@ import * as ComParaCivicGetCabildeo from './types/com/para/civic/getCabildeo.js'
 import * as ComParaCivicListCabildeoPositions from './types/com/para/civic/listCabildeoPositions.js'
 import * as ComParaCivicListCabildeos from './types/com/para/civic/listCabildeos.js'
 import * as ComParaCommunityGetGovernance from './types/com/para/community/getGovernance.js'
+import * as ComParaDiscourseGetSentiment from './types/com/para/discourse/getSentiment.js'
+import * as ComParaDiscourseGetSnapshot from './types/com/para/discourse/getSnapshot.js'
+import * as ComParaDiscourseGetTopics from './types/com/para/discourse/getTopics.js'
 import * as ComParaFeedGetAuthorFeed from './types/com/para/feed/getAuthorFeed.js'
 import * as ComParaFeedGetPostThread from './types/com/para/feed/getPostThread.js'
 import * as ComParaFeedGetPosts from './types/com/para/feed/getPosts.js'
@@ -3150,6 +3153,7 @@ export class ComParaNS {
   actor: ComParaActorNS
   civic: ComParaCivicNS
   community: ComParaCommunityNS
+  discourse: ComParaDiscourseNS
   feed: ComParaFeedNS
   highlight: ComParaHighlightNS
   social: ComParaSocialNS
@@ -3159,6 +3163,7 @@ export class ComParaNS {
     this.actor = new ComParaActorNS(server)
     this.civic = new ComParaCivicNS(server)
     this.community = new ComParaCommunityNS(server)
+    this.discourse = new ComParaDiscourseNS(server)
     this.feed = new ComParaFeedNS(server)
     this.highlight = new ComParaHighlightNS(server)
     this.social = new ComParaSocialNS(server)
@@ -3245,6 +3250,50 @@ export class ComParaCommunityNS {
     >,
   ) {
     const nsid = 'com.para.community.getGovernance' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+}
+
+export class ComParaDiscourseNS {
+  _server: Server
+
+  constructor(server: Server) {
+    this._server = server
+  }
+
+  getSentiment<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaDiscourseGetSentiment.QueryParams,
+      ComParaDiscourseGetSentiment.HandlerInput,
+      ComParaDiscourseGetSentiment.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.discourse.getSentiment' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  getSnapshot<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaDiscourseGetSnapshot.QueryParams,
+      ComParaDiscourseGetSnapshot.HandlerInput,
+      ComParaDiscourseGetSnapshot.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.discourse.getSnapshot' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  getTopics<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaDiscourseGetTopics.QueryParams,
+      ComParaDiscourseGetTopics.HandlerInput,
+      ComParaDiscourseGetTopics.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.discourse.getTopics' // @ts-ignore
     return this._server.xrpc.method(nsid, cfg)
   }
 }

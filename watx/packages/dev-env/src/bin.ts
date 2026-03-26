@@ -55,7 +55,8 @@ const run = async () => {
     true,
   )
   const persistentMode = envBool('DEV_ENV_PERSISTENT', false)
-  const skipMockSetup = envBool('DEV_ENV_SKIP_MOCK_SETUP', persistentMode)
+  // Mock setup is now idempotent — always run it so accounts are available
+  const skipMockSetup = envBool('DEV_ENV_SKIP_MOCK_SETUP', false)
   const storageRoot = expandHome(
     envStr('DEV_ENV_STORAGE_ROOT', '~/.paramx-demo'),
   )

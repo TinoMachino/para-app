@@ -6,7 +6,8 @@ import {
   ChatBskyActorDeclaration,
 } from '@atproto/api'
 import { keyBy } from '@atproto/common'
-import { parseRecordBytes } from '../../../hydration/util'
+import { app, chat } from '../../../lexicons.js'
+import { parseJsonBytes } from '../../../hydration/util'
 import { Service } from '../../../proto/bsky_connect'
 import { VerificationMeta } from '../../../proto/bsky_pb'
 import { Database } from '../db'
@@ -96,7 +97,8 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
 
       const status = statuses.records[i]
 
-      const chatDeclaration = parseRecordBytes<ChatBskyActorDeclaration.Record>(
+      const chatDeclaration = parseJsonBytes<ChatBskyActorDeclaration.Record>(
+        chat.bsky.actor.declaration.main,
         chatDeclarations.records[i].record,
       )
 
@@ -115,7 +117,9 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
       const ageAssuranceForDids = new Set(returnAgeAssuranceForDids)
 
       const activitySubscription = () => {
-        const record = parseRecordBytes<AppBskyNotificationDeclaration.Record>(
+        const record =
+          parseJsonBytes<AppBskyNotificationDeclaration.Record>(
+          app.bsky.notification.declaration.main,
           notifDeclarations.records[i].record,
         )
 
@@ -666,22 +670,21 @@ const normalizeGovernanceMetadata = (
 
 const normalizeGovernanceHistory = (raw: unknown): GovernanceHistoryEntry[] => {
   if (!Array.isArray(raw)) return []
-  return raw
-    .map((item) => {
-      if (!item || typeof item !== 'object') return null
-      const value = item as Record<string, unknown>
-      return {
-        id:
-          stringOr(value.id) ||
-          `${stringOr(value.action) || 'publish-governance-updates'}-history`,
-        action: stringOr(value.action) || 'publish_governance_updates',
-        actorDid: stringOr(value.actorDid),
-        actorHandle: stringOr(value.actorHandle),
-        createdAt: stringOr(value.createdAt) || new Date().toISOString(),
-        summary: stringOr(value.summary) || 'Governance update published.',
-      }
+  return raw.reduce<GovernanceHistoryEntry[]>((acc, item) => {
+    if (!item || typeof item !== 'object') return acc
+    const value = item as Record<string, unknown>
+    acc.push({
+      id:
+        stringOr(value.id) ||
+        `${stringOr(value.action) || 'publish-governance-updates'}-history`,
+      action: stringOr(value.action) || 'publish_governance_updates',
+      actorDid: stringOr(value.actorDid),
+      actorHandle: stringOr(value.actorHandle),
+      createdAt: stringOr(value.createdAt) || new Date().toISOString(),
+      summary: stringOr(value.summary) || 'Governance update published.',
     })
-    .filter((item): item is GovernanceHistoryEntry => !!item)
+    return acc
+  }, [])
 }
 
 const stringOr = (value: unknown) =>

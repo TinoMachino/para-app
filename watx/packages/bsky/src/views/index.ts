@@ -7,7 +7,7 @@ import { HydrationState } from '../hydration/hydrator'
 import { Label } from '../hydration/label'
 import { RecordInfo } from '../hydration/util'
 import { ImageUriBuilder } from '../image/uri'
-import { ids } from '../lexicon/lexicons'
+import { ids } from '../lexicons.js'
 import {
   KnownFollowers,
   ProfileAssociatedActivitySubscription,
@@ -1138,7 +1138,7 @@ export class Views {
 
     const item = this.maybePost(bookmark.subjectUri, state)
     return {
-      createdAt: bookmark.indexedAt?.toDate().toISOString(),
+      createdAt: bookmark.indexedAt?.toISOString(),
       subject: {
         uri: bookmark.subjectUri,
         cid: bookmark.subjectCid,

@@ -1,5 +1,6 @@
 import assert from 'node:assert'
 import fs from 'node:fs/promises'
+import { Timestamp } from '@bufbuild/protobuf'
 import {
   AppBskyEmbedExternal,
   AtpAgent,
@@ -606,6 +607,32 @@ describe('pds profile views', () => {
       )
       expect(data.associated?.germ?.showButtonTo).toEqual('everyone')
       expect(forSnapshot(data.associated?.germ)).toMatchSnapshot()
+    })
+
+    it('filters out Go zero-value dates from dataplane', async () => {
+      const getActorsSpy = jest.spyOn(network.bsky.ctx.dataplane, 'getActors')
+
+      getActorsSpy.mockImplementationOnce(async (req) => {
+        const result = await network.bsky.ctx.dataplane.getActors(req)
+
+        if (result.actors.length > 0 && result.actors[0]) {
+          const actor = result.actors[0]
+          const goZeroDate = new Date(-62135596800000)
+          actor.createdAt = Timestamp.fromDate(goZeroDate)
+        }
+
+        return result
+      })
+
+      const { data } = await agent.app.bsky.actor.getProfile(
+        { actor: alice },
+        {
+          headers: await network.serviceHeaders(bob, ids.AppBskyActorGetProfile),
+        },
+      )
+
+      expect(data.createdAt).toBeUndefined()
+      getActorsSpy.mockRestore()
     })
   })
 

@@ -29,11 +29,36 @@ export class ServiceProfile {
     return this.client.assertDid
   }
 
+  static async getOrCreate(pds: TestPds, userDetails: ServiceUserDetails) {
+    const client = pds.getClient()
+    try {
+      await client.login({
+        identifier: userDetails.handle,
+        password: userDetails.password,
+      })
+    } catch (err) {
+      await client.createAccount(userDetails)
+    }
+    return client
+  }
+
   async migrateTo(newPds: TestPds, options: ServiceMigrationOptions = {}) {
     // Ensure serviceAuth is requested from the originating local PDS instance.
     this.client.sessionManager.pdsUrl = undefined
 
     const newClient = newPds.getClient()
+
+    try {
+      await newClient.login({
+        identifier: this.userDetails.handle,
+        password: this.userDetails.password,
+      })
+      this.pds = newPds
+      this.client = newClient
+      return
+    } catch (err) {
+      // continue with migration
+    }
 
     const newPdsDesc = await newClient.com.atproto.server.describeServer()
     const serviceAuth = await this.client.com.atproto.server.getServiceAuth({

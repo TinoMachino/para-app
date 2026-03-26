@@ -114,6 +114,13 @@ export function decodeQueryParam(
 }
 
 export function getSearchParams(url?: string): URLSearchParams | undefined {
+  return getSearchParamsWithOptions(url)
+}
+
+export function getSearchParamsWithOptions(
+  url?: string,
+  opts?: { parseLoose?: boolean },
+): URLSearchParams | undefined {
   if (!url) return undefined
 
   const queryStringIdx = url.indexOf('?')
@@ -122,17 +129,43 @@ export function getSearchParams(url?: string): URLSearchParams | undefined {
   const queryString = url.slice(queryStringIdx + 1)
   if (queryString.length === 0) return undefined
 
-  return new URLSearchParams(queryString)
+  const urlSearchParams = new URLSearchParams(queryString)
+
+  if (opts?.parseLoose) {
+    // Backwards-compat: normalize "foo[]" and "foo[0]" into repeated "foo"
+    // parameters so older clients keep working after stricter parsing.
+    const toAppend = new URLSearchParams()
+    const toDelete = new Set<string>()
+
+    for (const [key, value] of urlSearchParams) {
+      const match = key.endsWith(']') ? key.match(/^([^[]*)\[\d*\]$/) : null
+      if (match) {
+        toAppend.append(match[1], value)
+        toDelete.add(key)
+      }
+    }
+
+    for (const key of toDelete) {
+      urlSearchParams.delete(key)
+    }
+
+    for (const [key, value] of toAppend) {
+      urlSearchParams.append(key, value)
+    }
+  }
+
+  return urlSearchParams
 }
 
 export function getQueryParams(
   req: IncomingMessage | ExpressRequest,
+  opts?: { parseLoose?: boolean },
 ): UndecodedParams {
   if ('query' in req) return req.query
 
   const result: UndecodedParams = Object.create(null)
 
-  const searchParams = getSearchParams(req.url)
+  const searchParams = getSearchParamsWithOptions(req.url, opts)
   if (!searchParams) return result
 
   if (searchParams.has('__proto__')) {
@@ -155,9 +188,10 @@ export function createLexiconParamsVerifier<P extends Params = Params>(
   nsid: string,
   def: LexXrpcQuery | LexXrpcProcedure | LexXrpcSubscription,
   lexicons: Lexicons,
+  opts?: { parseLoose?: boolean },
 ): ParamsVerifierInternal<P> {
   return (req) => {
-    const queryParams = getQueryParams(req)
+    const queryParams = getQueryParams(req, opts)
     const params = decodeQueryParams(def, queryParams)
     try {
       return lexicons.assertValidXrpcParams(nsid, params) as P
@@ -170,10 +204,14 @@ export function createLexiconParamsVerifier<P extends Params = Params>(
 
 export function createSchemaParamsVerifier<
   M extends l.Procedure | l.Query | l.Subscription,
->(ns: l.Main<M>): ParamsVerifierInternal<LexMethodParams<M>> {
+>(
+  ns: l.Main<M>,
+  opts?: { parseLoose?: boolean },
+): ParamsVerifierInternal<LexMethodParams<M>> {
   const schema = l.getMain(ns)
   return (req) => {
-    const urlSearchParams = getSearchParams(req.url) ?? new URLSearchParams()
+    const urlSearchParams =
+      getSearchParamsWithOptions(req.url, opts) ?? new URLSearchParams()
     try {
       const params = schema.parameters.fromURLSearchParams(urlSearchParams)
       return params as LexMethodParams<M>

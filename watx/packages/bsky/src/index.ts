@@ -41,6 +41,7 @@ export { AppContext } from './context'
 export * from './data-plane'
 export { BackgroundQueue } from './data-plane/server/background'
 export { Database } from './data-plane/server/db'
+export * from './lexicons.js'
 export { Redis } from './redis'
 
 export class BskyAppView {

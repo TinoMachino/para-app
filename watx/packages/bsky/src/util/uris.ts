@@ -1,5 +1,5 @@
 import { AtUri } from '@atproto/syntax'
-import { ids } from '../lexicon/lexicons'
+import { ids } from '../lexicons.js'
 import {
   Main as StrongRef,
   validateMain as validateStrongRef,

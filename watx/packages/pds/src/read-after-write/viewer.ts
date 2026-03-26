@@ -4,7 +4,7 @@ import { AccountManager } from '../account-manager/account-manager'
 import { ActorStoreReader } from '../actor-store/actor-store-reader'
 import { BskyAppView } from '../bsky-app-view'
 import { ImageUrlBuilder } from '../image/image-url-builder'
-import { ids } from '../lexicon/lexicons'
+import { ids } from '../lexicons.js'
 import {
   ProfileView,
   ProfileViewBasic,

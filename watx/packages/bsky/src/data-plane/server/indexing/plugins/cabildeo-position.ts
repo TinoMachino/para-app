@@ -6,6 +6,7 @@ import { Database } from '../../db'
 import { DatabaseSchema, DatabaseSchemaType } from '../../db/database-schema'
 import { RecordProcessor } from '../processor'
 import { recomputeCabildeoAggregates } from './recompute-cabildeo-aggregates'
+import { indexPostDiscourse, deletePostDiscourse } from '../discourse-indexing'
 
 interface PositionRecord {
   cabildeo: string
@@ -54,6 +55,8 @@ const insertFn = async (
     return null
   }
 
+  await indexPostDiscourse(db, uri, obj.text, timestamp)
+
   return { record: inserted }
 }
 
@@ -74,6 +77,8 @@ const deleteFn = async (
     .where('uri', '=', uri.toString())
     .returningAll()
     .executeTakeFirst()
+
+  await deletePostDiscourse(db, uri)
 
   return deleted ? { record: deleted } : null
 }

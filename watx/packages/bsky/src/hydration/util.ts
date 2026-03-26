@@ -1,9 +1,15 @@
+import { Timestamp } from '@bufbuild/protobuf'
 import { CID } from 'multiformats/cid'
-import * as ui8 from 'uint8arrays'
-import { jsonToLex } from '@atproto/lexicon'
+import {
+  LexParseOptions,
+  LexValue,
+  RecordSchema,
+  Schema,
+  ValidateOptions,
+  lexParse,
+} from '@atproto/lex'
 import { AtUri } from '@atproto/syntax'
-import { lexicons } from '../lexicon/lexicons'
-import { Record } from '../proto/bsky_pb'
+import { Record as RecordEntry } from '../proto/bsky_pb'
 
 export class HydrationMap<T> extends Map<string, T | null> implements Merges {
   merge(map: HydrationMap<T>): this {
@@ -59,20 +65,18 @@ export const mergeManyMaps = <T>(...maps: HydrationMap<T>[]) => {
 export type ItemRef = { uri: string; cid?: string }
 
 export const parseRecord = <T extends UnknownRecord>(
-  entry: Record,
+  recordSchema: RecordSchema,
+  entry: RecordEntry,
   includeTakedowns: boolean,
 ): RecordInfo<T> | undefined => {
   if (!includeTakedowns && entry.takenDown) {
     return undefined
   }
-  const record = parseRecordBytes<T>(entry.record)
+  const record = parseJsonBytes<T>(recordSchema, entry.record)
   const cid = entry.cid
-  const sortedAt = entry.sortedAt?.toDate() ?? new Date(0)
-  const indexedAt = entry.indexedAt?.toDate() ?? new Date(0)
+  const sortedAt = parseDate(entry.sortedAt) ?? new Date(0)
+  const indexedAt = parseDate(entry.indexedAt) ?? new Date(0)
   if (!record || !cid) return
-  if (!isValidRecord(record)) {
-    return
-  }
   return {
     record,
     cid,
@@ -82,30 +86,24 @@ export const parseRecord = <T extends UnknownRecord>(
   }
 }
 
-const isValidRecord = (json: unknown) => {
-  const lexRecord = jsonToLex(json)
-  if (typeof lexRecord?.['$type'] !== 'string') {
-    return false
-  }
-  try {
-    lexicons.assertValidRecord(lexRecord['$type'], lexRecord)
-    return true
-  } catch {
-    return false
-  }
-}
-
-// @NOTE not parsed into lex format, so will not match lexicon record types on CID and blob values.
-export const parseRecordBytes = <T>(
+export const parseJsonBytes = <T = unknown>(
+  schema: Schema<LexValue>,
   bytes: Uint8Array | undefined,
+  options: LexParseOptions & ValidateOptions = { strict: false },
 ): T | undefined => {
-  return parseJsonBytes(bytes) as T
-}
-
-export const parseJsonBytes = (bytes: Uint8Array | undefined): unknown => {
   if (!bytes || bytes.byteLength === 0) return
-  const parsed = JSON.parse(ui8.toString(bytes, 'utf8'))
-  return parsed ?? undefined
+
+  const jsonBuffer = Buffer.from(
+    bytes.buffer,
+    bytes.byteOffset,
+    bytes.byteLength,
+  )
+  const value = lexParse(jsonBuffer.toString('utf8'), options)
+  return (
+    schema as {
+      ifMatches(input: unknown, options?: ValidateOptions): unknown
+    }
+  ).ifMatches(value, options) as T | undefined
 }
 
 export const parseString = (str: string | undefined): string | undefined => {
@@ -119,6 +117,16 @@ export const parseCid = (cidStr: string | undefined): CID | undefined => {
   } catch {
     return
   }
+}
+
+export const parseDate = (
+  timestamp: Timestamp | undefined,
+): Date | undefined => {
+  if (!timestamp) return undefined
+  const date = timestamp.toDate()
+  // Go zero-value time.Time comes through as year 0001; treat it as absent.
+  if (date.getTime() === -62135596800000) return undefined
+  return date
 }
 
 export const urisByCollection = (uris: string[]): Map<string, string[]> => {

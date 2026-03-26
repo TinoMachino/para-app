@@ -9,6 +9,7 @@ import * as blobTakedown from './tables/blob-takedown'
 import * as bookmark from './tables/bookmark'
 import * as cabildeo from './tables/cabildeo'
 import * as didCache from './tables/did-cache'
+import * as discourse from './tables/discourse'
 import * as draft from './tables/draft'
 import * as duplicateRecord from './tables/duplicate-record'
 import * as feedGenerator from './tables/feed-generator'
@@ -97,6 +98,7 @@ export type DatabaseSchemaType = duplicateRecord.PartialDB &
   paraStatus.PartialDB &
   paraProfileStats.PartialDB &
   highlight.PartialDB &
-  cabildeo.PartialDB
+  cabildeo.PartialDB &
+  discourse.PartialDB
 
 export type DatabaseSchema = Kysely<DatabaseSchemaType>

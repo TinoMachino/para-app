@@ -7,6 +7,7 @@ import blocks from './blocks'
 import bookmarks from './bookmarks'
 import cabildeo from './cabildeo'
 import drafts from './drafts'
+import discourse from './discourse'
 import feedGens from './feed-gens'
 import feeds from './feeds'
 import follows from './follows'
@@ -38,6 +39,7 @@ export default (db: Database, idResolver: IdResolver) =>
       ...blocks(db),
       ...bookmarks(db),
       ...cabildeo(db),
+      ...discourse(db),
       ...drafts(db),
       ...feedGens(db),
       ...feeds(db),

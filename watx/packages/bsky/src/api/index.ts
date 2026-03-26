@@ -105,6 +105,9 @@ import getParaTimeline from './com/para/feed/getTimeline'
 import getParaHighlight from './com/para/highlight/getHighlight'
 import listParaHighlights from './com/para/highlight/listHighlights'
 import getParaPostMeta from './com/para/social/getPostMeta'
+import getParaDiscourseSnapshot from './com/para/discourse/getSnapshot'
+import getParaDiscourseTopics from './com/para/discourse/getTopics'
+import getParaDiscourseSentiment from './com/para/discourse/getSentiment'
 
 export * as health from './health'
 
@@ -225,5 +228,8 @@ export default function (server: Server, ctx: AppContext) {
   getParaPosts(server, ctx)
   getParaTimeline(server, ctx)
   getParaPostMeta(server, ctx)
+  getParaDiscourseSnapshot(server, ctx)
+  getParaDiscourseTopics(server, ctx)
+  getParaDiscourseSentiment(server, ctx)
   return server
 }

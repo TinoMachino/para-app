@@ -4,7 +4,7 @@ import {type AppBskyActorDefs, BSKY_LABELER_DID} from '@atproto/api'
 import {type ProxyHeaderValue} from '#/state/session/agent'
 import {BLUESKY_PROXY_DID, CHAT_PROXY_DID} from '#/env'
 
-const LOCAL_DEV_IP = process.env.EXPO_PUBLIC_LOCAL_DEV_IP || '192.168.100.37'
+const LOCAL_DEV_IP = process.env.EXPO_PUBLIC_LOCAL_DEV_IP || '192.168.100.31'
 const LOCAL_DEV_SERVICE_OVERRIDE = process.env.EXPO_PUBLIC_LOCAL_DEV_SERVICE
 const DEFAULT_SERVICE_OVERRIDE = process.env.EXPO_PUBLIC_DEFAULT_SERVICE
 const USE_LOCAL_DEFAULT_SERVICE =

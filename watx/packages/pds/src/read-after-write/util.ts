@@ -1,4 +1,5 @@
 import express from 'express'
+import { ValidationError } from '@atproto/lexicon'
 import { jsonToLex } from '@atproto/lexicon'
 import { HeadersMap } from '@atproto/xrpc'
 import {
@@ -7,7 +8,7 @@ import {
   parseReqNsid,
 } from '@atproto/xrpc-server'
 import { AppContext } from '../context'
-import { lexicons } from '../lexicon/lexicons'
+import { lexicons } from '../lexicons.js'
 import { readStickyLogger as log } from '../logger'
 import {
   asPipeThroughBuffer,
@@ -72,7 +73,14 @@ export const pipethroughReadAfterWrite = async <T>(
 
       const lex = jsonToLex(JSON.parse(buffer.toString('utf8')))
 
-      const parsedRes = lexicons.assertValidXrpcOutput(lxm, lex) as T
+      let parsedRes: T
+      try {
+        parsedRes = lexicons.assertValidXrpcOutput(lxm, lex) as T
+      } catch (err) {
+        // Invalid upstream payloads should skip read-after-write munging.
+        if (err instanceof ValidationError) return bufferRes
+        throw err
+      }
 
       const localViewer = ctx.localViewer(store)
 

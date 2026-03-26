@@ -77,28 +77,30 @@ export class LexiconAuthorityProfile extends ServiceProfile {
       password: 'hunter2',
     },
   ) {
-    const client = pds.getClient()
-    await client.createAccount(userDetails)
-
+    const client = await ServiceProfile.getOrCreate(pds, userDetails)
     return new LexiconAuthorityProfile(pds, client, userDetails)
   }
 
   async createRecords() {
-    await this.client.app.bsky.actor.profile.create(
-      { repo: this.did },
-      {
-        displayName: 'Lexicon Authority',
-        description: `the repo containing all the lexicons that can be resolved in dev`,
-      },
-    )
+    try {
+      await this.client.app.bsky.actor.profile.create(
+        { repo: this.did },
+        {
+          displayName: 'Lexicon Authority',
+          description: `the repo containing all the lexicons that can be resolved in dev`,
+        },
+      )
 
-    for (const doc of LEXICONS) {
-      await this.client.com.atproto.repo.createRecord({
-        repo: this.did,
-        collection: 'com.atproto.lexicon.schema',
-        rkey: doc.id,
-        record: doc,
-      })
+      for (const doc of LEXICONS) {
+        await this.client.com.atproto.repo.createRecord({
+          repo: this.did,
+          collection: 'com.atproto.lexicon.schema',
+          rkey: doc.id,
+          record: doc,
+        })
+      }
+    } catch (err) {
+      // ignore
     }
   }
 }

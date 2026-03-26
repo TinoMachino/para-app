@@ -23,7 +23,7 @@ import {
 import { buildProxiedContentEncoding } from '@atproto-labs/xrpc-utils'
 import { isAccessPrivileged } from './auth-scope'
 import { AppContext } from './context'
-import { ids } from './lexicon/lexicons'
+import { ids } from './lexicons.js'
 import { httpLogger } from './logger'
 
 export const proxyHandler = (ctx: AppContext): CatchallHandler => {
