@@ -34,6 +34,28 @@ export const MEXICAN_STATES = [
   'Zacatecas',
 ]
 
+export function normalizeMexicoStateName(stateName: string): string {
+  const normalized = stateName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+
+  if (
+    normalized === 'ciudad de mexico' ||
+    normalized === 'distrito federal' ||
+    normalized === 'cdmx'
+  ) {
+    return 'cdmx'
+  }
+
+  if (normalized === 'estado de mexico' || normalized === 'mexico') {
+    return 'estado-de-mexico'
+  }
+
+  return normalized
+}
+
 export const MOCK_MUNICIPALITIES: Record<string, string[]> = {
   All: ['All'],
   Jalisco: [

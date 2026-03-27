@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
 import {Image, StyleSheet, View} from 'react-native'
 import {
   type AppBskyFeedDefs,

@@ -7,6 +7,7 @@ import {
   type CabildeoPositionRecord,
   type CabildeoRecord,
 } from '#/lib/api/para-lexicons'
+import {districtKeyFor} from '#/lib/constants/electoralDistrictsData'
 
 export type PolicyItem = {
   id: string
@@ -34,6 +35,20 @@ export type CommunityData = {
   eyebrow?: string
   region?: string
   accent?: string
+}
+
+export type DistrictScopedCabildeoRecord = CabildeoRecord & {
+  districtKeys?: string[]
+}
+
+export type DistrictRaqRecord = {
+  id: string
+  title: string
+  summary: string
+  stateName: string
+  districtKeys: string[]
+  updatedAt: string
+  status: 'Open' | 'Draft'
 }
 
 export const VOTED_POLICIES: CategoryData[] = [
@@ -197,7 +212,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#003087',
     directoryGroup: 'political',
     subtitle: 'Democracia cristiana y agenda institucional',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#3B82F6',
   },
   {
@@ -209,7 +224,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#8B1538',
     directoryGroup: 'political',
     subtitle: 'Movimiento gobernante y soberanía social',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#E11D48',
   },
   {
@@ -221,7 +236,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#FF6B00',
     directoryGroup: 'political',
     subtitle: 'Ciudadanía, innovación y política urbana',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#FB923C',
   },
   {
@@ -233,7 +248,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#00923F',
     directoryGroup: 'political',
     subtitle: 'Estructura histórica e institucional',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#22C55E',
   },
   {
@@ -245,7 +260,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#228B22',
     directoryGroup: 'political',
     subtitle: 'Agenda verde y sustentabilidad',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#4ADE80',
   },
   {
@@ -257,7 +272,7 @@ export const COMMUNITY_DATA: CommunityData[] = [
     color: '#FF9500',
     directoryGroup: 'political',
     subtitle: 'Liberalismo clásico y mercado libre',
-    eyebrow: 'Political Community',
+    eyebrow: 'Party',
     accent: '#F59E0B',
   },
 ]
@@ -418,7 +433,7 @@ export const CATEGORIES = [
 
 // ─── Cabildeo Mock Data ──────────────────────────────────────────────────────
 
-export const MOCK_CABILDEOS: CabildeoRecord[] = [
+export const MOCK_CABILDEOS: DistrictScopedCabildeoRecord[] = [
   {
     title:
       '¿Debe Jalisco priorizar la desalinización sobre la conservación de acuíferos?',
@@ -430,6 +445,11 @@ export const MOCK_CABILDEOS: CabildeoRecord[] = [
     communities: ['p/CDMX', 'p/NuevoLeon'],
     flairs: ['policy_water_management', 'matter_water_scarcity'],
     region: 'Jalisco',
+    districtKeys: [
+      districtKeyFor('Jalisco', 4),
+      districtKeyFor('Jalisco', 7),
+      districtKeyFor('Jalisco', 10),
+    ],
     options: [
       {
         label: 'Desalinización',
@@ -465,6 +485,11 @@ export const MOCK_CABILDEOS: CabildeoRecord[] = [
     community: 'p/CDMX',
     flairs: ['policy_public_transit'],
     region: 'CDMX',
+    districtKeys: [
+      districtKeyFor('Ciudad de México', 7),
+      districtKeyFor('Ciudad de México', 12),
+      districtKeyFor('Ciudad de México', 24),
+    ],
     geoRestricted: true,
     options: [
       {
@@ -490,6 +515,7 @@ export const MOCK_CABILDEOS: CabildeoRecord[] = [
     communities: ['p/Chiapas', 'p/Guerrero'],
     flairs: ['matter_indigenous_rights', 'policy_mining_regulation'],
     region: 'Oaxaca',
+    districtKeys: [districtKeyFor('Oaxaca', 2), districtKeyFor('Oaxaca', 7)],
     options: [
       {
         label: 'Prohibición total',
@@ -526,6 +552,49 @@ export const MOCK_CABILDEOS: CabildeoRecord[] = [
         {community: 'p/Guerrero', dominantOption: 1, participation: '41%'},
       ],
     },
+  },
+]
+
+export const MOCK_DISTRICT_RAQS: DistrictRaqRecord[] = [
+  {
+    id: 'raq-jalisco-7-water-board',
+    title: '¿Cómo debería integrarse el consejo de agua metropolitano?',
+    summary:
+      'Vecinos de Guadalajara y Zapopan están discutiendo si el consejo debe reservar asientos fijos para comités barriales.',
+    stateName: 'Jalisco',
+    districtKeys: [districtKeyFor('Jalisco', 7)],
+    updatedAt: '2026-03-21T12:00:00Z',
+    status: 'Open',
+  },
+  {
+    id: 'raq-jalisco-10-riverfront',
+    title: '¿Qué prioridad debe tener la rehabilitación del Río Santiago?',
+    summary:
+      'Se están comparando tres enfoques: monitoreo ciudadano, remediación industrial y presupuesto metropolitano de emergencia.',
+    stateName: 'Jalisco',
+    districtKeys: [districtKeyFor('Jalisco', 10)],
+    updatedAt: '2026-03-18T09:30:00Z',
+    status: 'Open',
+  },
+  {
+    id: 'raq-cdmx-12-housing',
+    title: '¿Qué regla de vivienda asequible debe exigirse en corredores BRT?',
+    summary:
+      'Activistas de vivienda y movilidad están proponiendo mínimos obligatorios de vivienda asequible por proyecto.',
+    stateName: 'Ciudad de México',
+    districtKeys: [districtKeyFor('Ciudad de México', 12)],
+    updatedAt: '2026-03-23T18:10:00Z',
+    status: 'Open',
+  },
+  {
+    id: 'raq-oaxaca-2-land-rights',
+    title: '¿Cómo debería verificarse el consentimiento comunitario en proyectos extractivos?',
+    summary:
+      'Organizaciones territoriales proponen observadores independientes, actas públicas y vetos vinculantes.',
+    stateName: 'Oaxaca',
+    districtKeys: [districtKeyFor('Oaxaca', 2), districtKeyFor('Oaxaca', 7)],
+    updatedAt: '2026-03-11T16:45:00Z',
+    status: 'Draft',
   },
 ]
 
@@ -576,3 +645,60 @@ export const MOCK_CABILDEO_POSITIONS: CabildeoPositionRecord[] = [
     constructivenessScore: 0.15,
   },
 ]
+
+export const STATE_DEMOGRAPHICS: Record<string, { dominantParty: string; leadingCommunity: string; approval: string; active: string }> = {
+  Jalisco: {
+    dominantParty: 'MC',
+    leadingCommunity: 'p/Jalisco',
+    approval: '58%',
+    active: '840K',
+  },
+  CDMX: {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/CDMX',
+    approval: '62%',
+    active: '2.1M',
+  },
+  'Ciudad de México': {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/CDMX',
+    approval: '62%',
+    active: '2.1M',
+  },
+  'Distrito Federal': {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/CDMX',
+    approval: '62%',
+    active: '2.1M',
+  },
+  'Estado de México': {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/Edomex',
+    approval: '54%',
+    active: '1.6M',
+  },
+  'México': {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/Edomex',
+    approval: '54%',
+    active: '1.6M',
+  },
+  'Nuevo León': {
+    dominantParty: 'MC',
+    leadingCommunity: 'p/NuevoLeon',
+    approval: '51%',
+    active: '920K',
+  },
+  Oaxaca: {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/Oaxaca',
+    approval: '68%',
+    active: '410K',
+  },
+  default: {
+    dominantParty: 'Morena',
+    leadingCommunity: 'p/Mexico',
+    approval: '42%',
+    active: '1.2M',
+  }
+}

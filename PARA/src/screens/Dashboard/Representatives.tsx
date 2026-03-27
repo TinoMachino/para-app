@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useMemo, useState} from 'react'
 import {
   ActivityIndicator,
   ScrollView,
@@ -10,7 +10,9 @@ import {LinearGradient} from 'expo-linear-gradient'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
+import {useNavigation} from '@react-navigation/native'
 
+import {type NavigationProp} from '#/lib/routes/types'
 import {
   type RepresentativeItem,
   useRepresentativesQuery,
@@ -20,6 +22,7 @@ import {Text} from '#/view/com/util/text/Text'
 import {useTheme} from '#/alf'
 import {ActiveFiltersStackButton} from '#/components/BaseFilterControls'
 import {SearchInput} from '#/components/forms/SearchInput'
+import {Verified_Stroke2_Corner2_Rounded as VerifiedIcon} from '#/components/icons/Verified'
 import * as Layout from '#/components/Layout'
 
 const CATEGORIES = [
@@ -40,6 +43,7 @@ const CATEGORIES = [
 export function RepresentativesScreen({route}: {route: any}) {
   const {_} = useLingui()
   const t = useTheme()
+  const navigation = useNavigation<NavigationProp>()
 
   const [selectedCategory, setSelectedCategory] = useState(
     route.params?.category || 'All',
@@ -78,10 +82,27 @@ export function RepresentativesScreen({route}: {route: any}) {
   const communityReps = filteredReps.filter(r => r.type === 'Community')
 
   const onPressRep = (rep: RepresentativeItem) => {
-    // navigation.navigate('Profile', {screen: 'Profile', params: {name: rep.handle}})
-    // Placeholder navigation, assuming profile route exists or just log
-    console.log('Navigate to rep', rep.handle)
+    navigation.navigate('Profile', {name: rep.handle})
   }
+
+  const getRepresentativeBadges = useMemo(
+    () => (rep: RepresentativeItem) => {
+      const badges = [{label: 'Verified', tone: 'verified' as const}]
+
+      if (rep.type === 'Party') {
+        badges.push({label: 'Official', tone: 'official' as const})
+      }
+
+      if (rep.state !== 'National' && rep.municipality === 'State') {
+        badges.push({label: 'State', tone: 'state' as const})
+      } else if (rep.type === 'Community') {
+        badges.push({label: 'Community', tone: 'community' as const})
+      }
+
+      return badges
+    },
+    [],
+  )
 
   return (
     <Layout.Screen testID="representativesScreen">
@@ -207,6 +228,38 @@ export function RepresentativesScreen({route}: {route: any}) {
                         <Text style={[styles.repName, t.atoms.text]}>
                           {rep.name}
                         </Text>
+                        <View style={styles.badgesRow}>
+                          {getRepresentativeBadges(rep).map(badge => (
+                            <View
+                              key={`${rep.id}-${badge.label}`}
+                              style={[
+                                styles.badgePill,
+                                badge.tone === 'verified'
+                                  ? {backgroundColor: t.palette.primary_25}
+                                  : badge.tone === 'official'
+                                    ? {backgroundColor: 'rgba(52, 199, 89, 0.14)'}
+                                    : {backgroundColor: t.palette.contrast_25},
+                              ]}>
+                              {badge.tone === 'verified' ? (
+                                <VerifiedIcon
+                                  size="xs"
+                                  style={{color: t.palette.primary_600}}
+                                />
+                              ) : null}
+                              <Text
+                                style={[
+                                  styles.badgeText,
+                                  badge.tone === 'verified'
+                                    ? {color: t.palette.primary_700}
+                                    : badge.tone === 'official'
+                                      ? {color: '#34C759'}
+                                      : t.atoms.text_contrast_medium,
+                                ]}>
+                                {badge.label}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
                         <Text
                           style={[
                             styles.repHandle,
@@ -268,6 +321,38 @@ export function RepresentativesScreen({route}: {route: any}) {
                         <Text style={[styles.repName, t.atoms.text]}>
                           {rep.name}
                         </Text>
+                        <View style={styles.badgesRow}>
+                          {getRepresentativeBadges(rep).map(badge => (
+                            <View
+                              key={`${rep.id}-${badge.label}`}
+                              style={[
+                                styles.badgePill,
+                                badge.tone === 'verified'
+                                  ? {backgroundColor: t.palette.primary_25}
+                                  : badge.tone === 'official'
+                                    ? {backgroundColor: 'rgba(52, 199, 89, 0.14)'}
+                                    : {backgroundColor: t.palette.contrast_25},
+                              ]}>
+                              {badge.tone === 'verified' ? (
+                                <VerifiedIcon
+                                  size="xs"
+                                  style={{color: t.palette.primary_600}}
+                                />
+                              ) : null}
+                              <Text
+                                style={[
+                                  styles.badgeText,
+                                  badge.tone === 'verified'
+                                    ? {color: t.palette.primary_700}
+                                    : badge.tone === 'official'
+                                      ? {color: '#34C759'}
+                                      : t.atoms.text_contrast_medium,
+                                ]}>
+                                {badge.label}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
                         <Text
                           style={[
                             styles.repHandle,
@@ -412,6 +497,24 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '700',
     marginBottom: 2,
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 6,
+  },
+  badgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   repHandle: {
     fontSize: 13,

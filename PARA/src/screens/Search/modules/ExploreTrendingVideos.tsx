@@ -7,10 +7,17 @@ import {Trans} from '@lingui/react/macro'
 import {useFocusEffect} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {VIDEO_FEED_URI} from '#/lib/constants'
+import {
+  DEFAULT_VIDEO_FEED_DESCRIPTOR,
+  DEFAULT_VIDEO_FEED_URI,
+} from '#/lib/constants'
 import {makeCustomFeedLink} from '#/lib/routes/links'
 import {logger} from '#/logger'
-import {RQKEY, usePostFeedQuery} from '#/state/queries/post-feed'
+import {
+  type FeedDescriptor,
+  RQKEY,
+  usePostFeedQuery,
+} from '#/state/queries/post-feed'
 import {BlockDrawerGesture} from '#/view/shell/BlockDrawerGesture'
 import {atoms as a, tokens, useGutters, useTheme} from '#/alf'
 import {ButtonIcon} from '#/components/Button'
@@ -24,7 +31,8 @@ import {
 
 const CARD_WIDTH = 100
 
-const FEED_DESC = `feedgen|${VIDEO_FEED_URI}`
+const FEED_DESC = (DEFAULT_VIDEO_FEED_DESCRIPTOR ??
+  'following') as FeedDescriptor
 const FEED_PARAMS: {
   feedCacheKey: 'explore'
 } = {
@@ -32,18 +40,24 @@ const FEED_PARAMS: {
 }
 
 export function ExploreTrendingVideos() {
+  const hasVideoFeed = Boolean(DEFAULT_VIDEO_FEED_URI)
   const gutters = useGutters([0, 'base'])
-  const {data, isLoading, error} = usePostFeedQuery(FEED_DESC, FEED_PARAMS)
+  const {data, isLoading, error} = usePostFeedQuery(FEED_DESC, FEED_PARAMS, {
+    enabled: hasVideoFeed,
+  })
 
   // Refetch on tab change if nothing else is using this query.
   const queryClient = useQueryClient()
   useFocusEffect(() => {
+    if (!hasVideoFeed) {
+      return
+    }
     return () => {
       const query = queryClient
         .getQueryCache()
         .find({queryKey: RQKEY(FEED_DESC, FEED_PARAMS)})
       if (query && query.getObserversCount() <= 1) {
-        query.fetch()
+        void query.fetch()
       }
     }
   })
@@ -72,6 +86,10 @@ export function ExploreTrendingVideos() {
   //   },
   //   [addSavedFeeds],
   // )
+
+  if (!hasVideoFeed || !DEFAULT_VIDEO_FEED_URI) {
+    return null
+  }
 
   if (error) {
     return null
@@ -161,7 +179,7 @@ function VideoCards({
       .slice(0, 8)
   }, [data])
   const href = useMemo(() => {
-    const urip = new AtUri(VIDEO_FEED_URI)
+    const urip = new AtUri(DEFAULT_VIDEO_FEED_URI!)
     return makeCustomFeedLink(urip.host, urip.rkey, undefined, 'explore')
   }, [])
 
@@ -174,7 +192,7 @@ function VideoCards({
             moderation={item.moderation}
             sourceContext={{
               type: 'feedgen',
-              uri: VIDEO_FEED_URI,
+              uri: DEFAULT_VIDEO_FEED_URI!,
               sourceInterstitial: 'explore',
             }}
             onInteract={() => {

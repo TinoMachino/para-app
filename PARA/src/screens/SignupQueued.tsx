@@ -9,7 +9,7 @@ import {Trans} from '@lingui/react/macro'
 import {logger} from '#/logger'
 import {isSignupQueued, useAgent, useSessionApi} from '#/state/session'
 import {useOnboardingDispatch} from '#/state/shell'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
 import {atoms as a, native, useBreakpoints, useTheme, web} from '#/alf'
 import {Button, ButtonIcon, ButtonText} from '#/components/Button'
 import {Loader} from '#/components/Loader'
@@ -121,7 +121,7 @@ export function SignupQueued() {
           <View style={[a.flex_1, {maxWidth: COL_WIDTH}]}>
             <View
               style={[a.w_full, a.justify_center, a.align_center, a.my_4xl]}>
-              <Logo width={120} />
+              <Logomark width={96} fill="#474652" />
             </View>
 
             <Text style={[a.text_4xl, a.font_bold, a.pb_sm]}>

@@ -1,10 +1,16 @@
-import {useCallback, useImperativeHandle, useRef, useState} from 'react'
+import {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 import {View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
-import {BSKY_SERVICE} from '#/lib/constants'
+import {BSKY_SERVICE, isLikelyLocalServiceUrl} from '#/lib/constants'
 import * as persisted from '#/state/persisted'
 import {useSession} from '#/state/session'
 import {atoms as a, platform, useBreakpoints, useTheme, web} from '#/alf'
@@ -22,9 +28,11 @@ type SegmentedControlOptions = typeof BSKY_SERVICE | 'custom'
 
 export function ServerInputDialog({
   control,
+  serviceUrl,
   onSelect,
 }: {
   control: Dialog.DialogOuterProps['control']
+  serviceUrl: string
   onSelect: (url: string) => void
 }) {
   const ax = useAnalytics()
@@ -32,8 +40,22 @@ export function ServerInputDialog({
 
   // persist these options between dialog open/close
   const [fixedOption, setFixedOption] =
-    useState<SegmentedControlOptions>(BSKY_SERVICE)
-  const [previousCustomAddress, setPreviousCustomAddress] = useState('')
+    useState<SegmentedControlOptions>(
+      serviceUrl === BSKY_SERVICE ? BSKY_SERVICE : 'custom',
+    )
+  const [previousCustomAddress, setPreviousCustomAddress] = useState(
+    serviceUrl === BSKY_SERVICE ? '' : serviceUrl,
+  )
+
+  useEffect(() => {
+    if (serviceUrl === BSKY_SERVICE) {
+      setFixedOption(BSKY_SERVICE)
+      setPreviousCustomAddress('')
+    } else if (serviceUrl) {
+      setFixedOption('custom')
+      setPreviousCustomAddress(serviceUrl)
+    }
+  }, [serviceUrl])
 
   const onClose = useCallback(() => {
     const result = formRef.current?.getFormState()
@@ -87,6 +109,10 @@ function DialogInner({
     persisted.get('pdsAddressHistory') || [],
   )
 
+  useEffect(() => {
+    setCustomAddress(initialCustomAddress)
+  }, [initialCustomAddress])
+
   useImperativeHandle(
     formRef,
     () => ({
@@ -101,7 +127,11 @@ function DialogInner({
           url = fixedOption
         }
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          if (url === 'localhost' || url.startsWith('localhost:')) {
+          if (
+            url === 'localhost' ||
+            url.startsWith('localhost:') ||
+            isLikelyLocalServiceUrl(url)
+          ) {
             url = `http://${url}`
           } else {
             url = `https://${url}`

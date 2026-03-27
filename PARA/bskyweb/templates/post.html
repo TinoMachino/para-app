@@ -2,11 +2,11 @@
 
 {% block head_title %}
 {%- if postView -%}
-  @{{ postView.Author.Handle }} on Bluesky
+  @{{ postView.Author.Handle }} on PARA
 {%- elif requiresAuth and profileHandle -%}
-  @{{ profileHandle }} on Bluesky
+  @{{ profileHandle }} on PARA
 {%- else -%}
-  Bluesky
+  PARA
 {%- endif -%}
 {% endblock %}
 
@@ -76,7 +76,7 @@
         {% else %}
         "name": "@{{ postView.Author.Handle }}",
         {% endif -%}
-        "url": "https://bsky.app/profile/{{ postView.Author.Handle }}"
+        "url": "https://paramx.social/profile/{{ postView.Author.Handle }}"
       },
       {%- if postText %}
       "text": "{{ postText }}",

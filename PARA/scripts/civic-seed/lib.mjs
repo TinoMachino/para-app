@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const FAKE_STRONG_REF_CID =
+  'bafyreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku'
 
 export function defaultManifestPath() {
   return path.resolve(__dirname, 'manifest.v1.json')
@@ -156,6 +158,20 @@ export function buildSeedOperations({manifest, actorsByAlias}) {
     })
   }
 
+  for (const entry of manifest.follows || []) {
+    const actor = getActor(actorsByAlias, entry.actor, 'follow actor')
+    operations.push({
+      group: 'follow',
+      actorAlias: entry.actor,
+      did: actor.did,
+      collection: 'app.bsky.graph.follow',
+      rkey:
+        entry.rkey ||
+        `seed-follow-${sanitizeRkeyComponent(entry.actor)}-${sanitizeRkeyComponent(entry.subject)}`,
+      record: buildFollowRecord(entry, actorsByAlias),
+    })
+  }
+
   for (const entry of manifest.governanceRecords || []) {
     const actor = getActor(actorsByAlias, entry.actor, 'governance record actor')
     operations.push({
@@ -217,44 +233,81 @@ export function buildSeedOperations({manifest, actorsByAlias}) {
   }
 
   for (const entry of manifest.openQuestionPosts || []) {
-    const actor = getActor(
-      actorsByAlias,
-      entry.actor,
-      'open question post actor',
+    operations.push(
+      buildPostOperation({
+        entry,
+        actorsByAlias,
+        group: 'open-question-post',
+        context: 'open question post actor',
+      }),
     )
-    operations.push({
-      group: 'open-question-post',
-      actorAlias: entry.actor,
-      did: actor.did,
-      collection: 'app.bsky.feed.post',
-      rkey: entry.rkey,
-      record: buildPostRecord(entry),
-    })
   }
 
   for (const entry of manifest.badgePosts || []) {
-    const actor = getActor(actorsByAlias, entry.actor, 'badge post actor')
-    operations.push({
-      group: 'badge-post',
-      actorAlias: entry.actor,
-      did: actor.did,
-      collection: 'app.bsky.feed.post',
-      rkey: entry.rkey,
-      record: buildPostRecord(entry),
-    })
+    operations.push(
+      buildPostOperation({
+        entry,
+        actorsByAlias,
+        group: 'badge-post',
+        context: 'badge post actor',
+      }),
+    )
+  }
+
+  for (const entry of manifest.replyPosts || []) {
+    operations.push(
+      buildReplyPostOperation({
+        entry,
+        actorsByAlias,
+        group: 'reply-post',
+        context: 'reply post actor',
+      }),
+    )
+  }
+
+  for (const entry of manifest.likes || []) {
+    operations.push(
+      buildLikeOperation({
+        entry,
+        actorsByAlias,
+        group: 'like',
+        context: 'like actor',
+      }),
+    )
+  }
+
+  for (const entry of manifest.reposts || []) {
+    operations.push(
+      buildRepostOperation({
+        entry,
+        actorsByAlias,
+        group: 'repost',
+        context: 'repost actor',
+      }),
+    )
   }
 
   for (const scenario of manifest.bulkScenarios || []) {
-    if (scenario.type !== 'high_activity_cabildeo') {
-      throw new Error(`Unsupported bulk scenario type: ${scenario.type}`)
+    if (scenario.type === 'high_activity_cabildeo') {
+      operations.push(
+        ...buildHighActivityOperations({
+          scenario,
+          actorsByAlias,
+          cabildeoUriByAlias,
+        }),
+      )
+      continue
     }
-    operations.push(
-      ...buildHighActivityOperations({
-        scenario,
-        actorsByAlias,
-        cabildeoUriByAlias,
-      }),
-    )
+    if (scenario.type === 'demo_social_graph') {
+      operations.push(
+        ...buildDemoSocialGraphOperations({
+          scenario,
+          actorsByAlias,
+        }),
+      )
+      continue
+    }
+    throw new Error(`Unsupported bulk scenario type: ${scenario.type}`)
   }
 
   return operations
@@ -291,20 +344,33 @@ export async function applySeedOperations(
     failed: 0,
     byCollection: {},
   }
+  const runtimeState = {
+    recordRefs: new Map(),
+  }
 
   for (const op of operations) {
+    let resolvedOp
     if (dryRun) {
+      resolvedOp = resolveSeedOperation(op, runtimeState)
       result.written += 1
-      increment(result.byCollection, op.collection)
+      increment(result.byCollection, resolvedOp.collection)
+      registerRecordRef(runtimeState, resolvedOp, {
+        uri: `at://${resolvedOp.did}/${resolvedOp.collection}/${resolvedOp.rkey}`,
+        cid: FAKE_STRONG_REF_CID,
+      })
       continue
     }
 
     try {
-      await writer.putRecord(op)
+      resolvedOp = resolveSeedOperation(op, runtimeState)
+      const writeResult = await writer.putRecord(resolvedOp)
+      registerRecordRef(runtimeState, resolvedOp, writeResult)
       result.written += 1
-      increment(result.byCollection, op.collection)
+      increment(result.byCollection, resolvedOp.collection)
       if (verbose) {
-        console.log(`put ${op.collection}/${op.rkey} as ${op.actorAlias}`)
+        console.log(
+          `put ${resolvedOp.collection}/${resolvedOp.rkey} as ${resolvedOp.actorAlias}`,
+        )
       }
     } catch (err) {
       result.failed += 1
@@ -378,6 +444,10 @@ export class InMemorySeedWriter {
   async putRecord(op) {
     const key = this.keyFor(op)
     this.store.set(key, structuredClone(op.record))
+    return {
+      uri: `at://${op.did}/${op.collection}/${op.rkey}`,
+      cid: FAKE_STRONG_REF_CID,
+    }
   }
 
   async deleteRecord(op) {
@@ -397,6 +467,33 @@ export class InMemorySeedWriter {
   hasKey(key) {
     return this.store.has(key)
   }
+
+  dumpValues() {
+    return Array.from(this.store.values(), (value) => structuredClone(value))
+  }
+}
+
+function resolveSeedOperation(op, runtimeState) {
+  if (!op.recordBuilder) return op
+  return {
+    ...op,
+    record: op.recordBuilder(runtimeState),
+  }
+}
+
+function registerRecordRef(runtimeState, op, writeResult) {
+  if (!op.refKey) return
+  const uri = writeResult?.uri || `at://${op.did}/${op.collection}/${op.rkey}`
+  const cid = writeResult?.cid || FAKE_STRONG_REF_CID
+  runtimeState.recordRefs.set(op.refKey, {uri, cid})
+}
+
+function resolveRecordRef(runtimeState, refKey, context) {
+  const ref = runtimeState.recordRefs.get(refKey)
+  if (!ref) {
+    throw new Error(`Unknown record ref "${refKey}" in ${context}.`)
+  }
+  return ref
 }
 
 function buildHighActivityOperations({
@@ -473,6 +570,199 @@ function buildHighActivityOperations({
       }),
     })
   }
+
+  return operations
+}
+
+function buildDemoSocialGraphOperations({scenario, actorsByAlias}) {
+  const operations = []
+  const actorAliases = scenario.actors || []
+  if (!scenario.alias) {
+    throw new Error('demo_social_graph must include alias.')
+  }
+  if (!actorAliases.length) {
+    throw new Error('demo_social_graph must include non-empty actors.')
+  }
+  if (scenario.anchorActor && !actorAliases.includes(scenario.anchorActor)) {
+    throw new Error('demo_social_graph anchorActor must be included in actors.')
+  }
+
+  const followsPerActor = Math.max(1, scenario.followsPerActor || 4)
+  const postsPerActor = Math.max(1, scenario.postsPerActor || 3)
+  const replyCount = Math.max(0, scenario.replyCount || actorAliases.length * 2)
+  const likesPerPost = Math.max(0, scenario.likesPerPost || 2)
+  const repostEvery = Math.max(1, scenario.repostEvery || 4)
+  const baseDate = scenario.startAt || new Date().toISOString()
+  const bridgeActors = dedupeList([
+    ...(scenario.bridgeActors || []),
+    ...(scenario.anchorActor ? [scenario.anchorActor] : []),
+  ]).filter((alias) => actorAliases.includes(alias))
+  const topics = (scenario.topics || DEFAULT_SOCIAL_TOPICS).map((topic, index) => ({
+    community: topic.community || DEFAULT_SOCIAL_TOPICS[index % DEFAULT_SOCIAL_TOPICS.length].community,
+    tag: topic.tag || DEFAULT_SOCIAL_TOPICS[index % DEFAULT_SOCIAL_TOPICS.length].tag,
+    focus: topic.focus || DEFAULT_SOCIAL_TOPICS[index % DEFAULT_SOCIAL_TOPICS.length].focus,
+    proposal:
+      topic.proposal ||
+      DEFAULT_SOCIAL_TOPICS[index % DEFAULT_SOCIAL_TOPICS.length].proposal,
+  }))
+
+  const followPairs = new Set()
+  let minuteCursor = 0
+
+  const pushFollow = (actorAlias, subjectAlias) => {
+    if (!actorAlias || !subjectAlias || actorAlias === subjectAlias) return
+    const key = `${actorAlias}->${subjectAlias}`
+    if (followPairs.has(key)) return
+    followPairs.add(key)
+    const actor = getActor(actorsByAlias, actorAlias, 'demo social follow actor')
+    operations.push({
+      group: 'demo-follow',
+      actorAlias,
+      did: actor.did,
+      collection: 'app.bsky.graph.follow',
+      rkey: `seed-demo-follow-${sanitizeRkeyComponent(actorAlias)}-${sanitizeRkeyComponent(subjectAlias)}`,
+      record: buildFollowRecord(
+        {
+          subject: subjectAlias,
+          createdAt: plusMinutes(baseDate, minuteCursor),
+        },
+        actorsByAlias,
+      ),
+    })
+    minuteCursor += 1
+  }
+
+  actorAliases.forEach((actorAlias, index) => {
+    for (let offset = 1; offset <= followsPerActor; offset += 1) {
+      pushFollow(actorAlias, actorAliases[(index + offset) % actorAliases.length])
+    }
+    for (const bridgeAlias of bridgeActors) {
+      pushFollow(actorAlias, bridgeAlias)
+    }
+  })
+
+  if (scenario.anchorActor) {
+    for (const actorAlias of actorAliases) {
+      pushFollow(scenario.anchorActor, actorAlias)
+      pushFollow(actorAlias, scenario.anchorActor)
+    }
+  }
+
+  const publishedRefs = []
+  const primaryRefs = []
+  const totalPrimaryPosts = postsPerActor * actorAliases.length
+
+  for (let i = 0; i < totalPrimaryPosts; i += 1) {
+    const actorAlias = actorAliases[i % actorAliases.length]
+    const actor = getActor(actorsByAlias, actorAlias, 'demo social post actor')
+    const topic = topics[i % topics.length]
+    const refKey = `demo-post-${scenario.alias}-${String(i).padStart(4, '0')}`
+    const createdAt = plusMinutes(baseDate, minuteCursor)
+    minuteCursor += 7
+    const entry = {
+      alias: refKey,
+      actor: actorAlias,
+      rkey: `seed-demo-post-${sanitizeRkeyComponent(scenario.alias)}-${String(i).padStart(4, '0')}`,
+      text: renderPrimaryPostText({actor, actorAlias, topic, index: i}),
+      tags: [topic.tag, sanitizeRkeyComponent(actorAlias)],
+      langs: ['es'],
+      createdAt,
+    }
+    operations.push(
+      buildPostOperation({
+        entry,
+        actorsByAlias,
+        group: 'demo-post',
+        context: 'demo social post actor',
+      }),
+    )
+    const refMeta = {refKey, rootRef: refKey, actorAlias}
+    primaryRefs.push(refMeta)
+    publishedRefs.push(refMeta)
+  }
+
+  for (let i = 0; i < replyCount; i += 1) {
+    const actorAlias = actorAliases[i % actorAliases.length]
+    const actor = getActor(actorsByAlias, actorAlias, 'demo social reply actor')
+    const availableParents = publishedRefs.filter((ref) => ref.actorAlias !== actorAlias)
+    const parentRef =
+      availableParents[(i * 3) % availableParents.length] || primaryRefs[i % primaryRefs.length]
+    const rootRef = parentRef.rootRef || parentRef.refKey
+    const topic = topics[(i + 1) % topics.length]
+    const refKey = `demo-reply-${scenario.alias}-${String(i).padStart(4, '0')}`
+    const createdAt = plusMinutes(baseDate, minuteCursor)
+    minuteCursor += 5
+    const entry = {
+      alias: refKey,
+      actor: actorAlias,
+      rkey: `seed-demo-reply-${sanitizeRkeyComponent(scenario.alias)}-${String(i).padStart(4, '0')}`,
+      text: renderReplyPostText({actor, actorAlias, topic, index: i}),
+      tags: [topic.tag, 'debate'],
+      langs: ['es'],
+      createdAt,
+      parentRef: parentRef.refKey,
+      rootRef,
+    }
+    operations.push(
+      buildReplyPostOperation({
+        entry,
+        actorsByAlias,
+        group: 'demo-reply-post',
+        context: 'demo social reply actor',
+      }),
+    )
+    publishedRefs.push({refKey, rootRef, actorAlias})
+  }
+
+  publishedRefs.forEach((postRef, index) => {
+    const likers = rotateUniqueOtherActors({
+      actorAliases,
+      excludedAlias: postRef.actorAlias,
+      startIndex: index,
+      count: likesPerPost,
+    })
+    likers.forEach((actorAlias, likerIndex) => {
+      operations.push(
+        buildLikeOperation({
+          entry: {
+            actor: actorAlias,
+            subjectRef: postRef.refKey,
+            rkey: `seed-demo-like-${sanitizeRkeyComponent(actorAlias)}-${String(index).padStart(4, '0')}-${likerIndex}`,
+            createdAt: plusMinutes(baseDate, minuteCursor + likerIndex),
+          },
+          actorsByAlias,
+          group: 'demo-like',
+          context: 'demo social like actor',
+        }),
+      )
+    })
+
+    if ((index + 1) % repostEvery === 0) {
+      const repostActor = rotateUniqueOtherActors({
+        actorAliases,
+        excludedAlias: postRef.actorAlias,
+        startIndex: index + 2,
+        count: 1,
+      })[0]
+      if (repostActor) {
+        operations.push(
+          buildRepostOperation({
+            entry: {
+              actor: repostActor,
+              subjectRef: postRef.refKey,
+              rkey: `seed-demo-repost-${sanitizeRkeyComponent(repostActor)}-${String(index).padStart(4, '0')}`,
+              createdAt: plusMinutes(baseDate, minuteCursor + 1),
+            },
+            actorsByAlias,
+            group: 'demo-repost',
+            context: 'demo social repost actor',
+          }),
+        )
+      }
+    }
+
+    minuteCursor += Math.max(1, likesPerPost)
+  })
 
   return operations
 }
@@ -583,6 +873,14 @@ function buildVerificationRecord(entry, actorsByAlias) {
   })
 }
 
+function buildFollowRecord(entry, actorsByAlias) {
+  return compactObject({
+    $type: 'app.bsky.graph.follow',
+    subject: resolveDid(entry.subject, actorsByAlias),
+    createdAt: entry.createdAt || new Date().toISOString(),
+  })
+}
+
 function buildCabildeoRecord(entry) {
   return compactObject({
     $type: 'com.para.civic.cabildeo',
@@ -639,13 +937,119 @@ function buildDelegationRecord(entry, actorsByAlias, cabildeoUriByAlias) {
   })
 }
 
+function buildPostOperation({entry, actorsByAlias, group, context}) {
+  const actor = getActor(actorsByAlias, entry.actor, context)
+  return {
+    group,
+    actorAlias: entry.actor,
+    did: actor.did,
+    collection: 'app.bsky.feed.post',
+    rkey: entry.rkey,
+    refKey: resolvePostRefKey(entry),
+    record: buildPostRecord(entry),
+  }
+}
+
+function buildReplyPostOperation({entry, actorsByAlias, group, context}) {
+  const actor = getActor(actorsByAlias, entry.actor, context)
+  return {
+    group,
+    actorAlias: entry.actor,
+    did: actor.did,
+    collection: 'app.bsky.feed.post',
+    rkey: entry.rkey,
+    refKey: resolvePostRefKey(entry),
+    recordBuilder(runtimeState) {
+      const parent = resolveRecordRef(
+        runtimeState,
+        entry.parentRef,
+        `reply parent for ${entry.rkey}`,
+      )
+      const root = resolveRecordRef(
+        runtimeState,
+        entry.rootRef || entry.parentRef,
+        `reply root for ${entry.rkey}`,
+      )
+      return buildPostRecord({
+        ...entry,
+        reply: {root, parent},
+      })
+    },
+  }
+}
+
+function buildLikeOperation({entry, actorsByAlias, group, context}) {
+  const actor = getActor(actorsByAlias, entry.actor, context)
+  return {
+    group,
+    actorAlias: entry.actor,
+    did: actor.did,
+    collection: 'app.bsky.feed.like',
+    rkey:
+      entry.rkey ||
+      `seed-like-${sanitizeRkeyComponent(entry.actor)}-${sanitizeRkeyComponent(entry.subjectRef)}`,
+    recordBuilder(runtimeState) {
+      return buildLikeRecord({
+        ...entry,
+        subject: resolveRecordRef(
+          runtimeState,
+          entry.subjectRef,
+          `like subject for ${entry.actor}`,
+        ),
+      })
+    },
+  }
+}
+
+function buildRepostOperation({entry, actorsByAlias, group, context}) {
+  const actor = getActor(actorsByAlias, entry.actor, context)
+  return {
+    group,
+    actorAlias: entry.actor,
+    did: actor.did,
+    collection: 'app.bsky.feed.repost',
+    rkey:
+      entry.rkey ||
+      `seed-repost-${sanitizeRkeyComponent(entry.actor)}-${sanitizeRkeyComponent(entry.subjectRef)}`,
+    recordBuilder(runtimeState) {
+      return buildRepostRecord({
+        ...entry,
+        subject: resolveRecordRef(
+          runtimeState,
+          entry.subjectRef,
+          `repost subject for ${entry.actor}`,
+        ),
+      })
+    },
+  }
+}
+
 function buildPostRecord(entry) {
   return compactObject({
     $type: 'app.bsky.feed.post',
     text: entry.text,
     tags: entry.tags || [],
     langs: entry.langs || ['es'],
+    reply: entry.reply,
     createdAt: entry.createdAt,
+  })
+}
+
+function buildLikeRecord(entry) {
+  return compactObject({
+    $type: 'app.bsky.feed.like',
+    subject: entry.subject,
+    via: entry.via,
+    createdAt: entry.createdAt || new Date().toISOString(),
+  })
+}
+
+function buildRepostRecord(entry) {
+  return compactObject({
+    $type: 'app.bsky.feed.repost',
+    subject: entry.subject,
+    via: entry.via,
+    createdAt: entry.createdAt || new Date().toISOString(),
   })
 }
 
@@ -710,6 +1114,51 @@ function sanitizeRkeyComponent(value) {
     .slice(0, 60)
 }
 
+function resolvePostRefKey(entry) {
+  return entry.alias || entry.refKey || entry.rkey
+}
+
+function dedupeList(values) {
+  return [...new Set((values || []).filter(Boolean))]
+}
+
+function rotateUniqueOtherActors({
+  actorAliases,
+  excludedAlias,
+  startIndex,
+  count,
+}) {
+  const output = []
+  for (let offset = 0; offset < actorAliases.length && output.length < count; offset += 1) {
+    const candidate = actorAliases[(startIndex + offset) % actorAliases.length]
+    if (!candidate || candidate === excludedAlias || output.includes(candidate)) {
+      continue
+    }
+    output.push(candidate)
+  }
+  return output
+}
+
+function renderPrimaryPostText({actor, topic, index}) {
+  const templates = [
+    `En ${topic.community}, necesitamos ${topic.proposal}. ${topic.focus} no puede seguir sin seguimiento ciudadano.`,
+    `Abro hilo corto: ${topic.focus} en ${topic.community}. Mi propuesta es ${topic.proposal} y publicar avances cada semana.`,
+    `Estoy revisando comentarios sobre ${topic.focus} en ${topic.community}. Si no medimos impacto barrio por barrio, vamos tarde.`,
+    `${actor.displayName} comparte una nota para ${topic.community}: ${topic.proposal}. Hace falta claridad antes de la siguiente votacion.`,
+  ]
+  return templates[index % templates.length]
+}
+
+function renderReplyPostText({topic, index}) {
+  const templates = [
+    `De acuerdo en parte, pero antes publiquemos costos abiertos y calendario por colonia sobre ${topic.focus}.`,
+    `No compro el supuesto central. Para ${topic.community} falta evidencia comparable y metas trimestrales.`,
+    `Si esto va a votacion, agreguemos una version piloto enfocada en ${topic.proposal}.`,
+    `Buen punto, pero la comunidad necesita seguimiento publico sobre ${topic.focus} y responsables por etapa.`,
+  ]
+  return templates[index % templates.length]
+}
+
 function parseBoolEnv(value, fallback) {
   if (value === undefined || value === null || value === '') {
     return fallback
@@ -764,4 +1213,31 @@ const BULK_QUADRANTS = [
   'center-right',
   'lib-right',
   'auth-right',
+]
+
+const DEFAULT_SOCIAL_TOPICS = [
+  {
+    community: 'p/Jalisco',
+    tag: 'agua',
+    focus: 'el abasto de agua',
+    proposal: 'un tablero publico de consumo y fugas',
+  },
+  {
+    community: 'p/CDMX',
+    tag: 'movilidad',
+    focus: 'el tiempo de traslado',
+    proposal: 'priorizar carriles de autobus y datos abiertos por linea',
+  },
+  {
+    community: 'p/Oaxaca',
+    tag: 'territorio',
+    focus: 'la atencion de incidentes ambientales',
+    proposal: 'abrir reportes verificables y seguimiento comunitario',
+  },
+  {
+    community: 'p/NuevoLeon',
+    tag: 'vivienda',
+    focus: 'la vivienda cerca del empleo',
+    proposal: 'mezclar renta protegida con densificacion bien regulada',
+  },
 ]

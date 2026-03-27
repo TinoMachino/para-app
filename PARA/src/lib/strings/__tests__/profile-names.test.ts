@@ -23,6 +23,17 @@ describe('formatUserDisplayName', () => {
     ).toBe('f/Mayor Garcia')
   })
 
+  it('prefixes geographic group profiles with g/', () => {
+    expect(
+      formatUserDisplayName({
+        displayName: 'Jalisco',
+        handle: 'jalisco.test',
+        isFigure: false,
+        isGroup: true,
+      }),
+    ).toBe('g/Jalisco')
+  })
+
   it('falls back to the sanitized handle when there is no display name', () => {
     expect(
       formatUserDisplayName({

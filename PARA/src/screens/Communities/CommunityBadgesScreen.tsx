@@ -690,8 +690,15 @@ export function CommunityBadgesScreen() {
 
             <View style={[a.gap_sm]}>
               {governance.officials.map(rep => (
-                <View
+                <TouchableOpacity
                   key={`${rep.did || rep.handle || rep.displayName}-${rep.office}`}
+                  accessibilityRole="button"
+                  disabled={!rep.did && !rep.handle}
+                  onPress={() => {
+                    const actorId = rep.did || rep.handle
+                    if (!actorId) return
+                    navigation.navigate('Profile', {name: actorId})
+                  }}
                   style={[
                     styles.repCard,
                     t.atoms.bg_contrast_25,
@@ -739,7 +746,7 @@ export function CommunityBadgesScreen() {
                       {rep.handle}
                     </Text>
                   ) : null}
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>

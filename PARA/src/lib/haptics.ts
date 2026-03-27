@@ -10,7 +10,7 @@ export function useHaptics() {
 
   return useCallback(
     (strength: 'Light' | 'Medium' | 'Heavy' = 'Medium') => {
-      if (isHapticsDisabled || IS_WEB) {
+      if (isHapticsDisabled || IS_WEB || !Device.isDevice) {
         return
       }
 

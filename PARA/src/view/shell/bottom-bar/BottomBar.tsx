@@ -27,7 +27,7 @@ import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useShellLayout} from '#/state/shell/shell-layout'
 import {useCloseAllActiveElements} from '#/state/util'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
@@ -314,9 +314,9 @@ export function BottomBar({navigation}: BottomTabBarProps) {
                 gap: 8,
               }}>
               <View
-                style={{flexDirection: 'row', alignItems: 'center', gap: 8}}>
-                <Logo width={28} />
-                <View style={{paddingTop: 4}}>
+                style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                <Logomark width={25} fill="#474652" />
+                <View style={{paddingTop: 2}}>
                   <Logotype width={80} fill={t.atoms.text.color} />
                 </View>
               </View>

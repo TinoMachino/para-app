@@ -2,7 +2,7 @@ import {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {ActivityIndicator, StyleSheet} from 'react-native'
 import {useFocusEffect} from '@react-navigation/native'
 
-import {PROD_DEFAULT_FEED} from '#/lib/constants'
+import {DEFAULT_DISCOVER_FEED_DESCRIPTOR} from '#/lib/constants'
 import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
 import {useOTAUpdates} from '#/lib/hooks/useOTAUpdates'
 import {useSetTitle} from '#/lib/hooks/useSetTitle'
@@ -261,7 +261,7 @@ function HomeScreenReady({
           testID="customFeedPage"
           isPageFocused
           isPageAdjacent={false}
-          feed={`feedgen|${PROD_DEFAULT_FEED('whats-hot')}`}
+          feed={DEFAULT_DISCOVER_FEED_DESCRIPTOR as FeedDescriptor}
           renderEmptyState={renderCustomFeedEmptyState}
           feedInfo={pinnedFeedInfos[0]}
         />
@@ -324,7 +324,7 @@ function HomeScreenReady({
         testID="customFeedPage"
         isPageFocused
         isPageAdjacent={false}
-        feed={`feedgen|${PROD_DEFAULT_FEED('whats-hot')}`}
+        feed={DEFAULT_DISCOVER_FEED_DESCRIPTOR as FeedDescriptor}
         renderEmptyState={renderCustomFeedEmptyState}
         feedInfo={pinnedFeedInfos[0]}
       />

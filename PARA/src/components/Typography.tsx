@@ -97,4 +97,8 @@ export function P({style, ...rest}: TextProps) {
 const numberOfLinesClippingFix = {
   overflowY: 'visible',
   overflowX: 'clip',
+  // mimic browser default behavior of `min-width: 0` on `overflow: hidden`
+  // elements to allow text to shrink smaller than its intrinsic width when
+  // necessary
+  minWidth: 0,
 } satisfies React.CSSProperties as TextStyleProp

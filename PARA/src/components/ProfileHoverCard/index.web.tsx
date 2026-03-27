@@ -44,6 +44,7 @@ import {Text} from '#/components/Typography'
 import {useSimpleVerificationState} from '#/components/verification'
 import {VerificationCheck} from '#/components/verification/VerificationCheck'
 import {IS_WEB_TOUCH_DEVICE} from '#/env'
+import {USER_FLAIRS} from '#/lib/tags'
 import {type ProfileHoverCardProps} from './types'
 
 const floatingMiddlewares = [
@@ -108,7 +109,7 @@ type Action =
 
 const SHOW_DELAY = 500
 const SHOW_DURATION = 300
-const HIDE_DELAY = 150
+const HIDE_DELAY = 400
 const HIDE_DURATION = 200
 
 export function ProfileHoverCardInner(props: ProfileHoverCardProps) {
@@ -462,6 +463,17 @@ function Inner({
   const isLabeler = profile.associated?.labeler
   const verification = useSimpleVerificationState({profile})
 
+  const userFlair = React.useMemo(() => {
+    if (!profile.description) return null
+    const desc = profile.description.toLowerCase()
+    return Object.values(USER_FLAIRS).find(
+      f =>
+        desc.includes(f.label.toLowerCase()) ||
+        desc.includes(`#${f.id.replace('_', '')}`) ||
+        desc.includes(`#${f.id}`),
+    )
+  }, [profile.description])
+
   return (
     <View>
       <View style={[a.flex_row, a.justify_between, a.align_start]}>
@@ -540,6 +552,27 @@ function Inner({
                   width={16}
                   verifier={verification.role === 'verifier'}
                 />
+              </View>
+            )}
+            {userFlair && (
+              <View
+                style={[
+                  a.ml_sm,
+                  a.px_sm,
+                  {
+                    paddingVertical: 2,
+                    marginTop: -2,
+                  },
+                  a.rounded_full,
+                  {
+                    backgroundColor: `${userFlair.color}20`,
+                    borderWidth: 1,
+                    borderColor: `${userFlair.color}40`,
+                  },
+                ]}>
+                <Text style={[a.text_xs, a.font_bold, {color: userFlair.color}]}>
+                  {userFlair.label}
+                </Text>
               </View>
             )}
           </View>

@@ -1,6 +1,6 @@
 import {type AppBskyFeedDefs, type BskyAgent} from '@atproto/api'
 
-import {PROD_DEFAULT_FEED} from '#/lib/constants'
+import {DEFAULT_DISCOVER_FEED_URI, IS_LOCAL_DEV_MODE} from '#/lib/constants'
 import {CustomFeedAPI} from './custom'
 import {FollowingFeedAPI} from './following'
 import {type FeedAPI, type FeedAPIResponse} from './types'
@@ -45,7 +45,7 @@ export class HomeFeedAPI implements FeedAPI {
     this.following = new FollowingFeedAPI({agent})
     this.discover = new CustomFeedAPI({
       agent,
-      feedParams: {feed: PROD_DEFAULT_FEED('whats-hot')},
+      feedParams: {feed: DEFAULT_DISCOVER_FEED_URI || ''},
     })
     this.userInterests = userInterests
   }
@@ -54,7 +54,7 @@ export class HomeFeedAPI implements FeedAPI {
     this.following = new FollowingFeedAPI({agent: this.agent})
     this.discover = new CustomFeedAPI({
       agent: this.agent,
-      feedParams: {feed: PROD_DEFAULT_FEED('whats-hot')},
+      feedParams: {feed: DEFAULT_DISCOVER_FEED_URI || ''},
       userInterests: this.userInterests,
     })
     this.usingDiscover = false
@@ -93,7 +93,7 @@ export class HomeFeedAPI implements FeedAPI {
       }
     }
 
-    if (this.usingDiscover && !__DEV__) {
+    if (this.usingDiscover && !IS_LOCAL_DEV_MODE && DEFAULT_DISCOVER_FEED_URI) {
       const res = await this.discover.fetch({cursor, limit})
       returnCursor = res.cursor
       posts = posts.concat(res.feed)

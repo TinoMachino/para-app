@@ -6,12 +6,18 @@ import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {VIDEO_FEED_URI} from '#/lib/constants'
+import {
+  DEFAULT_VIDEO_FEED_DESCRIPTOR,
+  DEFAULT_VIDEO_FEED_URI,
+} from '#/lib/constants'
 import {makeCustomFeedLink} from '#/lib/routes/links'
 import {logEvent} from '#/lib/statsig/statsig'
 import {useTrendingSettingsApi} from '#/state/preferences/trending'
-import {usePostFeedQuery} from '#/state/queries/post-feed'
-import {RQKEY} from '#/state/queries/post-feed'
+import {
+  type FeedDescriptor,
+  RQKEY,
+  usePostFeedQuery,
+} from '#/state/queries/post-feed'
 import {BlockDrawerGesture} from '#/view/shell/BlockDrawerGesture'
 import {atoms as a, useGutters, useTheme} from '#/alf'
 import {Button, ButtonIcon} from '#/components/Button'
@@ -27,7 +33,8 @@ import {
 
 const CARD_WIDTH = 108
 
-const FEED_DESC = `feedgen|${VIDEO_FEED_URI}`
+const FEED_DESC = (DEFAULT_VIDEO_FEED_DESCRIPTOR ??
+  'following') as FeedDescriptor
 const FEED_PARAMS: {
   feedCacheKey: 'discover'
 } = {
@@ -35,23 +42,29 @@ const FEED_PARAMS: {
 }
 
 export function TrendingVideos() {
+  const hasVideoFeed = Boolean(DEFAULT_VIDEO_FEED_URI)
   const t = useTheme()
   const {_} = useLingui()
   const gutters = useGutters([0, 'base'])
-  const {data, isLoading, error} = usePostFeedQuery(FEED_DESC, FEED_PARAMS)
+  const {data, isLoading, error} = usePostFeedQuery(FEED_DESC, FEED_PARAMS, {
+    enabled: hasVideoFeed,
+  })
 
   // Refetch on unmount if nothing else is using this query.
   const queryClient = useQueryClient()
   useEffect(() => {
+    if (!hasVideoFeed) {
+      return
+    }
     return () => {
       const query = queryClient
         .getQueryCache()
         .find({queryKey: RQKEY(FEED_DESC, FEED_PARAMS)})
       if (query && query.getObserversCount() <= 1) {
-        query.fetch()
+        void query.fetch()
       }
     }
-  }, [queryClient])
+  }, [hasVideoFeed, queryClient])
 
   const {setTrendingVideoDisabled} = useTrendingSettingsApi()
   const trendingPrompt = Prompt.usePromptControl()
@@ -60,6 +73,10 @@ export function TrendingVideos() {
     setTrendingVideoDisabled(true)
     logEvent('trendingVideos:hide', {context: 'interstitial:discover'})
   }, [setTrendingVideoDisabled])
+
+  if (!hasVideoFeed || !DEFAULT_VIDEO_FEED_URI) {
+    return null
+  }
 
   if (error) {
     return null
@@ -166,7 +183,7 @@ function VideoCards({
             moderation={item.moderation}
             sourceContext={{
               type: 'feedgen',
-              uri: VIDEO_FEED_URI,
+              uri: DEFAULT_VIDEO_FEED_URI!,
               sourceInterstitial: 'discover',
             }}
             onInteract={() => {
@@ -188,7 +205,7 @@ function ViewMoreCard() {
   const {_} = useLingui()
 
   const href = useMemo(() => {
-    const urip = new AtUri(VIDEO_FEED_URI)
+    const urip = new AtUri(DEFAULT_VIDEO_FEED_URI!)
     return makeCustomFeedLink(urip.host, urip.rkey, undefined, 'discover')
   }, [])
 

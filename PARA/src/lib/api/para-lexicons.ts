@@ -304,3 +304,34 @@ export interface CabildeoDelegationRecord {
   reason?: string
   scopeFlairs?: string[] // Optional: Only delegate power for cabildeos matching these policy/matter flairs
 }
+// ─── Discourse Analysis ──────────────────────────────────────────────────────
+
+export interface DiscourseSnapshot {
+  community: string
+  bucket: string // ISO timestamp
+  postCount: number
+  uniqueAuthors: number
+  avgConstructiveness: number // 0-100
+  semanticVolatility: number // 0-100
+  lexicalDiversity: number // 0-100
+  polarizationDelta: number // 0-100
+  echoChamberIndex: number // 0-100
+  topKeywords: string // JSON string
+  sentimentDistribution: string // JSON string
+}
+
+export interface TopicCluster {
+  clusterLabel: string
+  keywords: string // JSON string array
+  postCount: number
+  authorCount: number
+  avgSentiment: number // 0-100
+}
+
+export interface SentimentDistribution {
+  anger: number // 0-100
+  fear: number // 0-100
+  trust: number // 0-100
+  uncertainty: number // 0-100
+  neutral: number // 0-100
+}

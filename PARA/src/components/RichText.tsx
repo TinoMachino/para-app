@@ -3,6 +3,7 @@ import {type StyleProp, type TextStyle} from 'react-native'
 import {AppBskyRichtextFacet, RichText as RichTextAPI} from '@atproto/api'
 
 import {toShortUrl} from '#/lib/strings/url-helpers'
+import {POST_FLAIRS, POST_TYPES} from '#/lib/tags'
 import {atoms as a, flatten, type TextStyleProp} from '#/alf'
 import {isOnlyEmoji} from '#/alf/typography'
 import {InlineLinkText, type LinkProps} from '#/components/Link'
@@ -14,6 +15,19 @@ const WORD_WRAP = {wordWrap: 1}
 // lifted from facet detection in `RichText` impl, _without_ `gm` flags
 const URL_REGEX =
   /(^|\s|\()((https?:\/\/[\S]+)|((?<domain>[a-z][a-z0-9]*(\.[a-z0-9]+)+)[\S]*))/i
+
+function isPARATag(tagStr: string) {
+  const norm = tagStr.trim().toLowerCase().replace(/^[|#?]+/, '')
+  const flairs = Object.values(POST_FLAIRS)
+  const types = Object.values(POST_TYPES)
+  const allTags = [...flairs, ...types].map(f => f.tag).filter(Boolean)
+
+  return allTags.some(tag => {
+    if (!tag) return false
+    const flairNorm = tag.toLowerCase().replace(/^[|#?]+/, '')
+    return flairNorm === norm
+  })
+}
 
 export type RichTextProps = TextStyleProp &
   Pick<TextProps, 'selectable' | 'onLayout' | 'onTextLayout'> & {
@@ -90,6 +104,10 @@ export function RichText({
         </Text>
       )
     }
+    let rawDisplay = text
+    rawDisplay = rawDisplay.replace(/\[PARA\]\s*/gi, '')
+    rawDisplay = rawDisplay.replace(/(?:\|{1,2}\??#\S+)(\s+|$)/g, '')
+
     return (
       <Text
         emoji
@@ -101,15 +119,17 @@ export function RichText({
         onTextLayout={onTextLayout}
         // @ts-ignore web only -prf
         dataSet={WORD_WRAP}>
-        {text}
+        {rawDisplay}
       </Text>
     )
   }
 
   const els = []
   let key = 0
-  // N.B. must access segments via `richText.segments`, not via destructuring
-  for (const segment of richText.segments()) {
+  const segments = Array.from(richText.segments())
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
     const link = segment.link
     const mention = segment.mention
     const tag = segment.tag
@@ -160,6 +180,10 @@ export function RichText({
       tag &&
       AppBskyRichtextFacet.validateTag(tag).success
     ) {
+      if (isPARATag(tag.tag)) {
+        key++
+        continue
+      }
       els.push(
         <RichTextTag
           key={key}
@@ -170,7 +194,27 @@ export function RichText({
         />,
       )
     } else {
-      els.push(segment.text)
+      if (tag && isPARATag(tag.tag)) {
+        key++
+        continue
+      }
+
+      let display = segment.text
+      display = display.replace(/\[PARA\]\s*/g, '')
+
+      const nextSegment = segments[i + 1]
+      const nextTag = nextSegment?.tag
+      if (
+        nextTag &&
+        AppBskyRichtextFacet.validateTag(nextTag).success &&
+        isPARATag(nextTag.tag)
+      ) {
+        display = display.replace(/(?:\s*\|\|?\s*)$/g, '')
+      }
+
+      if (display) {
+        els.push(display)
+      }
     }
     key++
   }

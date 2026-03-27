@@ -24,8 +24,10 @@ import {Plural, Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {MAX_POST_LINES} from '#/lib/constants'
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {
+  getDmServiceHeadersForServiceUrl,
+  MAX_POST_LINES,
+} from '#/lib/constants'
 import {useAnimatedValue} from '#/lib/hooks/useAnimatedValue'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {makeProfileLink} from '#/lib/routes/links'
@@ -868,6 +870,9 @@ function SayHelloBtn({profile}: {profile: AppBskyActorDefs.ProfileView}) {
   const agent = useAgent()
   const navigation = useNavigation<NavigationProp>()
   const [isLoading, setIsLoading] = useState(false)
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   if (
     profile.associated?.chat?.allowIncoming === 'none' ||
@@ -892,7 +897,7 @@ function SayHelloBtn({profile}: {profile: AppBskyActorDefs.ProfileView}) {
             {
               members: [profile.did, agent.session!.did!],
             },
-            {headers: DM_SERVICE_HEADERS},
+            {headers: dmServiceHeaders},
           )
           navigation.navigate('MessagesConversation', {
             conversation: res.data.convo.id,

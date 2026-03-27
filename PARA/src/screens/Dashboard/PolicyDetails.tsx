@@ -1,5 +1,6 @@
 import {useMemo, useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Trans} from '@lingui/react/macro'
 
 import {useBaseFilter} from '#/state/shell/base-filter'
@@ -15,6 +16,7 @@ export function PolicyDetailsScreen({
 }) {
   const {item} = route.params
   const t = useTheme()
+  const insets = useSafeAreaInsets()
   const {activeFilters, activeState} = useBaseFilter()
 
   const [activeView, setActiveView] = useState('General')
@@ -43,7 +45,10 @@ export function PolicyDetailsScreen({
 
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.contentContainer}>
+        contentContainerStyle={[
+          styles.contentContainer,
+          {paddingBottom: insets.bottom + 120},
+        ]}>
         <Layout.Center>
           <View style={[styles.headerSection, t.atoms.bg_contrast_25]}>
             <View
@@ -137,6 +142,12 @@ export function PolicyDetailsScreen({
                       width: 200,
                       height: 120,
                       justifyContent: 'center',
+                      borderColor: 'rgba(255,255,255,0.05)',
+                      shadowColor: '#000',
+                      shadowOpacity: 0.14,
+                      shadowRadius: 18,
+                      shadowOffset: {width: 0, height: 8},
+                      elevation: 6,
                     },
                   ]}>
                   <Text style={[t.atoms.text, {fontWeight: 'bold'}]}>
@@ -326,7 +337,11 @@ const styles = StyleSheet.create({
   title: {fontSize: 28, fontWeight: '800', lineHeight: 34},
   section: {paddingHorizontal: 24, marginBottom: 32},
   sectionTitle: {fontSize: 20, fontWeight: '800', marginBottom: 8},
-  infoCard: {padding: 16, borderRadius: 12, borderWidth: 1},
+  infoCard: {
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
   bodyText: {fontSize: 16, lineHeight: 24, opacity: 0.8},
 
   // Binary Stats

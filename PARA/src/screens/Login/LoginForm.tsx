@@ -14,9 +14,9 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
+import {IS_LOCAL_DEV_MODE, LOCAL_DEV_SERVICE} from '#/lib/constants'
 import {useRequestNotificationsPermission} from '#/lib/notifications/notifications'
-import {isNetworkError} from '#/lib/strings/errors'
-import {cleanError} from '#/lib/strings/errors'
+import {cleanError,isNetworkError} from '#/lib/strings/errors'
 import {createFullHandle} from '#/lib/strings/handles'
 import {logger} from '#/logger'
 import {useSetHasCheckedForStarterPack} from '#/state/preferences/used-starter-packs'
@@ -126,7 +126,6 @@ export const LoginForm = ({
         }
       }
 
-      // TODO remove double login
       await login(
         {
           service: serviceUrl,
@@ -189,6 +188,14 @@ export const LoginForm = ({
           onSelectServiceUrl={setServiceUrl}
           onOpenDialog={onPressSelectService}
         />
+        {IS_LOCAL_DEV_MODE && (
+          <Text style={[a.text_sm, t.atoms.text_contrast_medium, a.mt_sm]}>
+            <Trans>
+              Local demo login: use provider {LOCAL_DEV_SERVICE}, account
+              {' '}active-a.test, password hunter2.
+            </Trans>
+          </Text>
+        )}
       </View>
       <View>
         <TextField.LabelText>

@@ -1,5 +1,8 @@
 const path = require('path')
 const pkg = require('./package.json')
+require('dotenv').config()
+
+const splashManifest = require('./assets/splash/manifest.json')
 
 module.exports = function (_config) {
   /**
@@ -31,6 +34,15 @@ module.exports = function (_config) {
   }
 
   const PLATFORM = getPlatform()
+  const DEFAULT_GOOGLE_MAPS_API_KEY = 'YOUR_API_KEY'
+  const GOOGLE_MAPS_IOS_API_KEY =
+    process.env.GOOGLE_MAPS_IOS_API_KEY ||
+    process.env.GOOGLE_MAPS_API_KEY ||
+    DEFAULT_GOOGLE_MAPS_API_KEY
+  const GOOGLE_MAPS_ANDROID_API_KEY =
+    process.env.GOOGLE_MAPS_ANDROID_API_KEY ||
+    process.env.GOOGLE_MAPS_API_KEY ||
+    DEFAULT_GOOGLE_MAPS_API_KEY
 
   const IS_TESTFLIGHT = process.env.EXPO_PUBLIC_ENV === 'testflight'
   const IS_PRODUCTION = process.env.EXPO_PUBLIC_ENV === 'production'
@@ -68,6 +80,7 @@ module.exports = function (_config) {
         bundleIdentifier: 'com.parasocial.app',
         config: {
           usesNonExemptEncryption: false,
+          googleMapsApiKey: GOOGLE_MAPS_IOS_API_KEY,
         },
         icon:
           PLATFORM === 'web' // web build doesn't like .icon files
@@ -83,6 +96,8 @@ module.exports = function (_config) {
             'Used to save images to your library.',
           NSPhotoLibraryUsageDescription:
             'Used for profile pictures, posts, and other kinds of content',
+          NSLocationWhenInUseUsageDescription:
+            'Used to show your location on the map and find local communities.',
           CFBundleSpokenName: 'PARA',
           CFBundleLocalizations: [
             'en',
@@ -203,11 +218,11 @@ module.exports = function (_config) {
         googleServicesFile: './google-services.json',
         package: 'com.parasocial.app',
         metaData: {
-          'com.google.android.geo.API_KEY': process.env.GOOGLE_MAPS_API_KEY,
+          'com.google.android.geo.API_KEY': GOOGLE_MAPS_ANDROID_API_KEY,
         },
         config: {
           googleMaps: {
-            apiKey: process.env.GOOGLE_MAPS_API_KEY,
+            apiKey: GOOGLE_MAPS_ANDROID_API_KEY,
           },
         },
         intentFilters: [
@@ -330,25 +345,27 @@ module.exports = function (_config) {
           'expo-splash-screen',
           {
             ios: {
-              enableFullScreenImage_legacy: true, // iOS only
-              backgroundColor: '#A8CCFF', // primary_200
-              image: './assets/splash/splash-light.png',
-              resizeMode: 'cover',
+              enableFullScreenImage_legacy:
+                splashManifest.native.ios.enableFullScreenImageLegacy, // iOS only
+              backgroundColor: splashManifest.colors.light,
+              image: splashManifest.native.ios.lightImage,
+              resizeMode: splashManifest.native.ios.resizeMode,
               dark: {
-                enableFullScreenImage_legacy: true, // iOS only
-                backgroundColor: '#00398A', // primary_800
-                image: './assets/splash/splash-dark.png',
-                resizeMode: 'cover',
+                enableFullScreenImage_legacy:
+                  splashManifest.native.ios.enableFullScreenImageLegacy, // iOS only
+                backgroundColor: splashManifest.colors.dark,
+                image: splashManifest.native.ios.darkImage,
+                resizeMode: splashManifest.native.ios.resizeMode,
               },
             },
             android: {
-              backgroundColor: '#A8CCFF', // primary_200
-              image: './assets/splash/android-splash-logo-white.png',
-              imageWidth: 102, // even division of 306px
+              backgroundColor: splashManifest.colors.light,
+              image: splashManifest.native.android.lightImage,
+              imageWidth: splashManifest.native.android.imageWidth, // even division of 306px
               dark: {
-                backgroundColor: '#00398A', // primary_800
-                image: './assets/splash/android-splash-logo-white.png',
-                imageWidth: 102,
+                backgroundColor: splashManifest.colors.dark,
+                image: splashManifest.native.android.darkImage,
+                imageWidth: splashManifest.native.android.imageWidth,
               },
             },
           },

@@ -52,6 +52,7 @@ type Props = NativeStackScreenProps<CommonNavigatorParams, 'MessagesInbox'>
 export function MessagesInboxScreen(props: Props) {
   const {_} = useLingui()
   const aaCopy = useAgeAssuranceCopy()
+
   return (
     <AgeRestrictedScreen
       screenTitle={_(msg`Chat requests`)}

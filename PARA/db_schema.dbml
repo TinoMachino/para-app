@@ -57,3 +57,20 @@ Table post_flairs {
   post_id integer [ref: > posts.id]
   flair_id integer [ref: > flairs.id]
 }
+
+Table electoral_districts {
+  id integer [primary key, note: 'Sequential ID 1-300']
+  district_number integer [not null, note: 'District number within state']
+  state_name varchar [not null]
+  display_name varchar [not null, note: 'e.g. Distrito 3, Jalisco']
+  registered_voters integer [default: 0]
+  turnout_pct decimal [default: 0, note: 'Last election turnout %']
+  dominant_party varchar
+  current_deputy varchar
+  deputy_party varchar
+  accent_color varchar [note: 'Hex color derived from dominant party']
+
+  indexes {
+    (state_name, district_number) [unique]
+  }
+}

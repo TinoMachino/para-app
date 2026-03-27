@@ -55,10 +55,13 @@ export function StepInterests() {
     <View style={[a.align_start, a.gap_sm]} testID="onboardingInterests">
       <OnboardingPosition />
       <OnboardingTitleText>
-        <Trans>What are your interests?</Trans>
+        <Trans>What do you want to pay attention to?</Trans>
       </OnboardingTitleText>
       <OnboardingDescriptionText>
-        <Trans>We'll use this to help customize your experience.</Trans>
+        <Trans>
+          Choose a few issues and topics to shape your first PARA spaces,
+          people, and conversations.
+        </Trans>
       </OnboardingDescriptionText>
 
       <View style={[a.w_full, a.pt_lg]}>

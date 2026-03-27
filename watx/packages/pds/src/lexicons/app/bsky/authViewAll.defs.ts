@@ -14,6 +14,7 @@ const main = l.permissionSet(
     l.permission('rpc', {
       inheritAud: true,
       lxm: [
+        'app.bsky.actor.getPreferences',
         'app.bsky.actor.getProfile',
         'app.bsky.actor.getProfiles',
         'app.bsky.actor.getSuggestions',

@@ -190,10 +190,10 @@ pnpm --filter @atproto/bsky test -- tests/views/para-feed.test.ts tests/data-pla
 
 ### Node ABI mismatch (e.g. `better-sqlite3`)
 
-If Node major changed, rebuild deps under Node 18:
+If Node major changed, rebuild deps under the repo Node version from `.nvmrc`:
 
 ```bash
-nvm use 18
+nvm use
 pnpm install --frozen-lockfile
 pnpm --filter @atproto/pds rebuild better-sqlite3
 ```

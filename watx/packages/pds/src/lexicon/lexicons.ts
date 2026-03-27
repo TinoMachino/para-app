@@ -16750,6 +16750,213 @@ export const schemaDict = {
       },
     },
   },
+  ComParaDiscourseGetSentiment: {
+    lexicon: 1,
+    id: 'com.para.discourse.getSentiment',
+    defs: {
+      main: {
+        type: 'query',
+        description: 'Get the sentiment breakdown for a community.',
+        parameters: {
+          type: 'params',
+          properties: {
+            community: {
+              type: 'string',
+            },
+            timeframe: {
+              type: 'string',
+              enum: ['1h', '24h', '7d', '30d'],
+            },
+          },
+          required: ['timeframe'],
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['sentiment'],
+            properties: {
+              sentiment: {
+                type: 'ref',
+                ref: 'lex:com.para.discourse.getSentiment#sentimentDistribution',
+              },
+            },
+          },
+        },
+      },
+      sentimentDistribution: {
+        type: 'object',
+        required: ['anger', 'fear', 'trust', 'uncertainty', 'neutral'],
+        properties: {
+          anger: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          fear: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          trust: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          uncertainty: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          neutral: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+        },
+      },
+    },
+  },
+  ComParaDiscourseGetSnapshot: {
+    lexicon: 1,
+    id: 'com.para.discourse.getSnapshot',
+    defs: {
+      main: {
+        type: 'query',
+        description: 'Get aggregate discourse metrics for a community.',
+        parameters: {
+          type: 'params',
+          properties: {
+            community: {
+              type: 'string',
+            },
+            timeframe: {
+              type: 'string',
+              enum: ['1h', '24h', '7d', '30d'],
+            },
+          },
+          required: ['timeframe'],
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['snapshots'],
+            properties: {
+              snapshots: {
+                type: 'array',
+                items: {
+                  type: 'ref',
+                  ref: 'lex:com.para.discourse.getSnapshot#snapshot',
+                },
+              },
+            },
+          },
+        },
+      },
+      snapshot: {
+        type: 'object',
+        required: ['community', 'bucket', 'postCount', 'uniqueAuthors'],
+        properties: {
+          community: {
+            type: 'string',
+          },
+          bucket: {
+            type: 'string',
+            format: 'datetime',
+          },
+          postCount: {
+            type: 'integer',
+          },
+          uniqueAuthors: {
+            type: 'integer',
+          },
+          avgConstructiveness: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          semanticVolatility: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          lexicalDiversity: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          polarizationDelta: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          echoChamberIndex: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+          topKeywords: {
+            type: 'string',
+          },
+          sentimentDistribution: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
+  ComParaDiscourseGetTopics: {
+    lexicon: 1,
+    id: 'com.para.discourse.getTopics',
+    defs: {
+      main: {
+        type: 'query',
+        description: 'Get emergent topic clusters for a community.',
+        parameters: {
+          type: 'params',
+          properties: {
+            community: {
+              type: 'string',
+            },
+            timeframe: {
+              type: 'string',
+              enum: ['1h', '24h', '7d', '30d'],
+            },
+          },
+          required: ['timeframe'],
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['topics'],
+            properties: {
+              topics: {
+                type: 'array',
+                items: {
+                  type: 'ref',
+                  ref: 'lex:com.para.discourse.getTopics#topic',
+                },
+              },
+            },
+          },
+        },
+      },
+      topic: {
+        type: 'object',
+        required: ['clusterLabel', 'postCount', 'authorCount'],
+        properties: {
+          clusterLabel: {
+            type: 'string',
+          },
+          keywords: {
+            type: 'string',
+          },
+          postCount: {
+            type: 'integer',
+          },
+          authorCount: {
+            type: 'integer',
+          },
+          avgSentiment: {
+            type: 'integer',
+            description: 'Scaled 0-100',
+          },
+        },
+      },
+    },
+  },
   ComParaFeedGetAuthorFeed: {
     lexicon: 1,
     id: 'com.para.feed.getAuthorFeed',
@@ -23127,6 +23334,9 @@ export const ids = {
   ComParaCivicVote: 'com.para.civic.vote',
   ComParaCommunityDefs: 'com.para.community.defs',
   ComParaCommunityGetGovernance: 'com.para.community.getGovernance',
+  ComParaDiscourseGetSentiment: 'com.para.discourse.getSentiment',
+  ComParaDiscourseGetSnapshot: 'com.para.discourse.getSnapshot',
+  ComParaDiscourseGetTopics: 'com.para.discourse.getTopics',
   ComParaFeedGetAuthorFeed: 'com.para.feed.getAuthorFeed',
   ComParaFeedGetPostThread: 'com.para.feed.getPostThread',
   ComParaFeedGetPosts: 'com.para.feed.getPosts',

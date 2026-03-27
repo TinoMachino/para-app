@@ -251,8 +251,18 @@ let DrawerContent = ({}: React.PropsWithoutRef<{}>): React.ReactNode => {
   }, [navigation, setDrawerOpen])
 
   const onPressCommunities = useCallback(() => {
-    navigation.navigate('Communities')
+    if (IS_WEB) {
+      navigation.navigate('Communities')
+      setDrawerOpen(false)
+      return
+    }
+
     setDrawerOpen(false)
+    // @ts-expect-error nested navigators aren't typed here
+    navigation.navigate('BaseTab', {
+      screen: 'Communities',
+      params: {},
+    })
   }, [navigation, setDrawerOpen])
 
   const onPressBase = useCallback(() => {

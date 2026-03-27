@@ -75,7 +75,7 @@ import {createNativeStackNavigatorWithAuth} from '#/view/shell/createNativeStack
 import {BaseScreen} from '#/screens/Base/BaseScreen'
 import {CompassScreen} from '#/screens/Base/CompassScreen'
 import {CreatePostScreen} from '#/screens/Base/CreatePostScreen'
-import {MapScreen} from '#/screens/Base/MapScreen'
+// Lazy loaded below
 import {MyBaseScreen} from '#/screens/Base/MyBaseScreen'
 import {BookmarksScreen} from '#/screens/Bookmarks'
 import {CabildeoDetailScreen} from '#/screens/Communities/CabildeoDetailScreen'
@@ -90,7 +90,7 @@ import {CreateCabildeoScreen} from '#/screens/Communities/CreateCabildeoScreen'
 import {CreatePositionScreen} from '#/screens/Communities/CreatePositionScreen'
 import {DelegateVoteScreen} from '#/screens/Communities/DelegateVoteScreen'
 import {DiscourseAnalysisScreen} from '#/screens/Dashboard/DiscourseAnalysis'
-import {MemesAndDocumentsScreen} from '#/screens/Dashboard/MemesAndDocuments'
+import {MemesAndDocumentsScreen} from '#/screens/Dashboard/MemesAndDocumentsScreen'
 import {PoliciesDashboard} from '#/screens/Dashboard/PoliciesAndMatters'
 import {PolicyDetailsScreen} from '#/screens/Dashboard/PolicyDetails'
 import {RepresentativesScreen} from '#/screens/Dashboard/Representatives'
@@ -796,8 +796,15 @@ function commonScreens(Stack: typeof Flat, unreadCountLabel?: string) {
       />
       <Stack.Screen
         name="Map"
-        getComponent={() => MapScreen}
+        getComponent={() => require('#/screens/Map/MapScreen').MapScreen}
         options={{title: title(msg`Map`)}}
+      />
+      <Stack.Screen
+        name="DistrictProfile"
+        getComponent={() =>
+          require('#/screens/Map/DistrictProfileScreen').DistrictProfileScreen
+        }
+        options={{title: title(msg`District Profile`)}}
       />
       <Stack.Screen
         name="Compass"

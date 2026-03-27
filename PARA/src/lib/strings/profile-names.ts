@@ -5,17 +5,19 @@ export function formatUserDisplayName({
   displayName,
   handle,
   isFigure,
+  isGroup = false,
   moderation,
 }: {
   displayName?: string | null
   handle: string
   isFigure: boolean
+  isGroup?: boolean
   moderation?: Parameters<typeof sanitizeDisplayName>[1]
 }) {
   const baseName = sanitizeDisplayName(
     displayName || sanitizeHandle(handle),
     moderation,
   )
-  const prefix = isFigure ? 'f/' : 'i/'
+  const prefix = isGroup ? 'g/' : isFigure ? 'f/' : 'i/'
   return `${prefix}${baseName}`
 }

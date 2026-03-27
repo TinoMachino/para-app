@@ -4,166 +4,105 @@ const SERVICE = process.env.PARA_PDS_URL || 'http://localhost:2583'
 const PASSWORD = process.env.PARA_TEST_PASSWORD || 'hunter2'
 
 const ACCOUNTS = [
-  {handle: 'alice.test', password: PASSWORD, party: 'Morena', community: 'Morena'},
-  {handle: 'bob.test', password: PASSWORD, party: 'PAN', community: 'PAN'},
+  {handle: 'alice.test', password: PASSWORD, party: 'p/Morena', community: 'p/Morena'},
+  {handle: 'bob.test', password: PASSWORD, party: 'p/PAN', community: 'p/PAN'},
+  {handle: 'carla.test', password: PASSWORD, party: 'p/MC', community: 'p/NuevoLeon'},
 ]
 
-function withCommunityLabel(text, community) {
-  return `${text} (p/${community})`
-}
-
 const POSTS = [
+  // ALICE: Water Rights & Industrial Balance
   {
     visibility: 'private',
     account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Official transit policy rollout for CDMX budget review.',
-      'Morena',
-    ),
-    flairs: ['||#TransportePublico'],
-    tags: ['||#TransportePublico'],
+    text: "Es fundamental garantizar el acceso al agua como derecho humano. La propuesta de crear una empresa pública de agua debe ir acompañada de un plan hídrico integral para la región. ||#EmpresaPublicaDeAgua |#IndustriaHidrica",
+    flairs: ['||#EmpresaPublicaDeAgua', '|#IndustriaHidrica'],
+    tags: ['agua', 'derechos', 'infraestructura', '||#EmpresaPublicaDeAgua', '|#IndustriaHidrica'],
     postType: 'policy',
-    official: true,
-    party: 'Morena',
-    community: 'Morena',
+    party: 'p/Morena',
+    community: 'p/Morena',
     createMeta: true,
   },
   {
     visibility: 'private',
     account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Community inflation report from neighborhood assemblies this week.',
-      'Morena',
-    ),
-    flairs: ['|#Inflacion'],
-    tags: ['|#Inflacion'],
-    postType: 'matter',
-    party: 'Morena',
-    community: 'Morena',
-    createMeta: true,
-  },
-  {
-    visibility: 'private',
-    account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Meme draft about how every transit debate ends in another committee.',
-      'Morena',
-    ),
-    flairs: ['|#Pobreza'],
-    tags: ['|#Pobreza', '#Meme'],
-    postType: 'meme',
-    party: 'Morena',
-    community: 'Morena',
-    createMeta: true,
-  },
-  {
-    visibility: 'private',
-    account: 'bob.test',
-    text: withCommunityLabel(
-      '[Seed] RAQ note clarifying the democracy thread before voting closes.',
-      'PAN',
-    ),
-    flairs: ['|#Democracia'],
-    tags: ['|#Democracia', '|#!RAQ'],
-    postType: 'raq',
-    party: 'PAN',
-    community: 'PAN',
-  },
-  {
-    visibility: 'private',
-    account: 'bob.test',
-    text: withCommunityLabel(
-      '[Seed] Open question on whether the energy industry should be scoped as a local matter first.',
-      'PAN',
-    ),
-    flairs: ['|#IndustriaEnergetica'],
-    tags: ['|#IndustriaEnergetica', '|#?OpenQuestion'],
+    text: "¿Cómo equilibramos el desarrollo industrial con la protección de nuestros mantos acuíferos en la zona metropolitana? El debate está abierto en la asamblea de hoy. |#IndustriaHidrica |#?OpenQuestion",
+    flairs: ['|#IndustriaHidrica', '|#?OpenQuestion'],
+    tags: ['debate', 'agua', 'industria', '|#IndustriaHidrica', '|#?OpenQuestion'],
     postType: 'open_question',
-    party: 'PAN',
-    community: 'PAN',
+    party: 'p/Morena',
+    community: 'p/Morena',
+  },
+  
+  // BOB: Public Transit & Clarifications
+  {
+    visibility: 'private',
+    account: 'bob.test',
+    text: "Se requiere ampliar la red de transporte público conectando la periferia con los centros de trabajo. Es una inversión prioritaria para reducir la desigualdad urbana y mejorar los tiempos de traslado. ||#TransportePublico |#SubvencionesDeViajesEnBus",
+    flairs: ['||#TransportePublico', '|#SubvencionesDeViajesEnBus'],
+    tags: ['movilidad', 'transporte', 'ciudad', '||#TransportePublico', '|#SubvencionesDeViajesEnBus'],
+    postType: 'policy',
+    party: 'p/PAN',
+    community: 'p/PAN',
+    createMeta: true,
   },
   {
     visibility: 'private',
     account: 'bob.test',
-    text: withCommunityLabel(
-      '[Seed] Meta post about badge rollout, moderation labels, and community posting rules.',
-      'PAN',
-    ),
-    flairs: ['|#Tecnologia'],
-    tags: ['|#Tecnologia', '#META'],
+    text: "Para aclarar la votación de la asamblea de ayer respecto al dictamen: El subsidio al transporte se mantendrá sin cambios para estudiantes y adultos mayores; la reforma solo ajusta las tarifas generales. ||#TransportePublico |#!RAQ",
+    flairs: ['||#TransportePublico', '|#!RAQ'],
+    tags: ['aclaracion', 'subsidios', 'transporte', '||#TransportePublico', '|#!RAQ'],
+    postType: 'raq',
+    party: 'p/PAN',
+    community: 'p/PAN',
+  },
+
+  // CARLA: Education & Meta Coordination
+  {
+    visibility: 'private',
+    account: 'carla.test',
+    text: "Necesitamos modernizar nuestras escuelas públicas con mejor infraestructura en la región escolar. La educación equitativa y científica es la base del futuro para nuestra comunidad. ||#EscuelasPublicas ||#EducacionLaica",
+    flairs: ['||#EscuelasPublicas', '||#EducacionLaica'],
+    tags: ['educacion', 'escuelas', 'presupuesto', '||#EscuelasPublicas', '||#EducacionLaica'],
+    postType: 'policy',
+    party: 'p/MC',
+    community: 'p/NuevoLeon',
+    createMeta: true,
+  },
+  {
+    visibility: 'private',
+    account: 'carla.test',
+    text: "Recordatorio para los vocales de la mesa directiva: por favor revisen el borrador técnico sobre los comedores escolares antes de la sesión de votación de este viernes a mediodía. ||#ComedoresEscolaresGratuitos #META",
+    flairs: ['||#ComedoresEscolaresGratuitos', '#META'],
+    tags: ['anuncio', 'asamblea', 'comite', '||#ComedoresEscolaresGratuitos', '#META'],
     postType: 'meta',
-    party: 'PAN',
-    community: 'PAN',
+    party: 'p/MC',
+    community: 'p/NuevoLeon',
   },
-  {
-    visibility: 'private',
-    account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Competition entry for the tourism messaging sprint.',
-      'Morena',
-    ),
-    flairs: ['|#Turismo'],
-    tags: ['|#Turismo', '#Competition'],
-    postType: 'competition',
-    party: 'Morena',
-    community: 'Morena',
-  },
-  {
-    visibility: 'private',
-    account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Fake article simulation about a sudden crime-policy turnaround.',
-      'Morena',
-    ),
-    flairs: ['|#Delincuencia'],
-    tags: ['|#Delincuencia', '#FakeArticle'],
-    postType: 'fake_article',
-    party: 'Morena',
-    community: 'Morena',
-  },
+
+  // PUBLIC MIRRORS
   {
     visibility: 'public',
     account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Public mirror for community badge testing: official transit policy post.',
-      'Morena',
-    ),
-    tags: ['||#TransportePublico'],
-    party: 'Morena',
-    community: 'Morena',
-  },
-  {
-    visibility: 'public',
-    account: 'alice.test',
-    text: withCommunityLabel(
-      '[Seed] Public mirror for community badge testing: inflation matter post.',
-      'Morena',
-    ),
-    tags: ['|#Inflacion'],
-    party: 'Morena',
-    community: 'Morena',
+    text: "Es fundamental garantizar el acceso al agua como derecho humano. La propuesta de crear una empresa pública de agua debe ir acompañada de un plan hídrico integral para la región. ||#EmpresaPublicaDeAgua |#IndustriaHidrica",
+    tags: ['||#EmpresaPublicaDeAgua', '|#IndustriaHidrica'],
+    party: 'p/Morena',
+    community: 'p/Morena',
   },
   {
     visibility: 'public',
     account: 'bob.test',
-    text: withCommunityLabel(
-      '[Seed] Public mirror for community badge testing: poverty matter post.',
-      'PAN',
-    ),
-    tags: ['|#Pobreza'],
-    party: 'PAN',
-    community: 'PAN',
+    text: "Se requiere ampliar la red de transporte público conectando la periferia con los centros de trabajo. Es una inversión prioritaria para reducir la desigualdad urbana y mejorar los tiempos de traslado. ||#TransportePublico |#SubvencionesDeViajesEnBus",
+    tags: ['||#TransportePublico', '|#SubvencionesDeViajesEnBus'],
+    party: 'p/PAN',
+    community: 'p/PAN',
   },
   {
     visibility: 'public',
-    account: 'bob.test',
-    text: withCommunityLabel(
-      '[Seed] Public mirror for community badge testing: official schools policy post.',
-      'PAN',
-    ),
-    tags: ['||#EscuelasPublicas'],
-    party: 'PAN',
-    community: 'PAN',
+    account: 'carla.test',
+    text: "Necesitamos modernizar nuestras escuelas públicas con mejor infraestructura en la región escolar. La educación equitativa y científica es la base del futuro para nuestra comunidad. ||#EscuelasPublicas ||#EducacionLaica",
+    tags: ['||#EscuelasPublicas', '||#EducacionLaica'],
+    party: 'p/MC',
+    community: 'p/NuevoLeon',
   },
 ]
 

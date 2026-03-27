@@ -81,7 +81,9 @@ const run = async () => {
     persistentMode ? 'ozone_demo' : 'ozone_db',
   )
   const bskyDisplayUrl = bskyPublicUrl
-  const chatUrl = envStr('DEV_ENV_OZONE_CHAT_URL', `http://localhost:${chatPort}`)
+  const chatPublicUrl =
+    envMaybe('DEV_ENV_CHAT_PUBLIC_URL') ??
+    envStr('DEV_ENV_OZONE_CHAT_URL', `http://localhost:${chatPort}`)
 
   console.log(`
 ██████╗
@@ -112,10 +114,12 @@ const run = async () => {
     },
     ozone: {
       port: ozonePort,
-      chatUrl, // must run separate chat service
-      chatDid: 'did:example:chat',
       dbMaterializedViewRefreshIntervalMs: 30_000,
       dbPostgresSchema: ozoneDbSchema,
+    },
+    chat: {
+      port: chatPort,
+      publicUrl: chatPublicUrl,
     },
     introspect: { port: introspectPort },
   })
@@ -143,6 +147,11 @@ const run = async () => {
   )
   console.log(`🗼 Ozone server http://localhost:${ozonePort}`)
   console.log(`🗼 Ozone service DID ${network.ozone.ctx.cfg.service.did}`)
+  console.log(`💬 Chat service ${network.chat.url}`)
+  if (network.chatPublicUrl !== network.chat.url) {
+    console.log(`💬 Chat public URL ${network.chatPublicUrl}`)
+  }
+  console.log(`💬 Chat service DID ${network.chat.did}`)
   console.log(`🌅 Bsky Appview ${bskyDisplayUrl}`)
   console.log(`🌅 Bsky schema ${bskyDbSchema}`)
   console.log(`🗼 Ozone schema ${ozoneDbSchema}`)

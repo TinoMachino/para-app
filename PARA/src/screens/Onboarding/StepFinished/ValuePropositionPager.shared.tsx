@@ -9,27 +9,27 @@ export function useValuePropText(step: 0 | 1 | 2) {
 
   return [
     {
-      title: _(msg`Free your feed`),
+      title: _(msg`Start from civic context`),
       description: _(
-        msg`No more doomscrolling junk-filled algorithms. Find feeds that work for you, not against you.`,
+        msg`Base, communities, and issue spaces help you enter politics through place, identity, and shared concerns instead of a random feed.`,
       ),
       alt: _(
         msg`A collection of popular feeds you can find on PARA, including News, Booksky, Game Dev, Blacksky, and Fountain Pens`,
       ),
     },
     {
-      title: _(msg`Find your people`),
+      title: _(msg`Find people who matter`),
       description: _(
-        msg`Ditch the trolls and clickbait. Find real people and conversations that matter to you.`,
+        msg`Follow communities, representatives, organizers, and thoughtful people who help you understand what affects your life.`,
       ),
       alt: _(
         msg`Your profile picture surrounded by concentric circles of other users' profile pictures`,
       ),
     },
     {
-      title: _(msg`Forget the noise`),
+      title: _(msg`Turn attention into action`),
       description: _(
-        msg`No ads, no invasive tracking, no engagement traps. PARA respects your time and attention.`,
+        msg`Read highlights, track issues, join cabildeo, and move from browsing to participation.`,
       ),
       alt: _(
         msg`An illustration of several PARA posts alongside repost, like, and comment icons`,

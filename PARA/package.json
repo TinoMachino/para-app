@@ -51,6 +51,7 @@
     "seed:civic:apply": "node ./scripts/civic-seed/index.mjs apply",
     "seed:civic:reset": "node ./scripts/civic-seed/index.mjs reset",
     "seed:civic:test": "node --test ./scripts/civic-seed/lib.test.mjs",
+    "seed:civic:dm-smoke": "node ./scripts/civic-seed/dm-smoke.mjs",
     "lint": "eslint --cache --quiet src",
     "lint-native": "swiftlint ./modules && ktlint ./modules",
     "lint-native:fix": "swiftlint --fix ./modules && ktlint --format ./modules",
@@ -214,7 +215,7 @@
     "react-native-edge-to-edge": "^1.6.0",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-keyboard-controller": "^1.20.7",
-    "react-native-maps": "^1.27.2",
+    "react-native-maps": "1.20.1",
     "react-native-pager-view": "6.8.0",
     "react-native-progress": "bluesky-social/react-native-progress",
     "react-native-qrcode-styled": "^0.3.3",
@@ -292,8 +293,8 @@
     "react-refresh": "^0.14.0",
     "svgo": "^3.3.2",
     "ts-plugin-sort-import-suggestions": "^1.0.4",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.57.2",
     "webpack-bundle-analyzer": "^4.10.1"
   },
   "resolutions": {

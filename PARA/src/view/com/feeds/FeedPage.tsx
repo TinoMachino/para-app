@@ -13,7 +13,10 @@ import {useLingui} from '@lingui/react'
 import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {DISCOVER_FEED_URI, VIDEO_FEED_URIS} from '#/lib/constants'
+import {
+  isDefaultDiscoverFeedUri,
+  VIDEO_FEED_URIS,
+} from '#/lib/constants'
 import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
 import {ComposeIcon2} from '#/lib/icons'
 import {getRootNavigation, getTabState, TabState} from '#/lib/routes/helpers'
@@ -137,7 +140,7 @@ export function FeedPage({
   }, [scrollToTop, feed, queryClient])
 
   const shouldPrefetch = IS_NATIVE && isPageAdjacent
-  const isDiscoverFeed = feedInfo.uri === DISCOVER_FEED_URI
+  const isDiscoverFeed = isDefaultDiscoverFeedUri(feedInfo.uri)
   return (
     <View
       testID={testID}

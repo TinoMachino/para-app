@@ -32,7 +32,7 @@ import {aggregateUserInterests} from '#/lib/api/feed/utils'
 import {FeedTuner, type FeedTunerFn} from '#/lib/api/feed-manip'
 import {
   DEFAULT_SERVICE,
-  DISCOVER_FEED_URI,
+  isDiscoverFeedUri,
   LOCAL_DEV_SERVICE,
 } from '#/lib/constants'
 import {logger} from '#/logger'
@@ -167,7 +167,7 @@ export function usePostFeedQuery(
     args: typeof selectArgs
     result: InfiniteData<FeedPage>
   } | null>(null)
-  const isDiscover = feedDesc.includes(DISCOVER_FEED_URI)
+  const isDiscover = isDiscoverFeedUri(feedDesc.split('|')[1])
 
   /**
    * The number of posts to fetch in a single request. Because we filter

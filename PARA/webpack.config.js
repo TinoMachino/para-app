@@ -1,3 +1,5 @@
+const path = require('path')
+const webpack = require('webpack')
 const createExpoWebpackConfigAsync = require('@expo/webpack-config')
 const {withAlias} = require('@expo/webpack-config/addons')
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
@@ -24,6 +26,7 @@ module.exports = async function (env, argv) {
     'react-native$': 'react-native-web',
     'react-native-webview': 'react-native-web-webview',
     'react-native-maps': '@teovilla/react-native-web-maps',
+    'react-native-uitextview': path.resolve(__dirname, 'src/platform/react-native-uitextview-mock.web.tsx'),
     // Force ESM version
     'unicode-segmenter/grapheme': require
       .resolve('unicode-segmenter/grapheme')
@@ -66,5 +69,15 @@ module.exports = async function (env, argv) {
       }),
     )
   }
+
+  // Suppress expo-contacts warning: ContactAccessButtonProps is a type-only
+  // re-export that doesn't exist at runtime on web.
+  config.plugins.push(
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/ContactAccessButton$/,
+      contextRegExp: /expo-contacts/,
+    }),
+  )
+
   return config
 }

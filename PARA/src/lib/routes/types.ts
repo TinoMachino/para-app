@@ -128,6 +128,7 @@ export type CommonNavigatorParams = {
   DelegateVote: {cabildeoUri: string}
   CreateCabildeo: undefined
   CreatePosition: {cabildeoUri: string; optionIndex?: number}
+  DistrictProfile: {districtId: number; initialTab?: 'overview' | 'activity'}
 }
 
 export type BottomTabNavigatorParams = CommonNavigatorParams & {
@@ -165,6 +166,7 @@ export type BaseTabNavigatorParams = CommonNavigatorParams & {
   }
   PolicyDetails: {item: any}
   MemesAndDocuments: {mode?: 'Memes' | 'Documents'; view?: 'board' | 'deck'}
+  DistrictProfile: {districtId: number; initialTab?: 'overview' | 'activity'}
 }
 
 export type FlatNavigatorParams = CommonNavigatorParams & {

@@ -6,7 +6,11 @@ import {
 } from '@atproto/api'
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
-import {PROD_DEFAULT_FEED} from '#/lib/constants'
+import {
+  DEFAULT_DISCOVER_SAVED_FEED,
+  IS_LOCAL_DEV_MODE,
+  TIMELINE_SAVED_FEED,
+} from '#/lib/constants'
 import {replaceEqualDeep} from '#/lib/functions'
 import {getAge} from '#/lib/strings/time'
 import {logger} from '#/logger'
@@ -63,7 +67,9 @@ export function usePreferencesQuery() {
 
         const preferences: UsePreferencesQueryResponse = {
           ...res,
-          savedFeeds: res.savedFeeds.filter(f => f.type !== 'unknown'),
+          savedFeeds: res.savedFeeds.filter(
+            f => f.type !== 'unknown' && (!IS_LOCAL_DEV_MODE || f.type !== 'feed'),
+          ),
           /**
            * Special preference, only used for following feed, previously
            * called `home`
@@ -297,8 +303,7 @@ export function useReplaceForYouWithDiscoverFeedMutation() {
       if (!discoverFeedConfig) {
         await agent.addSavedFeeds([
           {
-            type: 'feed',
-            value: PROD_DEFAULT_FEED('whats-hot'),
+            ...(DEFAULT_DISCOVER_SAVED_FEED ?? TIMELINE_SAVED_FEED),
             pinned: true,
           },
         ])

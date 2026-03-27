@@ -18,7 +18,10 @@ import {
 import {useLingui} from '@lingui/react/macro'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {DISCOVER_FEED_URI, KNOWN_SHUTDOWN_FEEDS} from '#/lib/constants'
+import {
+  isDefaultDiscoverFeedUri,
+  KNOWN_SHUTDOWN_FEEDS,
+} from '#/lib/constants'
 import {useInitialNumToRender} from '#/lib/hooks/useInitialNumToRender'
 import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
 import {isNetworkError} from '#/lib/strings/errors'
@@ -295,7 +298,7 @@ let PostFeed = ({
     }
 
     // Discover always has fresh content
-    if (feedUriOrActorDid === DISCOVER_FEED_URI) {
+    if (isDefaultDiscoverFeedUri(feedUriOrActorDid)) {
       return onHasNew(true)
     }
 
@@ -408,7 +411,7 @@ let PostFeed = ({
     let feedKind: 'following' | 'discover' | 'profile' | 'thevids' | undefined
     if (feedType === 'following') {
       feedKind = 'following'
-    } else if (feedUriOrActorDid === DISCOVER_FEED_URI) {
+    } else if (isDefaultDiscoverFeedUri(feedUriOrActorDid)) {
       feedKind = 'discover'
     } else if (
       feedType === 'author' &&
@@ -533,7 +536,7 @@ let PostFeed = ({
                     if (
                       hasSession &&
                       !hideComposerPrompt &&
-                      (feedUriOrActorDid === DISCOVER_FEED_URI ||
+                      (isDefaultDiscoverFeedUri(feedUriOrActorDid) ||
                         feed === 'following')
                     ) {
                       arr.push({

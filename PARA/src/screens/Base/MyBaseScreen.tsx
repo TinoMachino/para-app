@@ -18,7 +18,6 @@ import {
   MATTER_CATEGORIES,
   VOTED_POLICIES,
 } from '#/lib/constants/mockData'
-import {usePalette} from '#/lib/hooks/usePalette'
 import {type NavigationProp} from '#/lib/routes/types'
 import {USER_FLAIRS} from '#/lib/tags'
 import {deleteHighlight, getAllHighlights} from '#/state/highlights'
@@ -32,18 +31,19 @@ import {Text} from '#/view/com/util/text/Text'
 import {UserAvatar} from '#/view/com/util/UserAvatar'
 import {atoms as a, useTheme} from '#/alf'
 import {Button, ButtonIcon, ButtonText} from '#/components/Button'
-import {ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeft} from '#/components/icons/Arrow'
 import {Bookmark as BookmarkIcon} from '#/components/icons/Bookmark'
 import {ChevronRight_Stroke2_Corner0_Rounded as ChevronRight} from '#/components/icons/Chevron'
 import {SettingsGear2_Stroke2_Corner0_Rounded as SettingsIcon} from '#/components/icons/SettingsGear2'
 import {TimesLarge_Stroke2_Corner0_Rounded as XIcon} from '#/components/icons/Times'
 import {Tree_Stroke2_Corner0_Rounded as TreeIcon} from '#/components/icons/Tree'
 import * as Layout from '#/components/Layout'
-import {IS_WEB as _isWeb} from '#/env'
+import {PolicyCategoryModal} from '#/screens/Base/PolicyCategoryModal'
 
+// ---------------------------------------------------------------------------
+// MyBaseScreen
+// ---------------------------------------------------------------------------
 export function MyBaseScreen() {
   const {_} = useLingui()
-  const pal = usePalette('default')
   const t = useTheme()
   const {currentAccount} = useSession()
   const navigation = useNavigation<NavigationProp>()
@@ -63,7 +63,6 @@ export function MyBaseScreen() {
 
   const [showFlairModal, setShowFlairModal] = useState(false)
 
-  // Load highlights on mount
   // Load highlights on focus
   useFocusEffect(
     useCallback(() => {
@@ -71,7 +70,6 @@ export function MyBaseScreen() {
     }, []),
   )
 
-  // Handle delete highlight
   const handleDeleteHighlight = useCallback((highlight: HighlightData) => {
     deleteHighlight(highlight.postUri, highlight.id)
     setMyHighlights(getAllHighlights())
@@ -145,12 +143,12 @@ export function MyBaseScreen() {
         </Layout.Header.Slot>
       </Layout.Header.Outer>
 
-      <Layout.Center style={{flex: 1}}>
+      <Layout.Center style={styles.flex1}>
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}>
           {/* Profile Section */}
-          <View style={[styles.profileSection, pal.border]}>
+          <View style={[styles.profileSection, t.atoms.border_contrast_low]}>
             <View style={styles.profileHeaderRow}>
               <UserAvatar
                 avatar={currentProfile?.avatar}
@@ -158,12 +156,12 @@ export function MyBaseScreen() {
                 type={currentProfile?.associated?.labeler ? 'labeler' : 'user'}
               />
               <View style={styles.profileInfo}>
-                <Text style={[styles.profileName, pal.text]}>
+                <Text style={[styles.profileName, t.atoms.text]}>
                   {currentProfile?.displayName ||
                     currentProfile?.handle ||
                     'User'}
                 </Text>
-                <Text style={[styles.profileHandle, pal.text]}>
+                <Text style={[styles.profileHandle, t.atoms.text]}>
                   @{currentProfile?.handle}
                 </Text>
                 <TouchableOpacity
@@ -197,31 +195,26 @@ export function MyBaseScreen() {
                 label="Influence"
                 value="850"
                 onPress={() => onPressMetric('Influence')}
-                pal={pal}
               />
               <MetricItem
                 label="Votes"
                 value="124"
                 onPress={() => onPressMetric('Votes')}
-                pal={pal}
               />
               <MetricItem
                 label="Posts"
                 value="42"
                 onPress={() => onPressMetric('Posts')}
-                pal={pal}
               />
               <MetricItem
                 label="Followers"
                 value="10.2k"
                 onPress={() => onPressMetric('Followers')}
-                pal={pal}
               />
               <MetricItem
                 label="Following"
                 value="234"
                 onPress={() => onPressMetric('Following')}
-                pal={pal}
               />
             </View>
 
@@ -241,21 +234,22 @@ export function MyBaseScreen() {
                     },
                   ]}
                 />
-                <Text style={[styles.supportInfoText, pal.textLight]}>
+                <Text
+                  style={[styles.supportInfoText, t.atoms.text_contrast_medium]}>
                   <Trans>Political Affiliation:</Trans>{' '}
-                  <Text style={[styles.supportInfoValue, pal.text]}>
+                  <Text style={[styles.supportInfoValue, t.atoms.text]}>
                     {affiliation || 'Not set'}
                   </Text>
                 </Text>
-                <ChevronRight size="sm" style={pal.textLight} />
+                <ChevronRight size="sm" style={t.atoms.text_contrast_medium} />
               </View>
             </TouchableOpacity>
           </View>
 
-          {/* Categories Section */}
+          {/* Voted Policies Section */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.mainSectionTitle, pal.text]}>
+              <Text style={[styles.mainSectionTitle, t.atoms.text]}>
                 <Trans>Voted Policies</Trans>
               </Text>
               <Button
@@ -276,14 +270,23 @@ export function MyBaseScreen() {
                 <TouchableOpacity
                   accessibilityRole="button"
                   key={index}
-                  style={[styles.categoryCard, pal.border, pal.viewLight]}
+                  style={[
+                    styles.categoryCard,
+                    t.atoms.border_contrast_low,
+                    t.atoms.bg_contrast_25,
+                  ]}
                   activeOpacity={0.7}
                   onPress={() => setActiveCategory(category)}>
-                  <Text style={[styles.categoryTitle, pal.text]}>
+                  <Text style={[styles.categoryTitle, t.atoms.text]}>
                     {category.title}
                   </Text>
                   {category.items.map((item, i) => (
-                    <Text key={i} style={[styles.categoryItem, pal.textLight]}>
+                    <Text
+                      key={i}
+                      style={[
+                        styles.categoryItem,
+                        t.atoms.text_contrast_medium,
+                      ]}>
                       • {item}
                     </Text>
                   ))}
@@ -292,9 +295,12 @@ export function MyBaseScreen() {
             </View>
           </View>
 
+          {/* Matters Section */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.mainSectionTitle, pal.text]}>Matters</Text>
+              <Text style={[styles.mainSectionTitle, t.atoms.text]}>
+                Matters
+              </Text>
               <Button
                 label={_(msg`Saved`)}
                 onPress={onPressSaved}
@@ -313,13 +319,22 @@ export function MyBaseScreen() {
                 <TouchableOpacity
                   accessibilityRole="button"
                   key={index}
-                  style={[styles.categoryCard, pal.border, pal.viewLight]}
+                  style={[
+                    styles.categoryCard,
+                    t.atoms.border_contrast_low,
+                    t.atoms.bg_contrast_25,
+                  ]}
                   activeOpacity={0.7}>
-                  <Text style={[styles.categoryTitle, pal.text]}>
+                  <Text style={[styles.categoryTitle, t.atoms.text]}>
                     {category.title}
                   </Text>
                   {category.items.map((item, i) => (
-                    <Text key={i} style={[styles.categoryItem, pal.textLight]}>
+                    <Text
+                      key={i}
+                      style={[
+                        styles.categoryItem,
+                        t.atoms.text_contrast_medium,
+                      ]}>
                       {item}
                     </Text>
                   ))}
@@ -331,21 +346,30 @@ export function MyBaseScreen() {
           {/* My Highlights Section */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.mainSectionTitle, pal.text]}>
+              <Text style={[styles.mainSectionTitle, t.atoms.text]}>
                 <Trans>My Highlights</Trans>
               </Text>
-              <Text style={[styles.highlightCount, pal.textLight]}>
+              <Text
+                style={[
+                  styles.highlightCount,
+                  t.atoms.text_contrast_medium,
+                ]}>
                 {myHighlights.length} saved
               </Text>
             </View>
 
             {myHighlights.length === 0 ? (
-              <View style={[styles.emptyHighlights, pal.viewLight]}>
-                <Text style={[styles.emptyHighlightsIcon]}>✨</Text>
-                <Text style={[styles.emptyHighlightsText, pal.text]}>
+              <View
+                style={[styles.emptyHighlights, t.atoms.bg_contrast_25]}>
+                <Text style={styles.emptyHighlightsIcon}>✨</Text>
+                <Text style={[styles.emptyHighlightsText, t.atoms.text]}>
                   <Trans>No highlights yet</Trans>
                 </Text>
-                <Text style={[styles.emptyHighlightsSubtext, pal.textLight]}>
+                <Text
+                  style={[
+                    styles.emptyHighlightsSubtext,
+                    t.atoms.text_contrast_medium,
+                  ]}>
                   Long-press text in a post and select "Highlight" to save it
                   here
                 </Text>
@@ -355,12 +379,15 @@ export function MyBaseScreen() {
                 {myHighlights.slice(0, 5).map(highlight => (
                   <View
                     key={highlight.id}
-                    style={[styles.highlightItem, pal.border, pal.viewLight]}>
+                    style={[
+                      styles.highlightItem,
+                      t.atoms.border_contrast_low,
+                      t.atoms.bg_contrast_25,
+                    ]}>
                     <TouchableOpacity
                       accessibilityRole="button"
                       style={[styles.highlightItemContent, a.flex_1]}
                       onPress={() => onPressHighlight(highlight)}>
-                      {/* Color indicator */}
                       <View
                         style={[
                           styles.highlightColorDot,
@@ -368,7 +395,6 @@ export function MyBaseScreen() {
                         ]}
                       />
                       <View style={styles.highlightTextContainer}>
-                        {/* Tag badge if exists */}
                         {highlight.tag && (
                           <Text
                             style={[
@@ -378,29 +404,30 @@ export function MyBaseScreen() {
                             #{highlight.tag}
                           </Text>
                         )}
-                        {/* Highlighted text - show post reference */}
                         <Text
-                          style={[styles.highlightText, pal.text]}
+                          style={[styles.highlightText, t.atoms.text]}
                           numberOfLines={2}>
                           {highlight.text ||
                             `Highlight from post (chars ${highlight.start}-${highlight.end})`}
                         </Text>
                       </View>
                     </TouchableOpacity>
-                    {/* Delete button */}
                     <TouchableOpacity
                       accessibilityRole="button"
                       onPress={() => handleDeleteHighlight(highlight)}
                       style={styles.deleteHighlightButton}
                       hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                      <XIcon size="sm" style={pal.textLight} />
+                      <XIcon size="sm" style={t.atoms.text_contrast_medium} />
                     </TouchableOpacity>
                   </View>
                 ))}
                 {myHighlights.length > 5 && (
                   <TouchableOpacity
                     accessibilityRole="button"
-                    style={[styles.viewAllHighlights, pal.viewLight]}
+                    style={[
+                      styles.viewAllHighlights,
+                      t.atoms.bg_contrast_25,
+                    ]}
                     onPress={() => navigation.navigate('Highlights')}>
                     <Text
                       style={[
@@ -415,24 +442,33 @@ export function MyBaseScreen() {
             )}
           </View>
 
-          {/* My Topics/Followed Items Section */}
+          {/* Followed Elements Section */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.mainSectionTitle, pal.text]}>
+              <Text style={[styles.mainSectionTitle, t.atoms.text]}>
                 <Trans>Followed Elements</Trans>
               </Text>
-              <Text style={[styles.highlightCount, pal.textLight]}>
+              <Text
+                style={[
+                  styles.highlightCount,
+                  t.atoms.text_contrast_medium,
+                ]}>
                 {followedItems.length} following
               </Text>
             </View>
 
             {followedItems.length === 0 ? (
-              <View style={[styles.emptyHighlights, pal.viewLight]}>
-                <Text style={[styles.emptyHighlightsIcon]}>🔖</Text>
-                <Text style={[styles.emptyHighlightsText, pal.text]}>
+              <View
+                style={[styles.emptyHighlights, t.atoms.bg_contrast_25]}>
+                <Text style={styles.emptyHighlightsIcon}>🔖</Text>
+                <Text style={[styles.emptyHighlightsText, t.atoms.text]}>
                   No topics followed
                 </Text>
-                <Text style={[styles.emptyHighlightsSubtext, pal.textLight]}>
+                <Text
+                  style={[
+                    styles.emptyHighlightsSubtext,
+                    t.atoms.text_contrast_medium,
+                  ]}>
                   Follow hashtags, policies, matters, or threads to see them
                   here
                 </Text>
@@ -444,37 +480,45 @@ export function MyBaseScreen() {
                   return (
                     <View
                       key={item.id}
-                      style={[styles.topicCard, pal.viewLight, pal.border]}>
+                      style={[
+                        styles.topicCard,
+                        t.atoms.bg_contrast_25,
+                        t.atoms.border_contrast_low,
+                      ]}>
                       <View style={styles.topicCardContent}>
-                        {/* Type icon */}
                         <View
                           style={[
                             styles.topicTypeIcon,
                             {backgroundColor: category.color + '20'},
                           ]}>
-                          <Text style={[styles.topicTypeEmoji]}>
+                          <Text style={styles.topicTypeEmoji}>
                             {category.icon}
                           </Text>
                         </View>
-                        {/* Topic info */}
                         <View style={styles.topicInfo}>
                           <Text
-                            style={[styles.topicName, pal.text]}
+                            style={[styles.topicName, t.atoms.text]}
                             numberOfLines={1}>
                             {item.displayName}
                           </Text>
-                          <Text style={[styles.topicType, pal.textLight]}>
+                          <Text
+                            style={[
+                              styles.topicType,
+                              t.atoms.text_contrast_medium,
+                            ]}>
                             {category.label}
                           </Text>
                         </View>
                       </View>
-                      {/* Unfollow button */}
                       <TouchableOpacity
                         accessibilityRole="button"
                         onPress={() => unfollowItem(item.id)}
                         style={styles.unfollowButton}
                         hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}>
-                        <XIcon size="sm" style={pal.textLight} />
+                        <XIcon
+                          size="sm"
+                          style={t.atoms.text_contrast_medium}
+                        />
                       </TouchableOpacity>
                     </View>
                   )
@@ -484,9 +528,15 @@ export function MyBaseScreen() {
             {followedItems.length > 8 && (
               <TouchableOpacity
                 accessibilityRole="button"
-                style={[styles.viewAllHighlights, pal.viewLight]}>
+                style={[
+                  styles.viewAllHighlights,
+                  t.atoms.bg_contrast_25,
+                ]}>
                 <Text
-                  style={[styles.viewAllText, {color: t.palette.primary_500}]}>
+                  style={[
+                    styles.viewAllText,
+                    {color: t.palette.primary_500},
+                  ]}>
                   View all {followedItems.length} topics →
                 </Text>
               </TouchableOpacity>
@@ -494,10 +544,15 @@ export function MyBaseScreen() {
           </View>
 
           {/* RAQ Section */}
-          <View style={[styles.raqSection, pal.border, pal.viewLight]}>
+          <View
+            style={[
+              styles.raqSection,
+              t.atoms.border_contrast_low,
+              t.atoms.bg_contrast_25,
+            ]}>
             <View>
-              <Text style={[styles.raqTitle, pal.text]}>RAQ</Text>
-              <Text style={[styles.raqProgress, pal.text]}>
+              <Text style={[styles.raqTitle, t.atoms.text]}>RAQ</Text>
+              <Text style={[styles.raqProgress, t.atoms.text]}>
                 17/25 completed
               </Text>
             </View>
@@ -537,37 +592,44 @@ export function MyBaseScreen() {
                 ? 'Votes History'
                 : 'Posts Breakdown'
           }
-          onClose={() => setActiveDetail(null)}
-          pal={pal}>
+          onClose={() => setActiveDetail(null)}>
           {activeDetail === 'Influence' ? (
             <>
-              <DetailRow label="Posts Influence" value="650" pal={pal} />
-              <DetailRow label="Comments Influence" value="200" pal={pal} />
+              <DetailRow label="Posts Influence" value="650" />
+              <DetailRow label="Comments Influence" value="200" />
             </>
           ) : activeDetail === 'Votes' ? (
             <>
-              <DetailRow label="Votes in Policies" value="80" pal={pal} />
-              <DetailRow label="Votes in Matters" value="34" pal={pal} />
-              <DetailRow label="Votes in Posts" value="10" pal={pal} />
+              <DetailRow label="Votes in Policies" value="80" />
+              <DetailRow label="Votes in Matters" value="34" />
+              <DetailRow label="Votes in Posts" value="10" />
             </>
           ) : (
             <>
-              {/* Posts Type Section */}
-              <Text style={[styles.modalSectionTitle, pal.textLight]}>
+              <Text
+                style={[
+                  styles.modalSectionTitle,
+                  t.atoms.text_contrast_medium,
+                ]}>
                 Type
               </Text>
-              <DetailRow label="Official" value="12" pal={pal} />
-              <DetailRow label="Not Official" value="30" pal={pal} />
+              <DetailRow label="Official" value="12" />
+              <DetailRow label="Not Official" value="30" />
 
-              <View style={[styles.modalDivider, pal.border]} />
+              <View
+                style={[styles.modalDivider, t.atoms.border_contrast_low]}
+              />
 
-              {/* Tags Section */}
-              <Text style={[styles.modalSectionTitle, pal.textLight]}>
+              <Text
+                style={[
+                  styles.modalSectionTitle,
+                  t.atoms.text_contrast_medium,
+                ]}>
                 Tags
               </Text>
-              <DetailRow label="Discussion" value="20" pal={pal} />
-              <DetailRow label="Survey" value="15" pal={pal} />
-              <DetailRow label="Meme" value="7" pal={pal} />
+              <DetailRow label="Discussion" value="20" />
+              <DetailRow label="Survey" value="15" />
+              <DetailRow label="Meme" value="7" />
             </>
           )}
         </DetailsDialog>
@@ -575,11 +637,16 @@ export function MyBaseScreen() {
 
       {/* Policy Category Modal */}
       {activeCategory && (
-        <PolicyCategoryModal
-          category={activeCategory}
-          onClose={() => setActiveCategory(null)}
-          pal={pal}
-        />
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={true}
+          onRequestClose={() => setActiveCategory(null)}>
+          <PolicyCategoryModal
+            category={activeCategory}
+            onClose={() => setActiveCategory(null)}
+          />
+        </Modal>
       )}
 
       {/* Flair Selection Modal */}
@@ -594,18 +661,23 @@ export function MyBaseScreen() {
             style={styles.modalBackdrop}
             onPress={() => setShowFlairModal(false)}
           />
-          <View style={[styles.modalContent, pal.view, pal.border]}>
+          <View
+            style={[
+              styles.modalContent,
+              t.atoms.bg,
+              t.atoms.border_contrast_low,
+            ]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, pal.text]}>
+              <Text style={[styles.modalTitle, t.atoms.text]}>
                 Choose Your Flair
               </Text>
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={() => setShowFlairModal(false)}>
-                <XIcon size="lg" style={pal.text} />
+                <XIcon size="lg" style={t.atoms.text} />
               </TouchableOpacity>
             </View>
-            <ScrollView style={{maxHeight: 400}}>
+            <ScrollView style={styles.flairScrollView}>
               <View style={styles.modalBody}>
                 {Object.values(USER_FLAIRS).map(flair => (
                   <TouchableOpacity
@@ -615,7 +687,7 @@ export function MyBaseScreen() {
                       styles.flairOption,
                       selectedFlair.id === flair.id &&
                         styles.flairOptionSelected,
-                      pal.border,
+                      t.atoms.border_contrast_low,
                     ]}
                     onPress={() => {
                       setSelectedFlair(flair)
@@ -624,7 +696,7 @@ export function MyBaseScreen() {
                     <View
                       style={[styles.flairDot, {backgroundColor: flair.color}]}
                     />
-                    <Text style={[styles.flairOptionText, pal.text]}>
+                    <Text style={[styles.flairOptionText, t.atoms.text]}>
                       {flair.label}
                     </Text>
                     {selectedFlair.id === flair.id && (
@@ -643,175 +715,18 @@ export function MyBaseScreen() {
   )
 }
 
-function PolicyCategoryModal({
-  category,
-  onClose,
-  pal,
-}: {
-  category: CategoryData
-  onClose: () => void
-  pal: any
-}) {
+// ---------------------------------------------------------------------------
+// Sub-components — use useTheme() directly instead of prop-drilling `pal`
+// ---------------------------------------------------------------------------
+
+function DetailRow({label, value}: {label: string; value: string}) {
   const t = useTheme()
-  const synergyScore = category.policies
-    ? Math.round(
-        (category.policies.filter(p => p.vote === p.communityVote).length /
-          category.policies.length) *
-          100,
-      )
-    : 0
-
-  return (
-    <Modal
-      animationType="slide"
-      transparent={false} // Full screen
-      visible={true}
-      onRequestClose={onClose}>
-      <View style={[styles.fullScreenModal, pal.view]}>
-        <View style={styles.fsModalHeader}>
-          <TouchableOpacity
-            accessibilityRole="button"
-            onPress={onClose}
-            style={styles.backButton}>
-            <ArrowLeft size="lg" style={pal.text} />
-          </TouchableOpacity>
-          <Text style={[styles.fsModalTitle, pal.text]}>{category.title}</Text>
-          <View style={{width: 24}} />
-        </View>
-
-        <ScrollView contentContainerStyle={styles.fsScrollContent}>
-          {/* Synergy Header */}
-          <View
-            style={[
-              styles.synergyCard,
-              {backgroundColor: t.palette.primary_500},
-            ]}>
-            <Text style={styles.synergyLabel}>Synergy Score</Text>
-            <Text style={styles.synergyValue}>{synergyScore}%</Text>
-            <Text style={styles.synergySubtitle}>Alignment with Community</Text>
-          </View>
-
-          <Text
-            style={[
-              styles.sectionTitle,
-              pal.text,
-              {marginTop: 24, paddingHorizontal: 20},
-            ]}>
-            Detailed Policies
-          </Text>
-
-          <View style={styles.policyList}>
-            {category.policies?.map(policy => (
-              <View
-                key={policy.id}
-                style={[styles.policyItemCard, pal.border, pal.view]}>
-                <View style={styles.policyHeader}>
-                  <Text style={[styles.policyTitle, pal.text]}>
-                    {policy.title}
-                  </Text>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      policy.status === 'Passed'
-                        ? {backgroundColor: '#d1fae5'}
-                        : policy.status === 'Rejected'
-                          ? {backgroundColor: '#fee2e2'}
-                          : {backgroundColor: '#f3f4f6'},
-                    ]}>
-                    <Text
-                      style={[
-                        styles.statusText,
-                        policy.status === 'Passed'
-                          ? {color: '#065f46'}
-                          : policy.status === 'Rejected'
-                            ? {color: '#991b1b'}
-                            : {color: '#374151'},
-                      ]}>
-                      {policy.status}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.alignmentRow}>
-                  <View style={styles.voteInfo}>
-                    <Text style={[styles.voteLabel, pal.textLight]}>
-                      You Voted
-                    </Text>
-                    <Text
-                      style={[
-                        styles.voteValue,
-                        policy.vote === 'For'
-                          ? {color: '#059669'}
-                          : {color: '#dc2626'},
-                      ]}>
-                      {policy.vote}
-                    </Text>
-                  </View>
-
-                  <View style={styles.synergyBadgeRow}>
-                    {policy.vote === policy.communityVote ? (
-                      <View
-                        style={[
-                          styles.synergyBadge,
-                          {backgroundColor: '#ecfdf5'},
-                        ]}>
-                        <Text style={styles.synergyBadgeText}>
-                          🤝 Consensus
-                        </Text>
-                      </View>
-                    ) : policy.communityVote === 'Split' ? (
-                      <View
-                        style={[
-                          styles.synergyBadge,
-                          {backgroundColor: '#f3f4f6'},
-                        ]}>
-                        <Text
-                          style={[styles.synergyBadgeText, {color: '#4b5563'}]}>
-                          ⚖️ Split
-                        </Text>
-                      </View>
-                    ) : (
-                      <View
-                        style={[
-                          styles.synergyBadge,
-                          {backgroundColor: '#fff1f2'},
-                        ]}>
-                        <Text
-                          style={[styles.synergyBadgeText, {color: '#be123c'}]}>
-                          🛡️ Contrarian
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </View>
-            ))}
-            {!category.policies && (
-              <Text
-                style={[pal.textLight, {textAlign: 'center', marginTop: 20}]}>
-                No details available for this category view.
-              </Text>
-            )}
-          </View>
-        </ScrollView>
-      </View>
-    </Modal>
-  )
-}
-
-function DetailRow({
-  label,
-  value,
-  pal,
-}: {
-  label: string
-  value: string
-  pal: any
-}) {
   return (
     <View style={styles.detailRow}>
-      <Text style={[styles.detailLabel, pal.textLight]}>{label}</Text>
-      <Text style={[styles.detailValue, pal.text]}>{value}</Text>
+      <Text style={[styles.detailLabel, t.atoms.text_contrast_medium]}>
+        {label}
+      </Text>
+      <Text style={[styles.detailValue, t.atoms.text]}>{value}</Text>
     </View>
   )
 }
@@ -820,13 +735,12 @@ function DetailsDialog({
   title,
   children,
   onClose,
-  pal,
 }: {
   title: string
   children: React.ReactNode
   onClose: () => void
-  pal: any
 }) {
+  const t = useTheme()
   return (
     <Modal
       transparent
@@ -839,14 +753,19 @@ function DetailsDialog({
           style={styles.modalBackdrop}
           onPress={onClose}
         />
-        <View style={[styles.modalContent, pal.view, pal.border]}>
+        <View
+          style={[
+            styles.modalContent,
+            t.atoms.bg,
+            t.atoms.border_contrast_low,
+          ]}>
           <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, pal.text]}>{title}</Text>
+            <Text style={[styles.modalTitle, t.atoms.text]}>{title}</Text>
             <TouchableOpacity
               accessibilityRole="button"
               onPress={onClose}
               hitSlop={10}>
-              <XIcon size="md" style={pal.text} />
+              <XIcon size="md" style={t.atoms.text} />
             </TouchableOpacity>
           </View>
           <View style={styles.modalBody}>{children}</View>
@@ -860,39 +779,30 @@ function MetricItem({
   label,
   value,
   onPress,
-  pal,
 }: {
   label: string
   value: string
   onPress: () => void
-  pal: any
 }) {
+  const t = useTheme()
   return (
     <View style={styles.metricItem}>
-      <Text style={[styles.metricLabel, pal.textLight]}>{label}</Text>
+      <Text style={[styles.metricLabel, t.atoms.text_contrast_medium]}>
+        {label}
+      </Text>
       <TouchableOpacity accessibilityRole="button" onPress={onPress}>
-        <Text style={[styles.metricValue, pal.text]}>{value}</Text>
+        <Text style={[styles.metricValue, t.atoms.text]}>{value}</Text>
       </TouchableOpacity>
     </View>
   )
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  headerCenter: {
+  flex1: {
     flex: 1,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
   },
   scrollView: {
     flex: 1,
@@ -901,6 +811,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 100,
   },
+  // Profile
   profileSection: {
     marginBottom: 24,
     paddingBottom: 16,
@@ -922,6 +833,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     opacity: 0.7,
   },
+  // Metrics
   metricsContainer: {
     marginTop: 12,
     flexDirection: 'row',
@@ -940,6 +852,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  // Political affiliation
   supportInfoContainer: {
     marginTop: 20,
     gap: 8,
@@ -960,17 +873,15 @@ const styles = StyleSheet.create({
   supportInfoValue: {
     fontWeight: '600',
   },
+  // Sections
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  savedButtonContainer: {
-    // Removed
-  },
   savedButton: {
-    paddingHorizontal: 8, // Smaller padding for tiny button
+    paddingHorizontal: 8,
   },
   sectionContainer: {
     marginBottom: 24,
@@ -978,9 +889,9 @@ const styles = StyleSheet.create({
   mainSectionTitle: {
     fontSize: 22,
     fontWeight: '800',
-    // marginBottom: 16, // Moved to row
     letterSpacing: 0.5,
   },
+  // Category cards
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1004,6 +915,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     lineHeight: 16,
   },
+  // RAQ
   raqSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1022,6 +934,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.7,
   },
+  // Policy tree
   policyTreeButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1029,10 +942,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -1043,7 +953,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 12,
   },
-  // Modal Styles
+  // Modal styles (shared by Details + Flair)
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -1060,7 +970,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 20,
-    // Shadow for iOS/Android
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -1107,121 +1016,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  // Full Screen Modal Styles
-  fullScreenModal: {
-    flex: 1,
-  },
-  fsModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60, // Safe area ish
-    paddingBottom: 20,
-  },
-  fsModalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  backButton: {
-    padding: 8,
-  },
-  fsScrollContent: {
-    paddingBottom: 40,
-  },
-  synergyCard: {
-    marginHorizontal: 20,
-    padding: 24,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  synergyLabel: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  synergyValue: {
-    color: 'white',
-    fontSize: 48,
-    fontWeight: '900',
-  },
-  synergySubtitle: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 16,
-  },
-  policyList: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  policyItemCard: {
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-  },
-  policyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  policyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-    marginRight: 12,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  alignmentRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-  },
-  voteInfo: {
-    alignItems: 'flex-start',
-  },
-  voteLabel: {
-    fontSize: 12,
-  },
-  voteValue: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  synergyBadgeRow: {
-    justifyContent: 'center',
-  },
-  synergyBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  synergyBadgeText: {
-    color: '#059669',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  // My Highlights Section styles
+  // Highlights
   highlightCount: {
     fontSize: 13,
     fontWeight: '500',
@@ -1295,7 +1090,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  // My Topics Section styles
+  // Topics
   topicsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1344,6 +1139,7 @@ const styles = StyleSheet.create({
   unfollowButton: {
     padding: 4,
   },
+  // Flair
   flairBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1361,6 +1157,9 @@ const styles = StyleSheet.create({
   },
   flairText: {
     fontSize: 13,
+  },
+  flairScrollView: {
+    maxHeight: 400,
   },
   flairOption: {
     flexDirection: 'row',

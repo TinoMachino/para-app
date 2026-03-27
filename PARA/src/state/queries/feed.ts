@@ -19,7 +19,12 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 
-import {DISCOVER_FEED_URI, DISCOVER_SAVED_FEED} from '#/lib/constants'
+import {
+  DEFAULT_DISCOVER_FEED_DESCRIPTOR,
+  DEFAULT_DISCOVER_FEED_URI,
+  DEFAULT_DISCOVER_SAVED_FEED,
+  IS_LOCAL_DEV_MODE,
+} from '#/lib/constants'
 import {sanitizeDisplayName} from '#/lib/strings/display-names'
 import {sanitizeHandle} from '#/lib/strings/handles'
 import {
@@ -243,7 +248,10 @@ export function useGetPopularFeedsQuery(options?: GetPopularFeedsOptions) {
   const lastPageCountRef = useRef(0)
 
   const query = useInfiniteQuery({
-    enabled: Boolean(moderationOpts) && options?.enabled !== false,
+    enabled:
+      !IS_LOCAL_DEV_MODE &&
+      Boolean(moderationOpts) &&
+      options?.enabled !== false,
     queryKey: createGetPopularFeedsQueryKey(options),
     queryFn: async ({pageParam}) => {
       const res = await agent.app.bsky.unspecced.getPopularFeedGenerators({
@@ -354,6 +362,9 @@ export function useSearchPopularFeedsMutation() {
 
   return useMutation({
     mutationFn: async (query: string) => {
+      if (IS_LOCAL_DEV_MODE) {
+        return []
+      }
       const res = await agent.app.bsky.unspecced.getPopularFeedGenerators({
         limit: 10,
         query: query,
@@ -386,7 +397,8 @@ export function usePopularFeedsSearch({
 }) {
   const agent = useAgent()
   const moderationOpts = useModerationOpts()
-  const enabledInner = enabled ?? Boolean(moderationOpts)
+  const enabledInner =
+    !IS_LOCAL_DEV_MODE && (enabled ?? Boolean(moderationOpts))
 
   return useQuery({
     enabled: enabledInner,
@@ -415,9 +427,11 @@ export type SavedFeedSourceInfo = FeedSourceInfo & {
 
 const PWI_DISCOVER_FEED_STUB: SavedFeedSourceInfo = {
   type: 'feed',
-  displayName: 'Discover',
-  uri: DISCOVER_FEED_URI,
-  feedDescriptor: `feedgen|${DISCOVER_FEED_URI}`,
+  displayName: DEFAULT_DISCOVER_FEED_URI ? 'Discover' : 'Following',
+  uri:
+    DEFAULT_DISCOVER_FEED_URI ||
+    'at://localdev/app.bsky.feed.generator/following',
+  feedDescriptor: DEFAULT_DISCOVER_FEED_DESCRIPTOR as FeedDescriptor,
   route: {
     href: '/',
     name: 'Home',
@@ -433,7 +447,11 @@ const PWI_DISCOVER_FEED_STUB: SavedFeedSourceInfo = {
   // ---
   savedFeed: {
     id: 'pwi-discover',
-    ...DISCOVER_SAVED_FEED,
+    ...(DEFAULT_DISCOVER_SAVED_FEED ?? {
+      type: 'timeline',
+      value: 'following',
+      pinned: true,
+    }),
   },
   contentMode: undefined,
 }

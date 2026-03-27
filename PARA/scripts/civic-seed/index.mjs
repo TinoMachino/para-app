@@ -72,12 +72,13 @@ async function main() {
       if (!client) {
         throw new Error(`No client for actor alias "${op.actorAlias}"`)
       }
-      await client.agent.com.atproto.repo.putRecord({
+      const response = await client.agent.com.atproto.repo.putRecord({
         repo: client.did,
         collection: op.collection,
         rkey: op.rkey,
         record: op.record,
       })
+      return response.data
     },
     async deleteRecord(op) {
       const client = clientsByAlias[op.actorAlias]

@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react'
+import {useCallback, useMemo, useRef, useState} from 'react'
 import {
   Modal,
   ScrollView,
@@ -177,7 +177,7 @@ export function CommunitiesScreen() {
               <Text style={[styles.sectionLead, t.atoms.text_contrast_medium]}>
                 <Trans>
                   Pick up where you left off, browse civic territories, and move
-                  into political communities without the dashboard clutter.
+                  into parties without the dashboard clutter.
                 </Trans>
               </Text>
 
@@ -204,8 +204,8 @@ export function CommunitiesScreen() {
               </Text>
               <Text style={[styles.sectionLead, t.atoms.text_contrast_medium]}>
                 <Trans>
-                  Start with civic territories, then move into political
-                  communities and coalition spaces.
+                  Start with civic territories, then move into parties
+                  and coalition spaces.
                 </Trans>
               </Text>
 
@@ -235,7 +235,7 @@ export function CommunitiesScreen() {
                 </DirectoryModule>
 
                 <DirectoryModule
-                  title="Political Communities"
+                  title="Parties"
                   description="National parties, movement communities, and coalition spaces."
                   theme={t}>
                   {IS_WEB ? (
@@ -328,8 +328,7 @@ export function CommunitiesScreen() {
                 </Trans>
               </Text>
 
-              <View
-                style={[styles.refineLayout, IS_WEB && styles.refineLayoutWeb]}>
+              <View style={styles.refineLayout}>
                 <RefinementPanel
                   title="Find by participation"
                   description="Browse live matter and policy themes, then refine once matching is ready."
@@ -755,7 +754,7 @@ function PoliticalCommunityCard({
         </View>
         <View style={styles.politicalMeta}>
           <Text style={[styles.cardEyebrow, {color: accent}]}>
-            {community.eyebrow || 'Political Community'}
+            {community.eyebrow || 'Party'}
           </Text>
           <Text
             style={[styles.politicalTitle, theme.atoms.text]}
@@ -1398,11 +1397,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   refineLayout: {
-    gap: 16,
-  },
-  refineLayoutWeb: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    gap: 24,
   },
   refinementPanel: {
     flex: 1,

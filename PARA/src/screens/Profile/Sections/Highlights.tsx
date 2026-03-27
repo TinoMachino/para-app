@@ -1,4 +1,4 @@
-import {forwardRef} from 'react'
+import {forwardRef, useEffect, useImperativeHandle} from 'react'
 import {findNodeHandle, View} from 'react-native'
 
 import {HIGHLIGHTS as MOCK_HIGHLIGHTS} from '#/lib/mock-data'

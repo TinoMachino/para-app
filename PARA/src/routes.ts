@@ -132,6 +132,7 @@ export const router = new Router<AllNavigatableRoutes>({
   CommunityBadges: '/communities/:communityId/badges',
   Highlights: '/highlights',
   SeeHighlightDetails: '/highlights/:highlightId',
+  DistrictProfile: '/districts/:districtId',
   Map: '/map',
   Compass: '/compass',
 })

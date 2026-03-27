@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useRef, useState} from 'react'
 import {
   Modal,
   ScrollView,
@@ -15,6 +15,7 @@ import {MEXICAN_STATES} from '#/lib/constants/mexico'
 import {type NavigationProp} from '#/lib/routes/types'
 import {useBaseFilter} from '#/state/shell/base-filter'
 import {Text} from '#/view/com/util/text/Text'
+import {BlockDrawerGesture} from '#/view/shell/BlockDrawerGesture'
 import {atoms as a, useTheme} from '#/alf'
 import {CommunityCard} from '#/components/CommunityCard'
 import * as Toggle from '#/components/forms/Toggle'
@@ -497,80 +498,82 @@ export function CommunityFilterList({
             accessibilityHint={_(
               msg`Applies the selected filters to the view`,
             )}>
-            <Text style={[styles.applyButtonTextSmall, t.atoms.text_inverted]}>
+            <Text style={[styles.applyButtonTextSmall, {color: '#FFFFFF'}]}>
               <Trans>Apply ({filterCount})</Trans>
             </Text>
           </TouchableOpacity>
         )}
 
         <WebScrollControls scrollViewRef={scrollViewRef} />
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.communityCardsContainer}>
-          {selectedFilters.map(filterName => {
-            let community = allCommunities.find(c => c.name === filterName)
-            if (!community) {
-              if (mexicanStates.includes(filterName)) {
-                community = {name: filterName, color: '#007AFF'}
-              } else {
-                return null
-              }
-            }
-            return (
-              <CommunityCard
-                key={community.name}
-                name={community.name}
-                color={community.color}
-                isPinned={true}
-                onToggle={() => toggleFilter(community.name)}
-                onProfile={() =>
-                  navigation.navigate('CommunityProfile', {
-                    communityId: community.name,
-                    communityName: community.name,
-                  })
+        <BlockDrawerGesture>
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.communityCardsContainer}>
+            {selectedFilters.map(filterName => {
+              let community = allCommunities.find(c => c.name === filterName)
+              if (!community) {
+                if (mexicanStates.includes(filterName)) {
+                  community = {name: filterName, color: '#007AFF'}
+                } else {
+                  return null
                 }
-              />
-            )
-          })}
+              }
+              return (
+                <CommunityCard
+                  key={community.name}
+                  name={community.name}
+                  color={community.color}
+                  isPinned={true}
+                  onToggle={() => toggleFilter(community.name)}
+                  onProfile={() =>
+                    navigation.navigate('CommunityProfile', {
+                      communityId: community.name,
+                      communityName: community.name,
+                    })
+                  }
+                />
+              )
+            })}
 
-          {viewMode === "View by 9th's"
-            ? ninthCommunities
-                .filter(c => !selectedFilters.includes(c.name))
-                .map(community => (
-                  <CommunityCard
-                    key={community.name}
-                    name={community.name}
-                    color={community.color}
-                    isPinned={false}
-                    onToggle={() => toggleFilter(community.name)}
-                    onProfile={() =>
-                      navigation.navigate('CommunityProfile', {
-                        communityId: community.name,
-                        communityName: community.name,
-                      })
-                    }
-                  />
-                ))
-            : officialParties
-                .filter(p => !selectedFilters.includes(p.name))
-                .map(party => (
-                  <CommunityCard
-                    key={party.name}
-                    name={party.name}
-                    color={party.color}
-                    isPinned={false}
-                    onToggle={() => toggleFilter(party.name)}
-                    onProfile={() =>
-                      navigation.navigate('CommunityProfile', {
-                        communityId: party.name,
-                        communityName: party.name,
-                      })
-                    }
-                  />
-                ))}
-        </ScrollView>
+            {viewMode === "View by 9th's"
+              ? ninthCommunities
+                  .filter(c => !selectedFilters.includes(c.name))
+                  .map(community => (
+                    <CommunityCard
+                      key={community.name}
+                      name={community.name}
+                      color={community.color}
+                      isPinned={false}
+                      onToggle={() => toggleFilter(community.name)}
+                      onProfile={() =>
+                        navigation.navigate('CommunityProfile', {
+                          communityId: community.name,
+                          communityName: community.name,
+                        })
+                      }
+                    />
+                  ))
+              : officialParties
+                  .filter(p => !selectedFilters.includes(p.name))
+                  .map(party => (
+                    <CommunityCard
+                      key={party.name}
+                      name={party.name}
+                      color={party.color}
+                      isPinned={false}
+                      onToggle={() => toggleFilter(party.name)}
+                      onProfile={() =>
+                        navigation.navigate('CommunityProfile', {
+                          communityId: party.name,
+                          communityName: party.name,
+                        })
+                      }
+                    />
+                  ))}
+          </ScrollView>
+        </BlockDrawerGesture>
       </View>
     </View>
   )

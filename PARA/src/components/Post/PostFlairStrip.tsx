@@ -16,8 +16,7 @@ function getBadgeDescriptor(badge: PostBadge) {
   }
 
   return {
-    marker: badge.isOfficial ? '||' : '|',
-    label: badge.isOfficial ? 'Official' : 'Community',
+    marker: badge.kind === 'policy' ? '||' : '|',
   }
 }
 
@@ -70,12 +69,6 @@ export function PostFlairStrip({
                     ]}>
                     {descriptor.marker}
                   </Text>
-                  {!compact ? (
-                    <Text
-                      style={[styles.sigLabel, t.atoms.text_contrast_medium]}>
-                      {descriptor.label}
-                    </Text>
-                  ) : null}
                 </View>
               ) : null}
               <View

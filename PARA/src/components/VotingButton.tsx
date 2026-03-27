@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react'
-import {Platform, StyleSheet, View} from 'react-native'
+import {Platform, Pressable, StyleSheet} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
@@ -125,13 +125,24 @@ export function VotingButton({
   }, [])
 
   return (
-    <View style={styles.container} {...webEventBlockers}>
+    <Pressable 
+      style={styles.container} 
+      {...webEventBlockers}
+      onPress={(e) => {
+        if (e && e.stopPropagation) {
+          e.stopPropagation()
+        }
+      }}
+    >
       <GestureDetector gesture={pan}>
         <Animated.View
           style={[
             styles.control,
             animatedStyle,
-            {backgroundColor: t.atoms.bg.backgroundColor},
+            {
+              backgroundColor: t.palette.contrast_25 + '30',
+              borderColor: t.palette.contrast_50 + '40',
+            },
           ]}>
           <Animated.View style={upArrowStyle}>
             <ArrowUp
@@ -152,7 +163,7 @@ export function VotingButton({
           </Animated.View>
         </Animated.View>
       </GestureDetector>
-    </View>
+    </Pressable>
   )
 }
 

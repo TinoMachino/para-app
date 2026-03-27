@@ -140,12 +140,20 @@ function DrawerLayout({children}: {children: React.ReactNode}) {
   const setIsDrawerOpen = useSetDrawerOpen()
   const isDrawerSwipeDisabled = useIsDrawerSwipeDisabled()
   const winDim = useWindowDimensions()
+  const insets = useSafeAreaInsets()
 
   const canGoBack = useNavigationState(state => !isStateAtTabRoot(state))
   const {hasSession} = useSession()
 
   const swipeEnabled = !canGoBack && hasSession && !isDrawerSwipeDisabled
   const [trendingScrollGesture] = useState(() => Gesture.Native())
+  const drawerWidth = Math.min(400, winDim.width * 0.8)
+  const edgeInset = Math.max(insets.left, insets.right)
+  const swipeEdgeWidth = IS_ANDROID ? Math.max(32, edgeInset + 24) : winDim.width
+  const swipeMinVelocity = IS_ANDROID ? 500 : 100
+  const swipeMinDistance = IS_ANDROID ? 60 : 10
+  const activeOffsetXWhenOpen: [number, number] = IS_ANDROID ? [-12, 12] : [-1, 1]
+  const activeOffsetXWhenClosed = IS_ANDROID ? 12 : 5
 
   const renderDrawerContent = useCallback(() => <DrawerContent />, [])
   const onOpenDrawer = useCallback(
@@ -160,13 +168,13 @@ function DrawerLayout({children}: {children: React.ReactNode}) {
   return (
     <Drawer
       renderDrawerContent={renderDrawerContent}
-      drawerStyle={{width: Math.min(400, winDim.width * 0.8)}}
+      drawerStyle={{width: drawerWidth}}
       configureGestureHandler={handler => {
         handler = handler.requireExternalGestureToFail(trendingScrollGesture)
 
         if (swipeEnabled) {
           if (isDrawerOpen) {
-            return handler.activeOffsetX([-1, 1])
+            return handler.activeOffsetX(activeOffsetXWhenOpen)
           } else {
             return (
               handler
@@ -175,7 +183,7 @@ function DrawerLayout({children}: {children: React.ReactNode}) {
                 .failOffsetX(-1)
                 // Don't rush declaring that a movement to the right
                 // is a drawer swipe. It could be a vertical scroll.
-                .activeOffsetX(5)
+                .activeOffsetX(activeOffsetXWhenClosed)
             )
           }
         } else {
@@ -188,9 +196,9 @@ function DrawerLayout({children}: {children: React.ReactNode}) {
       open={isDrawerOpen}
       onOpen={onOpenDrawer}
       onClose={onCloseDrawer}
-      swipeEdgeWidth={winDim.width}
-      swipeMinVelocity={100}
-      swipeMinDistance={10}
+      swipeEdgeWidth={swipeEdgeWidth}
+      swipeMinVelocity={swipeMinVelocity}
+      swipeMinDistance={swipeMinDistance}
       drawerType={IS_IOS ? 'slide' : 'front'}
       overlayStyle={{
         backgroundColor: select(t.name, {

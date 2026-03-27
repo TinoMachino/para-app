@@ -4,7 +4,7 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-controller'
 import {type AppBskyFeedDefs, type ModerationOpts} from '@atproto/api'
 import {Trans} from '@lingui/react/macro'
 
-import {DISCOVER_FEED_URI} from '#/lib/constants'
+import {isDiscoverFeedUri} from '#/lib/constants'
 import {useA11y} from '#/state/a11y'
 import {
   useGetPopularFeedsQuery,
@@ -35,7 +35,7 @@ export function StepFeeds({moderationOpts}: {moderationOpts: ModerationOpts}) {
   const {data: savedFeedsAndLists, isFetchedAfterMount: isFetchedSavedFeeds} =
     useSavedFeeds()
   const savedFeeds = savedFeedsAndLists?.feeds
-    .filter(f => f.type === 'feed' && f.view.uri !== DISCOVER_FEED_URI)
+    .filter(f => f.type === 'feed' && !isDiscoverFeedUri(f.view.uri))
     .map(f => f.view) as AppBskyFeedDefs.GeneratorView[]
 
   const {

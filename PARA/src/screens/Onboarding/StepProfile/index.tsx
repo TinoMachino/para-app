@@ -258,12 +258,12 @@ export function StepProfile() {
         <View style={[a.gap_sm]}>
           <OnboardingPosition />
           <OnboardingTitleText>
-            <Trans>Give your profile a face</Trans>
+            <Trans>Put a face to your voice</Trans>
           </OnboardingTitleText>
           <OnboardingDescriptionText>
             <Trans>
-              Help people know you're not a bot by uploading a picture or
-              creating an avatar.
+              People participate more openly when they know who is speaking.
+              Add a photo or create an avatar that feels like you.
             </Trans>
           </OnboardingDescriptionText>
         </View>

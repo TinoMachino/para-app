@@ -17,6 +17,7 @@ import {useModerationOpts} from '#/state/preferences/moderation-opts'
 import {useAgent, useSession} from '#/state/session'
 import {
   OnboardingControls,
+  OnboardingDescriptionText,
   OnboardingPosition,
   OnboardingTitleText,
 } from '#/screens/Onboarding/Layout'
@@ -168,9 +169,16 @@ export function StepSuggestedAccounts() {
       <OnboardingPosition />
       <OnboardingTitleText>
         <Trans comment="Accounts suggested to the user for them to follow">
-          Suggested for you
+          Start with people worth hearing from
         </Trans>
       </OnboardingTitleText>
+      <OnboardingDescriptionText>
+        <Trans>
+          Follow thoughtful people early so your feed starts with signal:
+          organizers, analysts, neighbors, and communities that help you
+          orient yourself.
+        </Trans>
+      </OnboardingDescriptionText>
 
       <View
         style={[

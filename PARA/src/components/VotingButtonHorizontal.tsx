@@ -1,5 +1,5 @@
 import {useMemo, useState} from 'react'
-import {Platform, StyleSheet, View} from 'react-native'
+import {Platform, Pressable, StyleSheet, View} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import Animated, {
   interpolateColor,
@@ -12,10 +12,6 @@ import Animated, {
 
 import {Text} from '#/view/com/util/text/Text'
 import {useTheme} from '#/alf'
-import {
-  ArrowLeft_Stroke2_Corner0_Rounded as ArrowLeft,
-  ArrowRight_Stroke2_Corner0_Rounded as ArrowRight,
-} from '#/components/icons/Arrow'
 
 interface VotingButtonHorizontalProps {
   initialVote?: number
@@ -25,6 +21,10 @@ interface VotingButtonHorizontalProps {
 type WebEventBoundary = {
   stopPropagation?: () => void
 }
+
+// Semantic colors
+const DISAGREE = '#EF4444'
+const AGREE = '#22C55E'
 
 export function VotingButtonHorizontal({
   initialVote = 0,
@@ -39,7 +39,7 @@ export function VotingButtonHorizontal({
   const pan = Gesture.Pan()
     .onBegin(() => {
       isActive.value = true
-      scale.value = withSpring(1.05)
+      scale.value = withSpring(1.04)
     })
     .onUpdate(event => {
       const clampedTranslation = Math.max(
@@ -67,23 +67,28 @@ export function VotingButtonHorizontal({
     })
 
   const controlStyle = useAnimatedStyle(() => {
+    const bg = interpolateColor(
+      translationX.value,
+      [-100, 0, 100],
+      [DISAGREE + '28', t.palette.contrast_50, AGREE + '28'],
+    )
+    const border = interpolateColor(
+      translationX.value,
+      [-100, 0, 100],
+      [DISAGREE + '50', t.palette.contrast_100, AGREE + '50'],
+    )
     return {
       transform: [{translateX: translationX.value}, {scale: scale.value}],
-      backgroundColor: t.atoms.bg_contrast_25.backgroundColor,
-      borderColor: t.atoms.border_contrast_low.borderColor,
+      backgroundColor: bg,
+      borderColor: border,
     }
   })
 
   const trackStyle = useAnimatedStyle(() => {
-    // Dynamically change track color based on swipe direction
     const backgroundColor = interpolateColor(
       translationX.value,
       [-100, 0, 100],
-      [
-        'rgba(255, 68, 68, 0.1)',
-        'rgba(0, 0, 0, 0.05)',
-        'rgba(76, 175, 80, 0.1)',
-      ],
+      [DISAGREE + '0C', t.palette.contrast_25, AGREE + '0C'],
     )
     return {backgroundColor}
   })
@@ -91,28 +96,18 @@ export function VotingButtonHorizontal({
   const voteTextStyle = useAnimatedStyle(() => {
     const color =
       currentVote > 0
-        ? '#4CAF50'
+        ? AGREE
         : currentVote < 0
-          ? '#FF4444'
-          : t.atoms.text.color
+          ? DISAGREE
+          : t.atoms.text_contrast_medium.color
     return {
       color: withTiming(color),
     }
   })
 
-  const leftArrowStyle = useAnimatedStyle(() => {
-    const active = currentVote < 0
+  const labelStyle = useAnimatedStyle(() => {
     return {
-      opacity: withTiming(active ? 1 : 0.3),
-      transform: [{scale: withSpring(active ? 1.3 : 1)}],
-    }
-  })
-
-  const rightArrowStyle = useAnimatedStyle(() => {
-    const active = currentVote > 0
-    return {
-      opacity: withTiming(active ? 1 : 0.3),
-      transform: [{scale: withSpring(active ? 1.3 : 1)}],
+      opacity: withTiming(currentVote === 0 ? 0.6 : 0),
     }
   })
 
@@ -134,45 +129,65 @@ export function VotingButtonHorizontal({
     }
   }, [])
 
+  // Compute tick marks colors
+  const tickColor = t.palette.contrast_100
+
   return (
-    <View style={styles.wrapper} {...webEventBlockers}>
-      <Animated.View style={[styles.track, trackStyle]} />
+    <Pressable
+      style={styles.wrapper}
+      {...webEventBlockers}
+      onPress={e => {
+        if (e && e.stopPropagation) {
+          e.stopPropagation()
+        }
+      }}>
+      {/* Track */}
+      <Animated.View
+        style={[
+          styles.track,
+          trackStyle,
+          {borderColor: t.palette.contrast_100},
+        ]}>
+        {/* Tick marks on track */}
+        <View style={styles.tickContainer}>
+          {[-3, -2, -1, 0, 1, 2, 3].map(tick => (
+            <View
+              key={tick}
+              style={[
+                styles.tick,
+                tick === 0 && styles.tickCenter,
+                {backgroundColor: tick === 0 ? t.palette.contrast_200 : tickColor},
+              ]}
+            />
+          ))}
+        </View>
+      </Animated.View>
+
+      {/* Draggable thumb */}
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.control, controlStyle]}>
-          <Animated.View style={leftArrowStyle}>
-            <ArrowLeft
-              size="sm"
-              style={{color: currentVote < 0 ? '#FF4444' : t.atoms.text.color}}
-            />
-          </Animated.View>
-
           <View style={styles.textWrapper}>
             <Animated.Text style={[styles.voteText, voteTextStyle]}>
-              {currentVote > 0 ? `+${currentVote}` : currentVote}
+              {currentVote > 0 ? `+${currentVote}` : `${currentVote}`}
             </Animated.Text>
-            {currentVote === 0 && (
-              <Text style={[styles.neutralLabel, t.atoms.text_contrast_low]}>
-                NEUTRAL
-              </Text>
-            )}
           </View>
-
-          <Animated.View style={rightArrowStyle}>
-            <ArrowRight
-              size="sm"
-              style={{color: currentVote > 0 ? '#4CAF50' : t.atoms.text.color}}
-            />
-          </Animated.View>
         </Animated.View>
       </GestureDetector>
-    </View>
+
+      {/* Neutral hint (fades out when voted) */}
+      <Animated.View style={[styles.neutralHint, labelStyle]} pointerEvents="none">
+        <Text style={[styles.neutralLabel, t.atoms.text_contrast_low]}>
+          NEUTRAL
+        </Text>
+      </Animated.View>
+    </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    width: 280,
-    height: 60,
+    width: 260,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -180,39 +195,56 @@ const styles = StyleSheet.create({
   track: {
     position: 'absolute',
     width: '100%',
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    height: 6,
+    borderRadius: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  tickContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    top: -6,
+    bottom: -6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tick: {
+    width: 1,
+    height: 8,
+    borderRadius: 1,
+  },
+  tickCenter: {
+    height: 12,
+    width: 2,
   },
   control: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    width: 140,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 25,
-    borderWidth: 1,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    justifyContent: 'center',
+    width: 56,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
   },
   textWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   voteText: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 17,
+    fontWeight: '700',
     textAlign: 'center',
-    minWidth: 32,
+    minWidth: 28,
+  },
+  neutralHint: {
+    position: 'absolute',
+    bottom: 0,
+    alignItems: 'center',
   },
   neutralLabel: {
     fontSize: 8,
-    fontWeight: 'bold',
-    marginTop: -2,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
 })

@@ -23,6 +23,8 @@ export class TestPds {
     const recoveryKey = (await Secp256k1Keypair.create()).did()
 
     const port = config.port || (await getPort())
+    // Keep bootstrap traffic on the local socket even when the PDS advertises
+    // a public hostname for shared-demo mode.
     const url = `http://localhost:${port}`
 
     const blobstoreLoc =

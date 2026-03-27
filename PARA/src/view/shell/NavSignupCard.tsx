@@ -6,7 +6,7 @@ import {Trans} from '@lingui/react/macro'
 
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useCloseAllActiveElements} from '#/state/util'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
 import {atoms as a} from '#/alf'
 import {AppLanguageDropdown} from '#/components/AppLanguageDropdown'
 import {Button, ButtonText} from '#/components/Button'
@@ -32,7 +32,7 @@ let NavSignupCard = ({}: {}): React.ReactNode => {
   return (
     <View style={[{maxWidth: 245}]}>
       <Link to="/" label="PARA - Home">
-        <Logo width={32} />
+        <Logomark width={28} fill="#474652" />
       </Link>
 
       <View style={[a.pt_lg]}>

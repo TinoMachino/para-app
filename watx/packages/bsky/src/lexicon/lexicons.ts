@@ -16859,18 +16859,23 @@ export const schemaDict = {
         properties: {
           anger: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           fear: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           trust: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           uncertainty: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           neutral: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
         },
       },
@@ -16932,18 +16937,23 @@ export const schemaDict = {
           },
           avgConstructiveness: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           semanticVolatility: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           lexicalDiversity: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           polarizationDelta: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           echoChamberIndex: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
           topKeywords: {
             type: 'string',
@@ -17010,6 +17020,7 @@ export const schemaDict = {
           },
           avgSentiment: {
             type: 'integer',
+            description: 'Scaled 0-100',
           },
         },
       },

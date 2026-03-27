@@ -10,7 +10,9 @@ import {
 } from 'react'
 import {type AtpSessionEvent, type BskyAgent} from '@atproto/api'
 
+import {isLikelyLocalServiceUrl} from '#/lib/constants'
 import * as persisted from '#/state/persisted'
+import * as userActionHistory from '#/state/userActionHistory'
 import {useCloseAllActiveElements} from '#/state/util'
 import {useGlobalDialogsControlContext} from '#/components/dialogs/Context'
 import {AnalyticsContext, useAnalyticsBase, utils} from '#/analytics'
@@ -102,6 +104,15 @@ class SessionStore {
   }
 }
 
+async function clearLocalSessionClientState(...ids: Array<string | undefined>) {
+  userActionHistory.reset()
+  await Promise.all(
+    [...new Set([...ids, 'logged-out'].filter(Boolean))]
+      .filter((id): id is string => Boolean(id))
+      .map(id => clearPersistedQueryStorage(id)),
+  )
+}
+
 export function Provider({children}: React.PropsWithChildren<{}>) {
   const ax = useAnalyticsBase()
   const cancelPendingTask = useOneTaskAtATime()
@@ -139,6 +150,9 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
       if (signal.aborted) {
         return
       }
+      if (isLikelyLocalServiceUrl(account.service)) {
+        await clearLocalSessionClientState(account.did)
+      }
       store.dispatch({
         type: 'switched-to-account',
         newAgent: agent,
@@ -163,6 +177,9 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
 
       if (signal.aborted) {
         return
+      }
+      if (isLikelyLocalServiceUrl(account.service)) {
+        await clearLocalSessionClientState(account.did)
       }
       store.dispatch({
         type: 'switched-to-account',
@@ -202,6 +219,12 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
       )
       addSessionDebugLog({type: 'method:end', method: 'logout'})
       if (prevState.currentAgentState.did) {
+        const currentAccount = prevState.accounts.find(
+          a => a.did === prevState.currentAgentState.did,
+        )
+        if (currentAccount && isLikelyLocalServiceUrl(currentAccount.service)) {
+          userActionHistory.reset()
+        }
         clearAgeAssuranceDataForDid({did: prevState.currentAgentState.did})
         void clearPersistedQueryStorage(prevState.currentAgentState.did)
       }
@@ -234,6 +257,13 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
       )
       addSessionDebugLog({type: 'method:end', method: 'logout'})
       clearAgeAssuranceData()
+      if (
+        prevState.accounts.some(account =>
+          isLikelyLocalServiceUrl(account.service),
+        )
+      ) {
+        userActionHistory.reset()
+      }
       for (const account of prevState.accounts) {
         void clearPersistedQueryStorage(account.did)
       }
@@ -258,6 +288,12 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
 
       if (signal.aborted) {
         return
+      }
+      if (
+        isLikelyLocalServiceUrl(storedAccount.service) ||
+        isLikelyLocalServiceUrl(account.service)
+      ) {
+        await clearLocalSessionClientState(storedAccount.did, account.did)
       }
       store.dispatch({
         type: 'switched-to-account',

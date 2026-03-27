@@ -1,12 +1,10 @@
 import {useCallback, useMemo, useState} from 'react'
 import {
-  LayoutAnimation,
   Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  UIManager,
   useWindowDimensions,
   View,
 } from 'react-native'
@@ -24,6 +22,8 @@ import {type NavigationProp} from '#/lib/routes/types'
 import {
   buildCommunitySearchQuery,
   formatCommunityName,
+  formatGeographicGroupName,
+  isGeographicGroupCommunity,
 } from '#/lib/strings/community-names'
 import {cleanError} from '#/lib/strings/errors'
 import {useCommunityGovernanceQuery} from '#/state/queries/community-governance'
@@ -41,6 +41,7 @@ import {PageText_Stroke2_Corner0_Rounded as PageTextIcon} from '#/components/ico
 import {Tree_Stroke2_Corner0_Rounded as TreeIcon} from '#/components/icons/Tree'
 import * as Layout from '#/components/Layout'
 import {ListFooter, ListMaybePlaceholder} from '#/components/Lists'
+import {ProfileHoverCard} from '#/components/ProfileHoverCard'
 
 type CommunityProfileParams = {
   communityId?: string
@@ -63,12 +64,6 @@ const EMPTY_GOVERNANCE: CommunityGovernanceView = {
 }
 
 export function CommunityProfileScreen() {
-  if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-  ) {
-    UIManager.setLayoutAnimationEnabledExperimental(true)
-  }
   const pal = usePalette('default')
   const t = useTheme()
   const navigation = useNavigation<NavigationProp>()
@@ -83,7 +78,6 @@ export function CommunityProfileScreen() {
   const communityId =
     route.params?.communityId || route.params?._communityId || '1'
   const {communityName = 'Community'} = route.params || {}
-  const agentDisplayName = 'Agente Xavier Exul'
   const formattedCommunity = useMemo(
     () => formatCommunityName(communityName),
     [communityName],
@@ -104,12 +98,27 @@ export function CommunityProfileScreen() {
     [communityName, fetchedGovernance?.community],
   )
   const governanceCommunity = fetchedGovernance?.community
-  const displayCommunityName = governanceCommunity
-    ? formatCommunityName(governanceCommunity).displayName
-    : formattedCommunity.displayName
-  const plainCommunityName = governanceCommunity
-    ? formatCommunityName(governanceCommunity).plainName
-    : formattedCommunity.plainName
+  const isGeographicGroup = isGeographicGroupCommunity({
+    communityId,
+    communityName: governanceCommunity || communityName,
+    slug: fetchedGovernance?.slug,
+  })
+  const formattedDisplayNameParts = isGeographicGroup
+    ? formatGeographicGroupName(governanceCommunity || communityName)
+    : governanceCommunity
+      ? formatCommunityName(governanceCommunity)
+      : formattedCommunity
+  const displayCommunityName = formattedDisplayNameParts.displayName
+  const plainCommunityName = formattedDisplayNameParts.plainName
+  const featuredRepresentative = useMemo(
+    () => governance.officials[0] || governance.deputies[0]?.activeHolder || null,
+    [governance.deputies, governance.officials],
+  )
+  const agentDisplayName =
+    featuredRepresentative?.displayName ||
+    featuredRepresentative?.handle ||
+    featuredRepresentative?.did ||
+    'Rafael Ibarra'
 
   const {
     data,
@@ -129,21 +138,10 @@ export function CommunityProfileScreen() {
 
   const [activeTab, setActiveTab] = useState<'Feed' | 'about'>('Feed')
   const [isJoined, setIsJoined] = useState(false)
-  const [isFollowingAgent, setIsFollowingAgent] = useState(false)
-  const [isAiDelegateExpanded, setIsAiDelegateExpanded] = useState(false)
   const [isPTR, setIsPTR] = useState(false)
 
   const onPressJoin = () => {
     setIsJoined(!isJoined)
-  }
-
-  const onPressFollowAgent = () => {
-    setIsFollowingAgent(!isFollowingAgent)
-  }
-
-  const onToggleAiDelegate = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-    setIsAiDelegateExpanded(previous => !previous)
   }
 
   const onRefresh = useCallback(async () => {
@@ -245,10 +243,11 @@ export function CommunityProfileScreen() {
   }
 
   const onPressAgentProfile = () => {
-    navigation.navigate('CommunityAgentProfile', {
-      agentId: agentDisplayName,
-      communityName,
-    })
+    const actorId =
+      featuredRepresentative?.did ||
+      featuredRepresentative?.handle ||
+      'deleg-rep.test'
+    navigation.navigate('Profile', {name: actorId})
   }
 
   const rules = [
@@ -260,7 +259,7 @@ export function CommunityProfileScreen() {
   ]
 
   return (
-    <Layout.Screen style={[pal.view, pal.border]}>
+    <Layout.Screen>
       <Layout.Header.Outer noBottomBorder>
         <Layout.Header.BackButton />
         <Layout.Header.Content>
@@ -393,164 +392,78 @@ export function CommunityProfileScreen() {
             </View>
           </View>
 
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Toggle AI Delegate"
-            accessibilityHint="Expands or collapses the AI Delegate actions."
-            onPress={onToggleAiDelegate}
-            style={[
-              styles.aiDelegateChip,
-              pal.border,
-              {
-                backgroundColor:
-                  t.scheme === 'dark'
-                    ? t.palette.contrast_25
-                    : 'rgba(67, 56, 202, 0.06)',
-                paddingVertical: 10,
-                paddingHorizontal: 16,
-              },
-            ]}>
-            <View style={styles.aiDelegateTopRow}>
-              <View style={styles.aiDelegateIdentity}>
+          {!isGeographicGroup ? (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="View AI Delegate Profile"
+              accessibilityHint="Navigates to the AI Delegate's profile page"
+              onPress={onPressAgentProfile}
+              style={[
+                pal.border,
+                {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                  borderBottomWidth: 1,
+                  backgroundColor: t.atoms.bg.backgroundColor,
+                },
+              ]}>
+              <ProfileHoverCard
+                inline
+                did={featuredRepresentative?.did || 'deleg-rep.test'}>
                 <View
                   style={[
                     styles.aiDelegateAvatar,
                     {
                       backgroundColor: t.palette.primary_500,
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      marginRight: 12,
                     },
                   ]}>
                   <MacintoshIcon style={{color: '#fff'}} size="sm" />
                 </View>
-                <View style={styles.aiDelegateTextBlock}>
-                  <Text
-                    style={[
-                      styles.aiDelegateName,
-                      pal.text,
-                      {fontSize: 14, marginBottom: 0},
-                    ]}>
-                    Agente Xavier Exul{' '}
-                    <Text
-                      style={{
-                        color: t.palette.primary_500,
-                        fontSize: 13,
-                        fontWeight: '600',
-                      }}>
-                      • AI Delegate
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={[
-                  styles.aiDelegateChevron,
-                  {
-                    backgroundColor:
-                      t.scheme === 'dark'
-                        ? t.palette.contrast_50
-                        : 'rgba(67, 56, 202, 0.08)',
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.aiDelegateChevronText,
-                    {color: t.palette.primary_500, fontSize: 16},
-                  ]}>
-                  {isAiDelegateExpanded ? '−' : '+'}
+              </ProfileHoverCard>
+              <View style={{flex: 1}}>
+                <Text style={[pal.text, {fontSize: 15, fontWeight: 'bold'}]}>
+                  {agentDisplayName}
                 </Text>
+                <Text style={[pal.textLight, {fontSize: 13}]}>AI Delegate</Text>
               </View>
-            </View>
-            {isAiDelegateExpanded ? (
-              <View style={styles.aiDelegateExpanded}>
-                <View style={styles.aiDelegateActions}>
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    onPress={onPressFollowAgent}
-                    style={[
-                      styles.aiDelegateActionPrimary,
-                      {
-                        backgroundColor: isFollowingAgent
-                          ? t.scheme === 'dark'
-                            ? t.palette.contrast_50
-                            : t.palette.primary_100
-                          : t.palette.primary_500,
-                        paddingVertical: 8,
-                      },
-                    ]}>
-                    <Text
-                      style={[
-                        styles.aiDelegateActionPrimaryText,
-                        {
-                          color: isFollowingAgent
-                            ? t.scheme === 'dark'
-                              ? t.palette.primary_100
-                              : t.palette.primary_700
-                            : '#fff',
-                          fontSize: 13,
-                        },
-                      ]}>
-                      {isFollowingAgent ? 'Following' : 'Follow'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    onPress={onPressChat}
-                    style={[
-                      styles.aiDelegateActionSecondary,
-                      {
-                        borderColor:
-                          t.scheme === 'dark'
-                            ? t.palette.contrast_100
-                            : t.palette.primary_200,
-                        paddingVertical: 8,
-                      },
-                    ]}>
-                    <ChatIcon
-                      style={{color: t.palette.primary_500}}
-                      size="xs"
-                    />
-                    <Text
-                      style={[
-                        styles.aiDelegateActionSecondaryText,
-                        {color: t.palette.primary_500, fontSize: 13},
-                      ]}>
-                      Message
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  onPress={onPressAgentProfile}
-                  style={[
-                    styles.aiDelegateActionSecondary,
-                    styles.aiDelegateActionWide,
-                    {
-                      borderColor:
-                        t.scheme === 'dark'
-                          ? t.palette.contrast_100
-                          : t.palette.primary_200,
-                    },
-                  ]}>
-                  <MacintoshIcon
-                    style={{color: t.palette.primary_500}}
-                    size="xs"
-                  />
-                  <Text
-                    style={[
-                      styles.aiDelegateActionSecondaryText,
-                      {color: t.palette.primary_500, fontSize: 13},
-                    ]}>
-                    View profile
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-          </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={onPressChat}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 16,
+                  backgroundColor:
+                    t.scheme === 'dark'
+                      ? t.palette.contrast_50
+                      : t.palette.primary_50,
+                }}>
+                <ChatIcon
+                  style={{
+                    color: t.scheme === 'dark' ? '#fff' : t.palette.primary_500,
+                  }}
+                  size="xs"
+                />
+                <Text
+                  style={{
+                    color: t.scheme === 'dark' ? '#fff' : t.palette.primary_500,
+                    fontSize: 13,
+                    fontWeight: '600',
+                  }}>
+                  Message
+                </Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          ) : null}
 
           {/* Navigation Tabs */}
           <View style={[styles.tabsContainer, pal.border]}>

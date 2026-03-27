@@ -9,7 +9,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {logger} from '#/logger'
 import {useAgent} from '#/state/session'
 import {RQKEY_ROOT as CONVO_LIST_KEY} from './list-conversations'
@@ -33,6 +33,9 @@ export function useLeaveConvo(
 ) {
   const queryClient = useQueryClient()
   const agent = useAgent()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   return useMutation({
     mutationKey: RQKEY(convoId),
@@ -41,7 +44,7 @@ export function useLeaveConvo(
 
       const {data} = await agent.chat.bsky.convo.leaveConvo(
         {convoId},
-        {headers: DM_SERVICE_HEADERS, encoding: 'application/json'},
+        {headers: dmServiceHeaders, encoding: 'application/json'},
       )
 
       return data

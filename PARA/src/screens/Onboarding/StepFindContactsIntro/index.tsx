@@ -40,13 +40,13 @@ export function StepFindContactsIntro() {
       <OnboardingPosition />
       <ContactsHeroImage />
       <OnboardingTitleText style={[a.mt_sm]}>
-        <Trans>PARA is more fun with friends</Trans>
+        <Trans>Bring your people with you</Trans>
       </OnboardingTitleText>
       <OnboardingDescriptionText>
         <Trans>
-          Find your friends on PARA by verifying your phone number and matching
-          with your contacts. We protect your information and you control what
-          happens next.{' '}
+          Find the people you already trust, organize with, or learn from.
+          Your contacts stay under your control, and you decide what happens
+          next.{' '}
           <InlineLinkText
             to={urls.website.blog.findFriendsAnnouncement}
             label={_(

@@ -12,6 +12,7 @@ import {useLingui} from '@lingui/react'
 import {Plural, Trans} from '@lingui/react/macro'
 
 import {useActorStatus} from '#/lib/actor-status'
+import {useNonReactiveCallback} from '#/lib/hooks/useNonReactiveCallback'
 import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
 import {useTranslate} from '#/lib/hooks/useTranslate'
 import {getPostBadges} from '#/lib/post-flairs'
@@ -262,7 +263,7 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
     }
   }, [postSource])
 
-  const onPressReply = useCallback(() => {
+  const onPressReply = useNonReactiveCallback(() => {
     openComposer({
       replyTo: {
         uri: post.uri,
@@ -285,15 +286,7 @@ const ThreadItemAnchorInner = memo(function ThreadItemAnchorInner({
         reqId: postSource.post.reqId,
       })
     }
-  }, [
-    openComposer,
-    post,
-    record,
-    onPostSuccess,
-    moderation,
-    postSource,
-    feedFeedback,
-  ])
+  })
 
   const onOpenAuthor = () => {
     logger.metric('post:clickthroughAuthor', {

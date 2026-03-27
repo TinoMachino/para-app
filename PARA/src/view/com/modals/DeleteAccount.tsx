@@ -11,7 +11,7 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {useWebMediaQueries} from '#/lib/hooks/useWebMediaQueries'
 import {cleanError} from '#/lib/strings/errors'
@@ -38,6 +38,9 @@ export function Component({}: {}) {
   const {currentAccount} = useSession()
   const agent = useAgent()
   const {removeAccount} = useSessionApi()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
   const {_} = useLingui()
   const {closeModal} = useModalControls()
   const {isMobile} = useWebMediaQueries()
@@ -71,7 +74,7 @@ export function Component({}: {}) {
       const {success} = await agent.api.chat.bsky.actor.deleteAccount(
         undefined,
         {
-          headers: DM_SERVICE_HEADERS,
+          headers: dmServiceHeaders,
         },
       )
       if (!success) {

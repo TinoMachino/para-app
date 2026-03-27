@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {STALE} from '#/state/queries'
 import {useOnMarkAsRead} from '#/state/queries/messages/list-conversations'
 import {useAgent} from '#/state/session'
@@ -21,13 +21,16 @@ export const RQKEY = (convoId: string) => [RQKEY_ROOT, convoId]
 
 export function useConvoQuery(convo: ChatBskyConvoDefs.ConvoView) {
   const agent = useAgent()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   return useQuery({
     queryKey: RQKEY(convo.id),
     queryFn: async () => {
       const {data} = await agent.chat.bsky.convo.getConvo(
         {convoId: convo.id},
-        {headers: DM_SERVICE_HEADERS},
+        {headers: dmServiceHeaders},
       )
       return data.convo
     },
@@ -47,6 +50,9 @@ export function useMarkAsReadMutation() {
   const optimisticUpdate = useOnMarkAsRead()
   const queryClient = useQueryClient()
   const agent = useAgent()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   return useMutation({
     mutationFn: async ({
@@ -65,7 +71,7 @@ export function useMarkAsReadMutation() {
         },
         {
           encoding: 'application/json',
-          headers: DM_SERVICE_HEADERS,
+          headers: dmServiceHeaders,
         },
       )
     },

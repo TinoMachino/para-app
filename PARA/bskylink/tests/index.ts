@@ -18,9 +18,9 @@ describe('link service', async () => {
       dbPostgresSchema: 'link_test',
       dbPostgresUrl: process.env.DB_POSTGRES_URL,
       safelinkEnabled: true,
-      ozoneUrl: 'http://localhost:2583',
-      ozoneAgentHandle: 'mod-authority.test',
-      ozoneAgentPass: 'hunter2',
+      safelinkPdsUrl: 'http://localhost:2583',
+      safelinkAgentIdentifier: 'mod-authority.test',
+      safelinkAgentPass: 'hunter2',
     })
     const migrateDb = Database.postgres({
       url: cfg.db.url,
@@ -291,9 +291,10 @@ describe('link service no safelink', async () => {
       dbPostgresSchema: 'link_test',
       dbPostgresUrl: process.env.DB_POSTGRES_URL,
       safelinkEnabled: false,
-      ozoneUrl: 'http://localhost:2583',
-      ozoneAgentHandle: 'mod-authority.test',
-      ozoneAgentPass: 'hunter2',
+      safelinkPdsUrl: 'http://localhost:2583',
+      safelinkAgentIdentifier: 'mod-authority.test',
+      safelinkAgentPass: 'hunter2',
+      metricsApiHost: 'http://localhost:2584',
     })
     const migrateDb = Database.postgres({
       url: cfg.db.url,
@@ -355,6 +356,22 @@ describe('link service no safelink', async () => {
       new RegExp(urlToRedirect.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
     )
     // No blocked-site div, always safe
+    assert.doesNotMatch(html, /"blocked-site"/)
+  })
+
+  it('normal redirect with query params', async () => {
+    const urlToRedirect = 'https://bsky.app/settings'
+    const url = new URL(`${baseUrl}/redirect`)
+    url.searchParams.set('u', urlToRedirect)
+    url.searchParams.set('utm_source', 'test')
+    const res = await fetch(url, {redirect: 'manual'})
+    assert.strictEqual(res.status, 200)
+    const html = await res.text()
+    assert.match(html, /meta http-equiv="refresh"/)
+    assert.match(
+      html,
+      new RegExp(urlToRedirect.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    )
     assert.doesNotMatch(html, /"blocked-site"/)
   })
 })

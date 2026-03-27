@@ -18,7 +18,7 @@ import {type FetchHandlerOptions} from '@atproto/xrpc'
 import {networkRetry} from '#/lib/async/retry'
 import {
   BSKY_SERVICE,
-  DISCOVER_SAVED_FEED,
+  DEFAULT_DISCOVER_SAVED_FEED,
   getBskyProxyHeaderForServiceUrl,
   IS_PROD_SERVICE,
   isLikelyLocalServiceUrl,
@@ -253,16 +253,22 @@ export async function createAgentAndCreateAccount(
           throw e
         }),
         networkRetry(1, () => {
-          return agent.overwriteSavedFeeds([
-            {
-              ...DISCOVER_SAVED_FEED,
-              id: TID.nextStr(),
-            },
-            {
-              ...TIMELINE_SAVED_FEED,
-              id: TID.nextStr(),
-            },
-          ])
+          return agent.overwriteSavedFeeds(
+            [
+              ...(DEFAULT_DISCOVER_SAVED_FEED
+                ? [
+                    {
+                      ...DEFAULT_DISCOVER_SAVED_FEED,
+                      id: TID.nextStr(),
+                    },
+                  ]
+                : []),
+              {
+                ...TIMELINE_SAVED_FEED,
+                id: TID.nextStr(),
+              },
+            ],
+          )
         }).catch(e => {
           logger.info(
             `createAgentAndCreateAccount: failed to set initial feeds`,

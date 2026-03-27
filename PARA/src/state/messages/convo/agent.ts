@@ -10,7 +10,7 @@ import EventEmitter from 'eventemitter3'
 import {nanoid} from 'nanoid/non-secure'
 
 import {networkRetry} from '#/lib/async/retry'
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {
   isErrorMaybeAppPasswordPermissions,
   isNetworkError,
@@ -89,6 +89,10 @@ export class Convo {
   sender: ChatBskyActorDefs.ProfileViewBasic | undefined
   recipients: ChatBskyActorDefs.ProfileViewBasic[] | undefined
   snapshot: ConvoState | undefined
+
+  private get dmServiceHeaders() {
+    return getDmServiceHeadersForServiceUrl(this.agent.serviceUrl.toString())
+  }
 
   constructor(params: ConvoParams) {
     this.id = nanoid(3)
@@ -568,7 +572,7 @@ export class Convo {
             {
               convoId: this.convoId,
             },
-            {headers: DM_SERVICE_HEADERS},
+            {headers: this.dmServiceHeaders},
           )
         })
 
@@ -641,7 +645,7 @@ export class Convo {
             convoId: this.convoId,
             limit: IS_NATIVE ? 30 : 60,
           },
-          {headers: DM_SERVICE_HEADERS},
+          {headers: this.dmServiceHeaders},
         )
       })
       const {cursor, messages} = response.data
@@ -876,7 +880,7 @@ export class Convo {
           convoId: this.convoId,
           message,
         },
-        {encoding: 'application/json', headers: DM_SERVICE_HEADERS},
+        {encoding: 'application/json', headers: this.dmServiceHeaders},
       )
       const res = response.data
 
@@ -973,7 +977,7 @@ export class Convo {
             message,
           })),
         },
-        {encoding: 'application/json', headers: DM_SERVICE_HEADERS},
+        {encoding: 'application/json', headers: this.dmServiceHeaders},
       )
       const {items} = data
 
@@ -1013,7 +1017,7 @@ export class Convo {
             convoId: this.convoId,
             messageId,
           },
-          {encoding: 'application/json', headers: DM_SERVICE_HEADERS},
+          {encoding: 'application/json', headers: this.dmServiceHeaders},
         )
       })
     } catch (e: any) {
@@ -1252,7 +1256,7 @@ export class Convo {
       logger.debug(`Adding reaction ${emoji} to message ${messageId}`)
       const {data} = await this.agent.chat.bsky.convo.addReaction(
         {messageId, value: emoji, convoId: this.convoId},
-        {encoding: 'application/json', headers: DM_SERVICE_HEADERS},
+        {encoding: 'application/json', headers: this.dmServiceHeaders},
       )
       if (ChatBskyConvoDefs.isMessageView(data.message)) {
         if (this.pastMessages.has(messageId)) {
@@ -1317,7 +1321,7 @@ export class Convo {
       logger.debug(`Removing reaction ${emoji} from message ${messageId}`)
       await this.agent.chat.bsky.convo.removeReaction(
         {messageId, value: emoji, convoId: this.convoId},
-        {encoding: 'application/json', headers: DM_SERVICE_HEADERS},
+        {encoding: 'application/json', headers: this.dmServiceHeaders},
       )
     } catch (error) {
       if (restore) restore()

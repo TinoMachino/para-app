@@ -4,11 +4,13 @@ import {type AppBskyActorDefs, BSKY_LABELER_DID} from '@atproto/api'
 import {type ProxyHeaderValue} from '#/state/session/agent'
 import {BLUESKY_PROXY_DID, CHAT_PROXY_DID} from '#/env'
 
-const LOCAL_DEV_IP = process.env.EXPO_PUBLIC_LOCAL_DEV_IP || '192.168.100.37'
+const LOCAL_DEV_IP = process.env.EXPO_PUBLIC_LOCAL_DEV_IP || '192.168.100.31'
 const LOCAL_DEV_SERVICE_OVERRIDE = process.env.EXPO_PUBLIC_LOCAL_DEV_SERVICE
 const DEFAULT_SERVICE_OVERRIDE = process.env.EXPO_PUBLIC_DEFAULT_SERVICE
 const USE_LOCAL_DEFAULT_SERVICE =
   process.env.EXPO_PUBLIC_USE_LOCAL_DEV_SERVICE === '1'
+const USE_LOCAL_DEMO_DEFAULTS =
+  !DEFAULT_SERVICE_OVERRIDE && (USE_LOCAL_DEFAULT_SERVICE || __DEV__)
 
 export const LOCAL_DEV_SERVICE =
   LOCAL_DEV_SERVICE_OVERRIDE ||
@@ -21,12 +23,13 @@ export const STAGING_SERVICE = 'https://staging.bsky.dev'
 export const BSKY_SERVICE = 'https://bsky.social'
 export const BSKY_SERVICE_DID = 'did:web:bsky.social'
 export const PUBLIC_BSKY_SERVICE = 'https://public.api.bsky.app'
-// Default to bsky.social for stability. Opt into local default with:
-// EXPO_PUBLIC_USE_LOCAL_DEV_SERVICE=1
-// or set EXPO_PUBLIC_DEFAULT_SERVICE explicitly.
+// Local/dev builds should default to the local PDS for seeded demo accounts.
+// Production/staging can still force a service explicitly with
+// EXPO_PUBLIC_DEFAULT_SERVICE.
 export const DEFAULT_SERVICE =
   DEFAULT_SERVICE_OVERRIDE ||
-  (USE_LOCAL_DEFAULT_SERVICE ? LOCAL_DEV_SERVICE : BSKY_SERVICE)
+  (USE_LOCAL_DEMO_DEFAULTS ? LOCAL_DEV_SERVICE : BSKY_SERVICE)
+export const IS_LOCAL_DEV_MODE = DEFAULT_SERVICE === LOCAL_DEV_SERVICE
 const HELP_DESK_LANG = 'en-us'
 export const HELP_DESK_URL = `https://blueskyweb.zendesk.com/hc/${HELP_DESK_LANG}`
 export const EMBED_SERVICE = 'https://embed.bsky.app'
@@ -160,26 +163,81 @@ export const VIDEO_FEED_URI =
 export const STAGING_VIDEO_FEED_URI =
   'at://did:plc:yofh3kx63drvfljkibw5zuxo/app.bsky.feed.generator/thevids'
 export const VIDEO_FEED_URIS = [VIDEO_FEED_URI, STAGING_VIDEO_FEED_URI]
-export const DISCOVER_SAVED_FEED = {
-  type: 'feed',
-  value: DISCOVER_FEED_URI,
-  pinned: true,
-}
 export const TIMELINE_SAVED_FEED = {
   type: 'timeline',
   value: 'following',
   pinned: true,
 }
+export const DEFAULT_DISCOVER_FEED_URI = IS_LOCAL_DEV_MODE
+  ? null
+  : DISCOVER_FEED_URI
+export const DEFAULT_DISCOVER_FEED_DESCRIPTOR = DEFAULT_DISCOVER_FEED_URI
+  ? `feedgen|${DEFAULT_DISCOVER_FEED_URI}`
+  : 'following'
+export const DEFAULT_VIDEO_FEED_URI = IS_LOCAL_DEV_MODE ? null : VIDEO_FEED_URI
+export const DEFAULT_VIDEO_FEED_DESCRIPTOR = DEFAULT_VIDEO_FEED_URI
+  ? `feedgen|${DEFAULT_VIDEO_FEED_URI}`
+  : null
+export const DEFAULT_VIDEO_FEED_URIS = DEFAULT_VIDEO_FEED_URI
+  ? [DEFAULT_VIDEO_FEED_URI, STAGING_VIDEO_FEED_URI]
+  : []
+export const DISCOVER_SAVED_FEED = {
+  type: 'feed',
+  value: DISCOVER_FEED_URI,
+  pinned: true,
+}
+export const DEFAULT_DISCOVER_SAVED_FEED = DEFAULT_DISCOVER_FEED_URI
+  ? {
+      type: 'feed',
+      value: DEFAULT_DISCOVER_FEED_URI,
+      pinned: true,
+    }
+  : null
 export const VIDEO_SAVED_FEED = {
   type: 'feed',
   value: VIDEO_FEED_URI,
   pinned: true,
 }
+export const DEFAULT_VIDEO_SAVED_FEED = DEFAULT_VIDEO_FEED_URI
+  ? {
+      type: 'feed',
+      value: DEFAULT_VIDEO_FEED_URI,
+      pinned: true,
+    }
+  : null
 
 export const RECOMMENDED_SAVED_FEEDS: Pick<
   AppBskyActorDefs.SavedFeed,
   'type' | 'value' | 'pinned'
->[] = [DISCOVER_SAVED_FEED, TIMELINE_SAVED_FEED]
+>[] = [
+  ...(DEFAULT_DISCOVER_SAVED_FEED ? [DEFAULT_DISCOVER_SAVED_FEED] : []),
+  TIMELINE_SAVED_FEED,
+]
+
+export const DEFAULT_ONBOARDING_SAVED_FEEDS: Pick<
+  AppBskyActorDefs.SavedFeed,
+  'type' | 'value' | 'pinned'
+>[] = [
+  ...(DEFAULT_DISCOVER_SAVED_FEED ? [DEFAULT_DISCOVER_SAVED_FEED] : []),
+  TIMELINE_SAVED_FEED,
+  ...(DEFAULT_VIDEO_SAVED_FEED ? [DEFAULT_VIDEO_SAVED_FEED] : []),
+]
+
+export function isDefaultDiscoverFeedUri(uri?: string | null) {
+  return Boolean(DEFAULT_DISCOVER_FEED_URI && uri === DEFAULT_DISCOVER_FEED_URI)
+}
+
+export function isDiscoverFeedUri(uri?: string | null) {
+  return Boolean(
+    uri &&
+      (uri === DISCOVER_FEED_URI ||
+        (DEFAULT_DISCOVER_FEED_URI !== null && uri === DEFAULT_DISCOVER_FEED_URI)),
+  )
+}
+
+export function isDefaultVideoFeedUri(uri?: string | null) {
+  return Boolean(uri && DEFAULT_VIDEO_FEED_URIS.includes(uri))
+}
 
 export const KNOWN_SHUTDOWN_FEEDS = [
   'at://did:plc:wqowuobffl66jv3kpsvo7ak4/app.bsky.feed.generator/the-algorithm', // for you by skygaze
@@ -235,8 +293,11 @@ export const PUBLIC_APPVIEW = 'https://api.bsky.app'
 export const PUBLIC_APPVIEW_DID = 'did:web:api.bsky.app'
 export const PUBLIC_STAGING_APPVIEW_DID = 'did:web:api.staging.bsky.dev'
 
-export const DEV_ENV_APPVIEW = `http://localhost:2584` // always the same
+export const DEV_ENV_APPVIEW = `http://${LOCAL_DEV_IP}:2584` // always the same
 export const DEV_ENV_APPVIEW_DID = `did:plc:dw4kbjf5mn7nhenabiqpkyh3` // always the same
+// Stable local dev chat DID published by watx/packages/dev-env/src/service-profile-chat.ts
+// for the default handle `chat.test` on the default chat port `2590`.
+export const DEV_ENV_CHAT_DID = 'did:plc:ztgydimgwegx72nfqbfgurrb'
 
 // temp hack for e2e - esb
 export const BLUESKY_PROXY_HEADER = {
@@ -256,6 +317,8 @@ export const BLUESKY_PROXY_HEADER = {
 
 const LOCAL_DEV_APPVIEW_PROXY_DID =
   process.env.EXPO_PUBLIC_LOCAL_BSKY_PROXY_DID || DEV_ENV_APPVIEW_DID
+const LOCAL_DEV_CHAT_PROXY_DID =
+  process.env.EXPO_PUBLIC_LOCAL_CHAT_PROXY_DID || DEV_ENV_CHAT_DID
 const LOCAL_DEV_SERVICE_HOSTNAME = parseServiceHostname(
   LOCAL_DEV_SERVICE_OVERRIDE || LOCAL_DEV_SERVICE,
 )
@@ -312,10 +375,7 @@ export function normalizeLocalServiceUrl(serviceUrl: string): string {
       : `http://${serviceUrl}`
     const url = new URL(normalizedUrl)
     if (isDirectLocalHostname(url.hostname)) {
-      url.protocol = 'http:'
-    }
-    if (!url.port && isDirectLocalHostname(url.hostname)) {
-      url.port = '2583'
+      return LOCAL_DEV_SERVICE.replace(/\/+$/, '')
     }
     return url.toString().replace(/\/+$/, '')
   } catch {
@@ -332,9 +392,17 @@ export function getBskyProxyHeaderForServiceUrl(
   return BLUESKY_PROXY_HEADER.get()
 }
 
-export const DM_SERVICE_HEADERS = {
-  'atproto-proxy': `${CHAT_PROXY_DID}#bsky_chat`,
+export function getDmServiceHeadersForServiceUrl(serviceUrl?: string) {
+  const proxyDid = isLikelyLocalServiceUrl(serviceUrl)
+    ? LOCAL_DEV_CHAT_PROXY_DID
+    : CHAT_PROXY_DID
+
+  return {
+    'atproto-proxy': `${proxyDid}#bsky_chat`,
+  }
 }
+
+export const DM_SERVICE_HEADERS = getDmServiceHeadersForServiceUrl()
 
 export const BLUESKY_MOD_SERVICE_HEADERS = {
   'atproto-proxy': `${BSKY_LABELER_DID}#atproto_labeler`,

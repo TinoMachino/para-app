@@ -19,7 +19,7 @@
     "node": ">=18.7.0"
   },
   "scripts": {
-    "codegen": "lex gen-server --yes ./src/lexicon ../../lexicons/com/atproto/*/* ../../lexicons/app/bsky/*/* ../../lexicons/chat/bsky/*/* ../../lexicons/tools/ozone/*/* ../../lexicons/com/para/* ../../lexicons/com/para/*/* && lex build --lexicons ../../lexicons --out ./src/lexicons --clear --indexFile",
+    "codegen": "lex gen-server --yes ./src/lexicon ../../lexicons/com/atproto/*/* ../../lexicons/app/bsky/*/* ../../lexicons/chat/bsky/*/* ../../lexicons/tools/ozone/*/* ../../lexicons/com/para/* ../../lexicons/com/para/*/* && ts-lex build --lexicons ../../lexicons --out ./src/lexicons --clear --indexFile",
     "prebuild": "pnpm run codegen",
     "build": "tsc --build tsconfig.build.json",
     "postbuild": "node ./build.templates.js",

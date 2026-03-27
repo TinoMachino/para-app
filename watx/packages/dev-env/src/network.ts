@@ -4,12 +4,14 @@ import * as uint8arrays from 'uint8arrays'
 import { wait } from '@atproto/common-web'
 import { createServiceJwt } from '@atproto/xrpc-server'
 import { TestBsky } from './bsky'
+import { TestChat } from './chat'
 import { EXAMPLE_LABELER } from './const'
 import { IntrospectServer } from './introspect'
 import { TestNetworkNoAppView } from './network-no-appview'
 import { TestOzone } from './ozone'
 import { TestPds } from './pds'
 import { TestPlc } from './plc'
+import { ChatServiceProfile } from './service-profile-chat'
 import { LexiconAuthorityProfile } from './service-profile-lexicon'
 import { OzoneServiceProfile } from './service-profile-ozone'
 import { TestServerParams } from './types'
@@ -23,6 +25,8 @@ export class TestNetwork extends TestNetworkNoAppView {
     public plc: TestPlc,
     public pds: TestPds,
     public bsky: TestBsky,
+    public chat: TestChat,
+    public chatPublicUrl: string,
     public ozone: TestOzone,
     public introspect?: IntrospectServer,
   ) {
@@ -44,6 +48,7 @@ export class TestNetwork extends TestNetworkNoAppView {
     const bskyPort = params.bsky?.port ?? (await getPort())
     const pdsPort = params.pds?.port ?? (await getPort())
     const ozonePort = params.ozone?.port ?? (await getPort())
+    const chatPort = params.chat?.port ?? (await getPort())
 
     const thirdPartyPds = await TestPds.create({
       didPlcUrl: plc.url,
@@ -68,6 +73,7 @@ export class TestNetwork extends TestNetworkNoAppView {
       pdsPort,
       rolodexUrl: process.env.BSKY_ROLODEX_URL,
       rolodexIgnoreBadTls: true,
+      // Shared-demo mode still bootstraps against the local PDS socket.
       repoProvider: `ws://localhost:${pdsPort}`,
       dbPostgresSchema: `appview_${dbPostgresSchema}`,
       dbPostgresUrl,
@@ -76,8 +82,16 @@ export class TestNetwork extends TestNetworkNoAppView {
       labelsFromIssuerDids: [ozoneServiceProfile.did, EXAMPLE_LABELER],
       // Using a static private key results in a static DID, which is useful for e2e tests with the social-app repo.
       privateKey:
-        '3f916c70dc69e4c5e83877f013325b11ecac31742e6a42f5c4fb240d0703d9d5=',
+        '3f916c70dc69e4c5e83877f013325b11ecac31742e6a42f5c4fb240d0703d9d5',
       ...params.bsky,
+    })
+    const chatPublicUrl =
+      params.chat?.publicUrl ?? `http://localhost:${chatPort}`
+    const chatServiceProfile = await ChatServiceProfile.create({
+      plcUrl: plc.url,
+      publicUrl: chatPublicUrl,
+      handle: params.chat?.handle,
+      privateKey: params.chat?.privateKey,
     })
 
     const pds = await TestPds.create({
@@ -91,8 +105,20 @@ export class TestNetwork extends TestNetworkNoAppView {
       ...params.pds,
     })
 
+    const chat = await TestChat.create({
+      port: chatPort,
+      serverDid: chatServiceProfile.did,
+      pds,
+    })
+
     // mock before any events start flowing from pds so that we don't miss e.g. any handle resolutions.
-    mockNetworkUtilities(pds, bsky)
+    mockNetworkUtilities(pds, bsky, [
+      {
+        id: '#bsky_chat',
+        publicUrl: chatPublicUrl,
+        localUrl: chat.url,
+      },
+    ])
 
     const ozone = await TestOzone.create({
       port: ozonePort,
@@ -106,6 +132,8 @@ export class TestNetwork extends TestNetworkNoAppView {
       appviewPushEvents: true,
       pdsUrl: pds.url,
       pdsDid: pds.ctx.cfg.service.did,
+      chatUrl: chat.url,
+      chatDid: chatServiceProfile.did,
       verifierDid: ozoneServiceProfile.did,
       verifierUrl: pds.url,
       verifierPassword: 'temp',
@@ -145,7 +173,15 @@ export class TestNetwork extends TestNetworkNoAppView {
       )
     }
 
-    return new TestNetwork(plc, pds, bsky, ozone, introspect)
+    return new TestNetwork(
+      plc,
+      pds,
+      bsky,
+      chat,
+      chatPublicUrl,
+      ozone,
+      introspect,
+    )
   }
 
   async processFullSubscription(timeout = 5000) {
@@ -202,6 +238,7 @@ export class TestNetwork extends TestNetworkNoAppView {
 
   async close() {
     await Promise.all(this.feedGens.map((fg) => fg.close()))
+    await this.chat.close()
     await this.ozone.close()
     await this.bsky.close()
     await this.pds.close()

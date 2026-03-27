@@ -16,9 +16,7 @@ import {useQueryClient} from '@tanstack/react-query'
 import {uploadBlob} from '#/lib/api'
 import {
   BSKY_APP_ACCOUNT_DID,
-  DISCOVER_SAVED_FEED,
-  TIMELINE_SAVED_FEED,
-  VIDEO_SAVED_FEED,
+  DEFAULT_ONBOARDING_SAVED_FEEDS,
 } from '#/lib/constants'
 import {useRequestNotificationsPermission} from '#/lib/notifications/notifications'
 import {logEvent} from '#/lib/statsig/statsig'
@@ -108,20 +106,11 @@ export function StepFinished() {
           await agent.setInterestsPref({tags: selectedInterests})
 
           // Default feeds that every user should have pinned when landing in the app
-          const feedsToSave: AppBskyActorDefs.SavedFeed[] = [
-            {
-              ...DISCOVER_SAVED_FEED,
+          const feedsToSave: AppBskyActorDefs.SavedFeed[] =
+            DEFAULT_ONBOARDING_SAVED_FEEDS.map(feed => ({
+              ...feed,
               id: TID.nextStr(),
-            },
-            {
-              ...TIMELINE_SAVED_FEED,
-              id: TID.nextStr(),
-            },
-            {
-              ...VIDEO_SAVED_FEED,
-              id: TID.nextStr(),
-            },
-          ]
+            }))
 
           // Any starter pack feeds will be pinned _after_ the defaults
           if (starterPack && starterPack.feeds?.length) {
@@ -327,7 +316,7 @@ function ValueProposition({
                 : _(msg`Next`)
             }
             onPress={onPress}>
-            <ButtonText>
+            <ButtonText style={{color: 'white'}}>
               {saving ? (
                 <Trans>Finalizing</Trans>
               ) : subStep === 2 ? (

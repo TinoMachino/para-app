@@ -124,6 +124,218 @@
       "displayName": "Rafael Ibarra",
       "description": "Trusted delegate for civic voting power.",
       "roles": ["delegate"]
+    },
+    {
+      "alias": "reporter_capital",
+      "handle": "reporter-capital.test",
+      "email": "reporter-capital@test.com",
+      "password": "hunter2",
+      "displayName": "Andrea Mena",
+      "description": "Metro reporter focused on transit failures and public data.",
+      "roles": ["journalist"]
+    },
+    {
+      "alias": "vecina_jalisco",
+      "handle": "vecina-jalisco.test",
+      "email": "vecina-jalisco@test.com",
+      "password": "hunter2",
+      "displayName": "Lucia Fonseca",
+      "description": "Neighborhood organizer following water and waste issues in Jalisco.",
+      "roles": ["resident", "organizer"]
+    },
+    {
+      "alias": "agua_watch_jal",
+      "handle": "agua-watch-jal.test",
+      "email": "agua-watch-jal@test.com",
+      "password": "hunter2",
+      "displayName": "Miguel Arroyo",
+      "description": "Volunteer who tracks leaks, reservoir updates, and water rationing.",
+      "roles": ["ngo", "resident"]
+    },
+    {
+      "alias": "estudiante_cdmx",
+      "handle": "estudiante-cdmx.test",
+      "email": "estudiante-cdmx@test.com",
+      "password": "hunter2",
+      "displayName": "Renata Solis",
+      "description": "Student commuter documenting unsafe transfers and long routes.",
+      "roles": ["student", "resident"]
+    },
+    {
+      "alias": "movilidad_colectiva",
+      "handle": "colectivo-anden.test",
+      "email": "movilidad-colectiva@test.com",
+      "password": "hunter2",
+      "displayName": "Colectivo Anden",
+      "description": "Transit collective posting corridor audits and service alerts.",
+      "roles": ["collective"]
+    },
+    {
+      "alias": "abogada_oax",
+      "handle": "abogada-oax.test",
+      "email": "abogada-oax@test.com",
+      "password": "hunter2",
+      "displayName": "Ximena Cruz",
+      "description": "Public-interest lawyer pushing for stronger environmental disclosure.",
+      "roles": ["expert", "resident"]
+    },
+    {
+      "alias": "barrio_vivienda",
+      "handle": "barrio-vivienda.test",
+      "email": "barrio-vivienda@test.com",
+      "password": "hunter2",
+      "displayName": "Comite Barrio Vivienda",
+      "description": "Housing committee collecting rent pressure stories and zoning proposals.",
+      "roles": ["collective", "housing"]
+    },
+    {
+      "alias": "datos_nl",
+      "handle": "datos-nl.test",
+      "email": "datos-nl@test.com",
+      "password": "hunter2",
+      "displayName": "Hector Salgado",
+      "description": "Spreadsheet-heavy policy nerd focused on land use and metro growth.",
+      "roles": ["researcher"]
+    }
+  ],
+  "follows": [
+    {
+      "actor": "active_participant",
+      "subject": "active_participant_2",
+      "rkey": "seed-follow-active-a-active-b",
+      "createdAt": "2026-03-11T08:00:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "official_jalisco",
+      "rkey": "seed-follow-active-a-off-jal",
+      "createdAt": "2026-03-11T08:01:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "official_cdmx",
+      "rkey": "seed-follow-active-a-off-cdmx",
+      "createdAt": "2026-03-11T08:02:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "mod_jalisco",
+      "rkey": "seed-follow-active-a-mod-jal",
+      "createdAt": "2026-03-11T08:03:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "mod_cdmx",
+      "rkey": "seed-follow-active-a-mod-cdmx",
+      "createdAt": "2026-03-11T08:04:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "mod_oaxaca",
+      "rkey": "seed-follow-active-a-mod-oax",
+      "createdAt": "2026-03-11T08:05:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "mod_nuevoleon",
+      "rkey": "seed-follow-active-a-mod-nl",
+      "createdAt": "2026-03-11T08:06:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "deputy_applicant",
+      "rkey": "seed-follow-active-a-deputy",
+      "createdAt": "2026-03-11T08:07:00.000Z"
+    },
+    {
+      "actor": "active_participant",
+      "subject": "delegate_rep",
+      "rkey": "seed-follow-active-a-delegate",
+      "createdAt": "2026-03-11T08:08:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "active_participant",
+      "rkey": "seed-follow-active-b-active-a",
+      "createdAt": "2026-03-11T08:09:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "official_jalisco",
+      "rkey": "seed-follow-active-b-off-jal",
+      "createdAt": "2026-03-11T08:10:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "official_cdmx",
+      "rkey": "seed-follow-active-b-off-cdmx",
+      "createdAt": "2026-03-11T08:11:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "mod_jalisco",
+      "rkey": "seed-follow-active-b-mod-jal",
+      "createdAt": "2026-03-11T08:12:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "mod_nuevoleon",
+      "rkey": "seed-follow-active-b-mod-nl",
+      "createdAt": "2026-03-11T08:13:00.000Z"
+    },
+    {
+      "actor": "active_participant_2",
+      "subject": "deputy_applicant",
+      "rkey": "seed-follow-active-b-deputy",
+      "createdAt": "2026-03-11T08:14:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "subject": "active_participant",
+      "rkey": "seed-follow-deputy-active-a",
+      "createdAt": "2026-03-11T08:15:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "subject": "active_participant_2",
+      "rkey": "seed-follow-deputy-active-b",
+      "createdAt": "2026-03-11T08:16:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "subject": "delegate_rep",
+      "rkey": "seed-follow-deputy-delegate",
+      "createdAt": "2026-03-11T08:17:00.000Z"
+    },
+    {
+      "actor": "deputy_applicant",
+      "subject": "official_cdmx",
+      "rkey": "seed-follow-deputy-off-cdmx",
+      "createdAt": "2026-03-11T08:18:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "subject": "active_participant",
+      "rkey": "seed-follow-delegate-active-a",
+      "createdAt": "2026-03-11T08:19:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "subject": "active_participant_2",
+      "rkey": "seed-follow-delegate-active-b",
+      "createdAt": "2026-03-11T08:20:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "subject": "official_jalisco",
+      "rkey": "seed-follow-delegate-off-jal",
+      "createdAt": "2026-03-11T08:21:00.000Z"
+    },
+    {
+      "actor": "delegate_rep",
+      "subject": "deputy_applicant",
+      "rkey": "seed-follow-delegate-deputy",
+      "createdAt": "2026-03-11T08:22:00.000Z"
     }
   ],
   "verificationRecords": [
@@ -1279,6 +1491,86 @@
       "stanceCycle": ["for", "against", "amendment"],
       "optionCycle": [0, 1, 2],
       "textPrefix": "Escenario mega de vivienda para validar paginacion, agregados y orden de timeline."
+    },
+    {
+      "type": "demo_social_graph",
+      "alias": "mx-civic-buzz",
+      "startAt": "2026-03-25T14:00:00.000Z",
+      "anchorActor": "active_participant",
+      "bridgeActors": [
+        "active_participant_2",
+        "delegate_rep",
+        "reporter_capital",
+        "mod_jalisco",
+        "official_jalisco",
+        "mod_cdmx",
+        "official_cdmx",
+        "mod_oaxaca",
+        "mod_nuevoleon"
+      ],
+      "actors": [
+        "active_participant",
+        "active_participant_2",
+        "delegate_rep",
+        "deputy_applicant",
+        "official_jalisco",
+        "official_cdmx",
+        "mod_jalisco",
+        "mod_cdmx",
+        "mod_oaxaca",
+        "mod_nuevoleon",
+        "reporter_capital",
+        "vecina_jalisco",
+        "agua_watch_jal",
+        "estudiante_cdmx",
+        "movilidad_colectiva",
+        "abogada_oax",
+        "barrio_vivienda",
+        "datos_nl"
+      ],
+      "followsPerActor": 6,
+      "postsPerActor": 4,
+      "replyCount": 54,
+      "likesPerPost": 3,
+      "repostEvery": 5,
+      "topics": [
+        {
+          "community": "p/Jalisco Agua",
+          "tag": "|#Matter",
+          "focus": "cortes de agua, fugas y tiempos reales de reparacion",
+          "proposal": "un tablero vecinal con cuadrillas, colonias afectadas y SLA publico"
+        },
+        {
+          "community": "p/CDMX Movilidad",
+          "tag": "|#Policy",
+          "focus": "transbordos inseguros, tiempos muertos y saturacion en horas pico",
+          "proposal": "priorizar rutas alimentadoras y publicar datos de intervalo por estacion"
+        },
+        {
+          "community": "p/Oaxaca Territorio",
+          "tag": "|#Matter",
+          "focus": "consulta ambiental, concesiones y seguimiento juridico local",
+          "proposal": "una mesa abierta con expedientes, mapas y compromisos por comunidad"
+        },
+        {
+          "community": "p/Nuevo Leon Vivienda",
+          "tag": "|#Policy",
+          "focus": "renta, suelo urbano y crecimiento cerca del metro",
+          "proposal": "zonificacion con vivienda asequible y metas trimestrales verificables"
+        },
+        {
+          "community": "r/Mexico",
+          "tag": "|#Matter",
+          "focus": "colas eternas para tramites vecinales",
+          "proposal": "ventanilla unica con seguimiento publico"
+        },
+        {
+          "community": "p/Participacion Ciudadana",
+          "tag": "|#Policy",
+          "focus": "delegaciones sin trazabilidad",
+          "proposal": "historial abierto de delegaciones y votos"
+        }
+      ]
     }
   ]
 }

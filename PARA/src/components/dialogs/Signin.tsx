@@ -4,9 +4,10 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
+import {IS_LOCAL_DEV_MODE, LOCAL_DEV_SERVICE} from '#/lib/constants'
 import {useLoggedOutViewControls} from '#/state/shell/logged-out'
 import {useCloseAllActiveElements} from '#/state/util'
-import {Logo} from '#/view/icons/Logo'
+import {Logomark} from '#/view/icons/Logomark'
 import {Logotype} from '#/view/icons/Logotype'
 import {atoms as a, useBreakpoints, useTheme} from '#/alf'
 import {Button, ButtonText} from '#/components/Button'
@@ -55,7 +56,7 @@ function SigninDialogInner({}: {control: Dialog.DialogOuterProps['control']}) {
             a.gap_sm,
             a.pb_lg,
           ]}>
-          <Logo width={36} />
+          <Logomark width={32} fill="#474652" />
           <View style={{paddingTop: 6}}>
             <Logotype width={120} fill={t.atoms.text.color} />
           </View>
@@ -77,6 +78,22 @@ function SigninDialogInner({}: {control: Dialog.DialogOuterProps['control']}) {
             Sign in or create your account to join the conversation!
           </Trans>
         </Text>
+
+        {IS_LOCAL_DEV_MODE && (
+          <Text
+            style={[
+              a.text_sm,
+              a.text_center,
+              t.atoms.text_contrast_medium,
+              a.pb_lg,
+              a.mx_auto,
+              {maxWidth: 320},
+            ]}>
+            <Trans>
+              Local demo account: active-a.test / hunter2 on {LOCAL_DEV_SERVICE}
+            </Trans>
+          </Text>
+        )}
 
         <View style={[a.flex_col, a.gap_md]}>
           <Button

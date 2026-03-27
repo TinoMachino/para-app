@@ -82,3 +82,10 @@ export function seen(posts: SeenPost[]) {
     .concat(posts)
     .slice(-SEEN_WINDOW)
 }
+
+export function reset() {
+  userActionHistory.likes = []
+  userActionHistory.follows = []
+  userActionHistory.followSuggestions = []
+  userActionHistory.seen = []
+}

@@ -1,7 +1,7 @@
 
 SHELL = /bin/bash
 .SHELLFLAGS = -o pipefail -c
-NODE_VERSION ?= 20
+NODE_VERSION ?= $(shell [ -f .nvmrc ] && tr -d '\n' < .nvmrc || echo 20)
 
 .PHONY: help
 help: ## Print info about all commands
@@ -15,24 +15,32 @@ help: ## Print info about all commands
 build: ## Compile all modules
 	pnpm build
 
+.PHONY: sync-local-dev-service
+sync-local-dev-service: ## Detect current LAN IP and update local app/backend env vars
+	bash ./scripts/sync-local-dev-service.sh
+
 .PHONY: test
 test: ## Run all tests
 	pnpm test
 
 .PHONY: run-dev-env
 run-dev-env: ## Run a "development environment" shell
+	@$(MAKE) sync-local-dev-service
 	bash -lc 'set -a; [ -f ".env" ] && . ".env"; [ -f ".env.local" ] && . ".env.local"; set +a; export NVM_DIR="$$HOME/.nvm"; [ -s "$$NVM_DIR/nvm.sh" ] || { echo "nvm not found at $$NVM_DIR/nvm.sh"; exit 1; }; . "$$NVM_DIR/nvm.sh"; nvm use $(NODE_VERSION) >/dev/null; cd packages/dev-env; NODE_ENV=development pnpm run start'
 
 .PHONY: run-dev-env-logged
 run-dev-env-logged: ## Run a "development environment" shell (with logging)
+	@$(MAKE) sync-local-dev-service
 	bash -lc 'set -a; [ -f ".env" ] && . ".env"; [ -f ".env.local" ] && . ".env.local"; set +a; export NVM_DIR="$$HOME/.nvm"; [ -s "$$NVM_DIR/nvm.sh" ] || { echo "nvm not found at $$NVM_DIR/nvm.sh"; exit 1; }; . "$$NVM_DIR/nvm.sh"; nvm use $(NODE_VERSION) >/dev/null; cd packages/dev-env; LOG_ENABLED=true NODE_ENV=development pnpm run start | pnpm exec pino-pretty'
 
 .PHONY: run-dev-env-persistent
 run-dev-env-persistent: ## Run dev-env backed by persistent local Postgres/Redis and fixed PDS storage
+	@$(MAKE) sync-local-dev-service
 	bash -lc 'set -a; [ -f ".env" ] && . ".env"; [ -f ".env.local" ] && . ".env.local"; [ -f ".env.shared-demo" ] && . ".env.shared-demo"; [ -f ".env.shared-demo.local" ] && . ".env.shared-demo.local"; set +a; export DEV_ENV_PERSISTENT=true; export DEV_ENV_PLC_DB_POSTGRES_URL="$${DEV_ENV_PLC_DB_POSTGRES_URL:-$${DB_POSTGRES_URL:-}}"; export NVM_DIR="$$HOME/.nvm"; [ -s "$$NVM_DIR/nvm.sh" ] || { echo "nvm not found at $$NVM_DIR/nvm.sh"; exit 1; }; . "$$NVM_DIR/nvm.sh"; nvm use $(NODE_VERSION) >/dev/null; cd packages/dev-env; NODE_ENV=development pnpm run start:persistent'
 
 .PHONY: run-dev-env-persistent-logged
 run-dev-env-persistent-logged: ## Run persistent dev-env with logging
+	@$(MAKE) sync-local-dev-service
 	bash -lc 'set -a; [ -f ".env" ] && . ".env"; [ -f ".env.local" ] && . ".env.local"; [ -f ".env.shared-demo" ] && . ".env.shared-demo"; [ -f ".env.shared-demo.local" ] && . ".env.shared-demo.local"; set +a; export DEV_ENV_PERSISTENT=true; export DEV_ENV_PLC_DB_POSTGRES_URL="$${DEV_ENV_PLC_DB_POSTGRES_URL:-$${DB_POSTGRES_URL:-}}"; export NVM_DIR="$$HOME/.nvm"; [ -s "$$NVM_DIR/nvm.sh" ] || { echo "nvm not found at $$NVM_DIR/nvm.sh"; exit 1; }; . "$$NVM_DIR/nvm.sh"; nvm use $(NODE_VERSION) >/dev/null; cd packages/dev-env; LOG_ENABLED=true NODE_ENV=development pnpm run start:persistent | pnpm exec pino-pretty'
 
 .PHONY: sync-indigo-para-lexicons

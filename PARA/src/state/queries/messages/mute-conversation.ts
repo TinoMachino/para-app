@@ -9,7 +9,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {useAgent} from '#/state/session'
 import {RQKEY as CONVO_KEY} from './conversation'
 import {RQKEY_ROOT as CONVO_LIST_KEY} from './list-conversations'
@@ -26,6 +26,9 @@ export function useMuteConvo(
 ) {
   const queryClient = useQueryClient()
   const agent = useAgent()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   return useMutation({
     mutationFn: async ({mute}: {mute: boolean}) => {
@@ -33,13 +36,13 @@ export function useMuteConvo(
       if (mute) {
         const {data} = await agent.api.chat.bsky.convo.muteConvo(
           {convoId},
-          {headers: DM_SERVICE_HEADERS, encoding: 'application/json'},
+          {headers: dmServiceHeaders, encoding: 'application/json'},
         )
         return data
       } else {
         const {data} = await agent.api.chat.bsky.convo.unmuteConvo(
           {convoId},
-          {headers: DM_SERVICE_HEADERS, encoding: 'application/json'},
+          {headers: dmServiceHeaders, encoding: 'application/json'},
         )
         return data
       }

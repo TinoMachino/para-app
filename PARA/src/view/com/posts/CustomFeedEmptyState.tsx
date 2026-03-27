@@ -7,7 +7,7 @@ import {
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
-import {DISCOVER_FEED_URI} from '#/lib/constants'
+import {isDefaultDiscoverFeedUri} from '#/lib/constants'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {MagnifyingGlassIcon} from '#/lib/icons'
 import {type NavigationProp} from '#/lib/routes/types'
@@ -28,10 +28,7 @@ export function CustomFeedEmptyState() {
     // Log the empty feed error event
     if (feedFeedback.feedSourceInfo && currentAccount?.did) {
       const uri = feedFeedback.feedSourceInfo.uri
-      if (
-        uri === DISCOVER_FEED_URI &&
-        !hasLoggedDiscoverEmptyErrorRef.current
-      ) {
+      if (isDefaultDiscoverFeedUri(uri) && !hasLoggedDiscoverEmptyErrorRef.current) {
         hasLoggedDiscoverEmptyErrorRef.current = true
         logger.metric('feed:discover:emptyError', {
           userDid: currentAccount.did,

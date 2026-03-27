@@ -4,7 +4,7 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {useCleanError} from '#/lib/hooks/useCleanError'
 import {sanitizeHandle} from '#/lib/strings/handles'
 import {logger} from '#/logger'
@@ -75,6 +75,9 @@ function DeleteAccountDialogInner({
   const agent = useAgent()
   const {currentAccount} = useSession()
   const {removeAccount} = useSessionApi()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   const [emailState, setEmailState] = useState(EmailState.DEFAULT)
   const [emailSentCount, setEmailSentCount] = useState(0)
@@ -116,7 +119,7 @@ function DeleteAccountDialogInner({
       const {success} = await agent.api.chat.bsky.actor.deleteAccount(
         undefined,
         {
-          headers: DM_SERVICE_HEADERS,
+          headers: dmServiceHeaders,
         },
       )
       if (!success) {
@@ -150,6 +153,7 @@ function DeleteAccountDialogInner({
     confirmCode,
     control,
     currentAccount,
+    dmServiceHeaders,
     password,
     removeAccount,
   ])
@@ -211,15 +215,15 @@ function DeleteAccountDialogInner({
             </Admonition>
           )}
           <Admonition style={[a.mt_lg]} type="tip">
-            <Trans>
-              You can also{' '}
-              <Span
-                style={[{color: t.palette.primary_500}, web(a.underline)]}
-                onPress={handleDeactivate}>
+              <Trans>
+                You can also{' '}
+                <Span
+                  style={[{color: t.palette.primary_500}, web(a.underline)]}
+                  onPress={handleDeactivate}>
                 temporarily deactivate
               </Span>{' '}
               your account instead. Your profile, posts, feeds, and lists will
-              no longer be visible to other Bluesky users. You can reactivate
+              no longer be visible to other PARA users. You can reactivate
               your account at any time by logging in.
             </Trans>
           </Admonition>
@@ -335,7 +339,7 @@ function DeleteAccountDialogInner({
             </Prompt.TitleText>
             <Prompt.DescriptionText>
               <Trans>
-                This will irreversibly delete your Bluesky account{' '}
+                This will irreversibly delete your PARA account{' '}
                 <Span style={[a.font_semi_bold, t.atoms.text]}>
                   {currentHandle}
                 </Span>{' '}

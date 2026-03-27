@@ -167,18 +167,20 @@ export function toDatetimeString(date: Date): DatetimeString {
  * @throws InvalidDatetimeError - if the input string could not be parsed as a datetime, even with permissive parsing.
  */
 export function normalizeDatetime(dtStr: string): ISODatetimeString {
-  // Parse the string as is
-  const date = new Date(dtStr)
-  if (isAtprotoDate(date)) {
-    return date.toISOString()
-  }
+  const hasTimezone = /.*(([+-]\d\d:?\d\d)|[a-zA-Z])$/.test(dtStr)
 
-  // if dtStr is not a valid date, try parsing again with a timezone
-  if (isNaN(date.getTime()) && !/.*(([+-]\d\d:?\d\d)|[a-zA-Z])$/.test(dtStr)) {
+  // Missing timezone should normalize as UTC rather than local time.
+  if (!hasTimezone) {
     const date = new Date(`${dtStr}Z`)
     if (isAtprotoDate(date)) {
       return date.toISOString()
     }
+  }
+
+  // Parse the string as is
+  const date = new Date(dtStr)
+  if (isAtprotoDate(date)) {
+    return date.toISOString()
   }
 
   throw new InvalidDatetimeError(
@@ -296,9 +298,6 @@ function parseDate(date: Date): Result<AtprotoDate> {
   }
   if (fullYear > 9999) {
     return failure('datetime year is too far in the future')
-  }
-  if (fullYear < 10) {
-    return failure('datetime so close to year zero not allowed')
   }
   return success(date as AtprotoDate)
 }

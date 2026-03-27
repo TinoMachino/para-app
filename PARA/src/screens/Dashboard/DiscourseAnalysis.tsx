@@ -9,7 +9,10 @@ import {
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
+import {useQuery} from '@tanstack/react-query'
 
+import {DiscourseAPI} from '#/lib/api/discourse'
+import {SentimentDistribution} from '#/lib/api/para-lexicons'
 import {getCabildeoUri} from '#/lib/cabildeo-client'
 import {
   DISCOURSE_COMMUNITIES,
@@ -19,6 +22,7 @@ import {
 } from '#/lib/constants/mockData'
 import {type NavigationProp} from '#/lib/routes/types'
 import {useBaseFilter} from '#/state/shell/base-filter'
+import {useAgent} from '#/state/session'
 import {Text} from '#/view/com/util/text/Text'
 import {useTheme} from '#/alf'
 import {ActiveFiltersStackButton} from '#/components/BaseFilterControls'
@@ -193,8 +197,17 @@ const StatisticalChart = ({
   )
 }
 
-const SentimentMatrix = () => {
+const SentimentMatrix = ({sentiment}: {sentiment?: SentimentDistribution}) => {
   const t = useTheme()
+
+  const display = sentiment || {
+    anger: 42,
+    fear: 28,
+    trust: 8,
+    uncertainty: 12,
+    neutral: 10,
+  }
+
   return (
     <View style={[styles.matrixContainer, t.atoms.bg_contrast_25]}>
       <View style={[styles.clusterHeader, {alignItems: 'flex-start'}]}>
@@ -222,7 +235,7 @@ const SentimentMatrix = () => {
               {backgroundColor: '#FF3B30', opacity: 0.8},
             ]}>
             <Text style={styles.matrixCellText}>Enojo</Text>
-            <Text style={styles.matrixCellValue}>42.5%</Text>
+            <Text style={styles.matrixCellValue}>{display.anger}%</Text>
           </View>
           <View
             style={[
@@ -230,7 +243,7 @@ const SentimentMatrix = () => {
               {backgroundColor: '#FF9500', opacity: 0.6},
             ]}>
             <Text style={styles.matrixCellText}>Incertidumbre</Text>
-            <Text style={styles.matrixCellValue}>12.1%</Text>
+            <Text style={styles.matrixCellValue}>{display.uncertainty}%</Text>
           </View>
         </View>
         <View style={styles.matrixRow}>
@@ -240,7 +253,7 @@ const SentimentMatrix = () => {
               {backgroundColor: '#34C759', opacity: 0.4},
             ]}>
             <Text style={styles.matrixCellText}>Confianza</Text>
-            <Text style={styles.matrixCellValue}>8.4%</Text>
+            <Text style={styles.matrixCellValue}>{display.trust}%</Text>
           </View>
           <View
             style={[
@@ -248,7 +261,7 @@ const SentimentMatrix = () => {
               {backgroundColor: '#007AFF', opacity: 0.7},
             ]}>
             <Text style={styles.matrixCellText}>Miedo</Text>
-            <Text style={styles.matrixCellValue}>28.9%</Text>
+            <Text style={styles.matrixCellValue}>{display.fear}%</Text>
           </View>
         </View>
       </View>
@@ -259,14 +272,78 @@ const SentimentMatrix = () => {
 export function DiscourseAnalysisScreen() {
   useLingui()
   const t = useTheme()
+  const agent = useAgent()
   const {activeFilters} = useBaseFilter()
-
   const [timeframe, setTimeframe] = useState<'24h' | '7d' | '30d'>('7d')
 
-  // --- Dynamic Data Logic ---
+  const discourseApi = useMemo(() => new DiscourseAPI(agent), [agent])
+  const community = activeFilters[0]
+
+  const {data: snapshot} = useQuery({
+    queryKey: ['discourse-snapshot', community, timeframe],
+    queryFn: () => discourseApi.getSnapshot({community, timeframe}),
+  })
+
+  const {data: topics} = useQuery({
+    queryKey: ['discourse-topics', community, timeframe],
+    queryFn: () => discourseApi.getTopics({community, timeframe}),
+  })
+
+  const {data: sentiment} = useQuery({
+    queryKey: ['discourse-sentiment', community, timeframe],
+    queryFn: () => discourseApi.getSentiment({community, timeframe}),
+  })
+
+  const latestSnapshot = snapshot?.[0]
+
   const dynamicData = useMemo(() => {
     const isMorena = activeFilters.includes('Morena')
     const isOpposition = activeFilters.includes('Frente Amplio')
+    const tfMultiplier = timeframe === '24h' ? 0.8 : timeframe === '7d' ? 1 : 1.2
+
+    const indicators = DISCOURSE_INDICATORS.map((ind, i) => {
+      const labelsEs = [
+        'Calidad Discursiva',
+        'Volatilidad Semántica',
+        'Diversidad Léxica',
+        'Eco-Cámara (Echo)',
+      ]
+      const descriptionsEs = [
+        'Mide qué tan constructivo y civil es el debate actual.',
+        'Rapidez con la que cambian los temas y el foco.',
+        'Riqueza del vocabulario utilizado en las discusiones.',
+        'Nivel de aislamiento de las opiniones dentro de grupos.',
+      ]
+
+      let displayValue = '0.00'
+      if (latestSnapshot) {
+        if (i === 0)
+          displayValue = (latestSnapshot.avgConstructiveness / 100).toFixed(2)
+        if (i === 1)
+          displayValue = (latestSnapshot.semanticVolatility / 100).toFixed(2)
+        if (i === 2)
+          displayValue = (latestSnapshot.lexicalDiversity / 100).toFixed(2)
+        if (i === 3)
+          displayValue = (latestSnapshot.echoChamberIndex / 100).toFixed(2)
+      } else {
+        displayValue = (ind.baseValue * tfMultiplier).toFixed(2)
+      }
+
+      return {
+        ...ind,
+        label: labelsEs[i] || ind.label,
+        description: descriptionsEs[i] || ind.description,
+        value: displayValue,
+        trend:
+          i === 0
+            ? timeframe === '24h'
+              ? ind.trendPlus
+              : ind.trendMinus
+            : ind.trend,
+        subValue:
+          i === 2 ? (isOpposition ? 'Tri-modal' : 'Bi-modal') : ind.subValue,
+      }
+    })
 
     return {
       heuristic: {
@@ -279,46 +356,7 @@ export function DiscourseAnalysisScreen() {
           ? 'Alta uniformidad en canales oficiales.'
           : 'Se detectan puntos de vista muy diversos y en conflicto.',
       },
-      indicators: DISCOURSE_INDICATORS.map((ind, i) => {
-        const isMorena = activeFilters.includes('Morena')
-        const isOpposition = activeFilters.includes('Frente Amplio')
-        const tfMultiplier =
-          timeframe === '24h' ? 0.8 : timeframe === '7d' ? 1 : 1.2
-
-        let value = (ind.baseValue * tfMultiplier).toFixed(2)
-        if (i === 1) value = (ind.baseValue * (isMorena ? 0.9 : 1.1)).toFixed(1)
-        if (i === 2) value = 'Δ' + (ind.baseValue * tfMultiplier).toFixed(1)
-        if (i === 3) value = (ind.baseValue * (isMorena ? 1.2 : 1)).toFixed(2)
-        if (i === 0) value += 'σ'
-
-        const labelsEs = [
-          'Volumen de Convers. ',
-          'Densidad de Nodos',
-          'Nuevos Participantes',
-          'Velocidad Angular',
-        ]
-        const descriptionsEs = [
-          'Cantidad de mensajes y actividad generada.',
-          'Qué tan unidas están las conversaciones centrales.',
-          'Interés reciente: cuentas nuevas entrando al debate.',
-          'Rapidez con la que cambian los temas en foco.',
-        ]
-
-        return {
-          ...ind,
-          label: labelsEs[i] || ind.label,
-          description: descriptionsEs[i] || ind.description,
-          value,
-          trend:
-            i === 0
-              ? timeframe === '24h'
-                ? ind.trendPlus
-                : ind.trendMinus
-              : ind.trend,
-          subValue:
-            i === 2 ? (isOpposition ? 'Tri-modal' : 'Bi-modal') : ind.subValue,
-        }
-      }),
+      indicators,
       polarization: [
         {label: 'Izquierda', value: isOpposition ? 40 : 85, color: '#34C759'},
         {label: 'Centro', value: 15, color: '#FFCC00'},
@@ -334,7 +372,7 @@ export function DiscourseAnalysisScreen() {
         {label: 'Apático', value: 28, color: '#5856D6'},
       ],
     }
-  }, [activeFilters, timeframe, t])
+  }, [activeFilters, timeframe, t, latestSnapshot])
 
   return (
     <Layout.Screen testID="discourseAnalysisScreen">
@@ -357,7 +395,6 @@ export function DiscourseAnalysisScreen() {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}>
         <Layout.Center style={styles.centerContainer}>
-          {/* Timeframe Selector */}
           <View style={styles.timeframeRow}>
             {(['24h', '7d', '30d'] as const).map(tf => (
               <TouchableOpacity
@@ -431,43 +468,43 @@ export function DiscourseAnalysisScreen() {
             />
           </View>
 
-          <SentimentMatrix />
+          <SentimentMatrix sentiment={sentiment} />
 
           <View style={[styles.fluxContainer, t.atoms.bg_contrast_25]}>
             <Text style={[styles.chartTitle, t.atoms.text]}>
-              Temas Principales por Comunidad
+              Temas Principales Directos
             </Text>
             <View style={styles.communityKeywords}>
-              {DISCOURSE_COMMUNITIES.filter(
-                comm =>
-                  activeFilters.length === 0 ||
-                  activeFilters.includes(comm.name) ||
-                  (activeFilters.includes('Morena') &&
-                    comm.name === 'Official'),
-              ) // Basic mock filtering logic
-                .map((comm, i) => (
+              {topics?.map((topic, i) => {
+                let parsedKeywords: string[] = []
+                try {
+                  parsedKeywords = JSON.parse(topic.keywords)
+                } catch (e) {
+                  parsedKeywords = topic.keywords.split(',').map(k => k.trim())
+                }
+                return (
                   <View key={i} style={styles.communityRow}>
                     <View
                       style={[
                         styles.communityIndicator,
-                        {backgroundColor: comm.color},
+                        {backgroundColor: t.palette.primary_500},
                       ]}
                     />
                     <Text style={[styles.communityName, t.atoms.text]}>
-                      {comm.name}:{' '}
+                      {topic.clusterLabel}:{' '}
                     </Text>
                     <View style={styles.keywordPills}>
-                      {comm.keywords.map(kw => (
+                      {parsedKeywords.map((kw: string) => (
                         <View
                           key={kw}
                           style={[
                             styles.keywordPill,
-                            {backgroundColor: comm.color + '15'},
+                            {backgroundColor: t.palette.primary_500 + '15'},
                           ]}>
                           <Text
                             style={[
                               styles.keywordPillText,
-                              {color: comm.color},
+                              {color: t.palette.primary_500},
                             ]}>
                             {kw}
                           </Text>
@@ -475,7 +512,13 @@ export function DiscourseAnalysisScreen() {
                       ))}
                     </View>
                   </View>
-                ))}
+                )
+              })}
+              {(!topics || topics.length === 0) && (
+                <Text style={[t.atoms.text_contrast_medium, {fontSize: 12}]}>
+                  No hay temas detectados aún para este periodo.
+                </Text>
+              )}
             </View>
           </View>
 

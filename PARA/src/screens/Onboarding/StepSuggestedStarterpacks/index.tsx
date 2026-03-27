@@ -7,6 +7,7 @@ import {useModerationOpts} from '#/state/preferences/moderation-opts'
 import {useOnboardingSuggestedStarterPacksQuery} from '#/state/queries/useOnboardingSuggestedStarterPacksQuery'
 import {
   OnboardingControls,
+  OnboardingDescriptionText,
   OnboardingPosition,
   OnboardingTitleText,
 } from '#/screens/Onboarding/Layout'
@@ -41,9 +42,15 @@ export function StepSuggestedStarterpacks() {
       <OnboardingPosition />
       <OnboardingTitleText>
         <Trans comment="Starter packs suggested to the user for them to follow">
-          Find people to follow
+          Start inside a civic circle
         </Trans>
       </OnboardingTitleText>
+      <OnboardingDescriptionText>
+        <Trans>
+          Starter packs help you enter PARA through real clusters of people,
+          not a cold empty timeline.
+        </Trans>
+      </OnboardingDescriptionText>
 
       <View
         style={[

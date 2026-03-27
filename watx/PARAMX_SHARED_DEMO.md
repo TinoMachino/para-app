@@ -72,7 +72,35 @@ Recommended storage root on the backend machine:
 - `~/.paramx-demo/pds`
 - `~/.paramx-demo/blobstore`
 
-## 3) Start the persistent backend stack
+## 3) Start the public tunnels first
+
+If `DEV_ENV_PDS_HOSTNAME` and `DEV_ENV_BSKY_PUBLIC_URL` point at ngrok domains,
+those tunnels must already be up before you start the persistent backend.
+
+Reserved-domain example:
+
+```bash
+ngrok http --url=https://pds.paramx.social.ngrok.pro 2583
+ngrok http --url=https://appview.paramx.social.ngrok.pro 2584
+```
+
+If you use random tunnel URLs instead:
+
+```bash
+ngrok http 2583
+ngrok http 2584
+```
+
+Then update `.env.shared-demo` so:
+
+- `DEV_ENV_PDS_HOSTNAME` matches the PDS tunnel hostname only
+- `DEV_ENV_BSKY_PUBLIC_URL` matches the full AppView tunnel URL
+
+If you skip this step, `make run-dev-env-persistent` can fail during bootstrap
+with `XRPCError: fetch failed` / `UND_ERR_CONNECT_TIMEOUT` while creating the
+service identities.
+
+## 4) Start the persistent backend stack
 
 ```bash
 make run-dev-env-persistent
@@ -91,7 +119,7 @@ Useful variant with logs:
 make run-dev-env-persistent-logged
 ```
 
-## 4) Verify health
+## 5) Verify health
 
 Local:
 
@@ -107,7 +135,7 @@ curl https://pds.paramx.social/xrpc/_health
 curl https://appview.paramx.social/xrpc/_health
 ```
 
-## 5) Seed the civic demo
+## 6) Seed the civic demo
 
 From the `PARA/` app root:
 
@@ -134,7 +162,7 @@ node ./scripts/civic-seed/index.mjs reset \
   --credentials <credentials.json>
 ```
 
-## 6) Expected persistence behavior
+## 7) Expected persistence behavior
 
 Persists across normal restarts:
 
@@ -146,7 +174,7 @@ Persists across normal restarts:
 
 Will be lost if you remove the persistent Docker volumes or delete the PDS storage directories.
 
-## 7) Reset points
+## 8) Reset points
 
 To clear civic demo content only:
 
@@ -161,7 +189,7 @@ To fully reset PDS repo/blob state:
 
 - delete the directories under `DEV_ENV_STORAGE_ROOT`
 
-## 8) Notes
+## 9) Notes
 
 - This is a shared demo/staging path, not full production hardening.
 - For a real public deployment, move tunnels to a dedicated host or reverse proxy and add monitoring/backups.

@@ -31,6 +31,8 @@ export class TestBsky {
     const plcClient = new PlcClient(cfg.plcUrl)
 
     const port = cfg.port || (await getPort())
+    // The appview may publish a public URL, but local bootstrap and tests
+    // should still talk to the local server directly.
     const url = `http://localhost:${port}`
 
     const op = await atprotoOp({

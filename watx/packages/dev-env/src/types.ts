@@ -45,6 +45,21 @@ export type OzoneConfig = Partial<ozone.OzoneEnvironment> & {
   imgInvalidator?: ozone.ImageInvalidator
 }
 
+export type ChatConfig = {
+  port?: number
+  serverDid?: string
+  publicUrl?: string
+  handle?: string
+  privateKey?: string
+  appviewUrl?: string
+}
+
+export type DidServiceRewrite = {
+  id: `#${string}`
+  publicUrl: string
+  localUrl: string
+}
+
 export type TestServerParams = {
   dbPostgresUrl: string
   dbPostgresSchema: string
@@ -52,6 +67,7 @@ export type TestServerParams = {
   plc: Partial<PlcConfig>
   bsky: Partial<BskyConfig>
   ozone: Partial<OzoneConfig>
+  chat: Partial<ChatConfig>
   introspect: Partial<IntrospectConfig>
 }
 

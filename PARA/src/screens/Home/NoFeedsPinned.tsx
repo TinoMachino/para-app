@@ -5,7 +5,7 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 
-import {DISCOVER_SAVED_FEED, TIMELINE_SAVED_FEED} from '#/lib/constants'
+import {RECOMMENDED_SAVED_FEEDS} from '#/lib/constants'
 import {useOverwriteSavedFeedsMutation} from '#/state/queries/preferences'
 import {type UsePreferencesQueryResponse} from '#/state/queries/preferences'
 import {CenteredView} from '#/view/com/util/Views'
@@ -28,35 +28,25 @@ export function NoFeedsPinned({
     useOverwriteSavedFeedsMutation()
 
   const addRecommendedFeeds = useCallback(async () => {
-    let skippedTimeline = false
-    let skippedDiscover = false
+    const recommendedKeys = new Set(
+      RECOMMENDED_SAVED_FEEDS.map(feed => `${feed.type}:${feed.value}`),
+    )
     let remainingSavedFeeds = []
 
-    // remove first instance of both timeline and discover, since we're going to overwrite them
+    // remove existing recommended feed entries, since we're going to overwrite them
     for (const savedFeed of preferences.savedFeeds) {
-      if (savedFeed.type === 'timeline' && !skippedTimeline) {
-        skippedTimeline = true
-      } else if (
-        savedFeed.value === DISCOVER_SAVED_FEED.value &&
-        !skippedDiscover
-      ) {
-        skippedDiscover = true
+      if (recommendedKeys.has(`${savedFeed.type}:${savedFeed.value}`)) {
       } else {
         remainingSavedFeeds.push(savedFeed)
       }
     }
 
     const toSave = [
-      {
-        ...DISCOVER_SAVED_FEED,
+      ...RECOMMENDED_SAVED_FEEDS.map(feed => ({
+        ...feed,
         pinned: true,
         id: TID.nextStr(),
-      },
-      {
-        ...TIMELINE_SAVED_FEED,
-        pinned: true,
-        id: TID.nextStr(),
-      },
+      })),
       ...remainingSavedFeeds,
     ]
 

@@ -10,6 +10,7 @@ import {
   type CommonNavigatorParams,
   type NavigationProp,
 } from '#/lib/routes/types'
+import {useProfileQuery} from '#/state/queries/profile'
 import {useTheme} from '#/alf'
 import {Macintosh_Stroke2_Corner2_Rounded as MacintoshIcon} from '#/components/icons/Macintosh'
 import {Message_Stroke2_Corner0_Rounded as ChatIcon} from '#/components/icons/Message'
@@ -22,8 +23,23 @@ export function CommunityAgentProfileScreen() {
   const route =
     useRoute<RouteProp<CommonNavigatorParams, 'CommunityAgentProfile'>>()
   const [isFollowing, setIsFollowing] = useState(false)
+  const {agentId} = route.params
+  const {data: seededProfile} = useProfileQuery({did: agentId})
 
-  const profile = COMMUNITY_AGENT_PROFILE
+  const profile = seededProfile
+    ? {
+        displayName:
+          seededProfile.displayName || seededProfile.handle || COMMUNITY_AGENT_PROFILE.displayName,
+        handle: seededProfile.handle,
+        role: 'Representative',
+        bio: seededProfile.description || COMMUNITY_AGENT_PROFILE.bio,
+        communityFocus: route.params.communityName || COMMUNITY_AGENT_PROFILE.communityFocus,
+        followersCount: seededProfile.followersCount || 0,
+        postsCount: seededProfile.postsCount || 0,
+        responseTime: 'Active',
+        expertise: ['Governance', 'Community', 'Policy'],
+      }
+    : COMMUNITY_AGENT_PROFILE
   const communityName = route.params.communityName || 'this community'
   const posts = useMemo(
     () =>

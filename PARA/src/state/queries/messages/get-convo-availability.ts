@@ -1,6 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 
-import {DM_SERVICE_HEADERS} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl} from '#/lib/constants'
 import {useAgent} from '#/state/session'
 import {STALE} from '..'
 
@@ -9,13 +9,16 @@ export const RQKEY = (did: string) => [RQKEY_ROOT, did]
 
 export function useGetConvoAvailabilityQuery(did: string) {
   const agent = useAgent()
+  const dmServiceHeaders = getDmServiceHeadersForServiceUrl(
+    agent.serviceUrl.toString(),
+  )
 
   return useQuery({
     queryKey: RQKEY(did),
     queryFn: async () => {
       const {data} = await agent.chat.bsky.convo.getConvoAvailability(
         {members: [did]},
-        {headers: DM_SERVICE_HEADERS},
+        {headers: dmServiceHeaders},
       )
 
       return data
