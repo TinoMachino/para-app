@@ -4,7 +4,7 @@ This project uses `pnpm` workspaces, Jest, and Docker-backed services (Postgres 
 
 ## Prerequisites
 
-- Node.js 18 (recommended via `nvm`)
+- Node.js 22 (recommended via `nvm`)
 - `pnpm` (via `corepack`)
 - Docker running
 
@@ -16,10 +16,10 @@ make deps
 make build
 ```
 
-If `nvm` is already installed, ensure Node 18 is active:
+If `nvm` is already installed, ensure Node 22 is active:
 
 ```bash
-nvm use 18
+nvm use 22
 node -v
 ```
 

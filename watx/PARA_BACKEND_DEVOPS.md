@@ -48,7 +48,7 @@ So Tap discovers repos via Para post activity and emits only Para-relevant recor
 
 ### Prerequisites
 
-- `nvm` installed and Node 18 available.
+- `nvm` installed and Node 22 available.
 - `pnpm` available through `corepack`.
 - Docker running.
 - Go toolchain installed (for Indigo commands).

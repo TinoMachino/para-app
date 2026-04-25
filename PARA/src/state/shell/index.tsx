@@ -1,10 +1,11 @@
+import {BaseFilterProvider} from './base-filter'
 import {Provider as ColorModeProvider} from './color-mode'
 import {Provider as DrawerOpenProvider} from './drawer-open'
 import {Provider as DrawerSwipableProvider} from './drawer-swipe-disabled'
 import {Provider as MinimalModeProvider} from './minimal-mode'
+import {PoliticalAffiliationProvider} from './political-affiliation'
 import {Provider as ShellLayoutProvder} from './shell-layout'
 import {Provider as TickEveryMinuteProvider} from './tick-every-minute'
-import {BaseFilterProvider} from './base-filter'
 
 export {useSetThemePrefs, useThemePrefs} from './color-mode'
 export {useIsDrawerOpen, useSetDrawerOpen} from './drawer-open'
@@ -29,7 +30,9 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
           <DrawerSwipableProvider>
             <MinimalModeProvider>
               <ColorModeProvider>
-                <TickEveryMinuteProvider>{children}</TickEveryMinuteProvider>
+                <PoliticalAffiliationProvider>
+                  <TickEveryMinuteProvider>{children}</TickEveryMinuteProvider>
+                </PoliticalAffiliationProvider>
               </ColorModeProvider>
             </MinimalModeProvider>
           </DrawerSwipableProvider>
