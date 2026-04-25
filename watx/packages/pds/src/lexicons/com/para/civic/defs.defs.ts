@@ -325,3 +325,104 @@ const positionView = l.typedObject<PositionView>(
 )
 
 export { positionView }
+
+type PolicySignalBucket = {
+  $type?: 'com.para.civic.defs#policySignalBucket'
+  signal: number
+  count: number
+}
+
+export type { PolicySignalBucket }
+
+const policySignalBucket = l.typedObject<PolicySignalBucket>(
+  $nsid,
+  'policySignalBucket',
+  l.object({
+    signal: l.integer({ minimum: -3, maximum: 3 }),
+    count: l.integer({ minimum: 0 }),
+  }),
+)
+
+export { policySignalBucket }
+
+type PolicyTally = {
+  $type?: 'com.para.civic.defs#policyTally'
+  subject: l.AtUriString
+  subjectType: 'policy' | l.UnknownString
+  community: string
+  voteCount: number
+  directVoteCount: number
+  delegatedVoteCount: number
+  signalSum: number
+  signalAverage: string
+  eligibleVoterCount: number
+  quorumTarget: number
+  quorumMet: boolean
+  official: boolean
+  certified: boolean
+  outcome:
+    | 'insufficient_quorum'
+    | 'contested'
+    | 'passed'
+    | 'strong_passed'
+    | 'failed'
+    | l.UnknownString
+  state:
+    | 'draft'
+    | 'deliberation'
+    | 'voting'
+    | 'passed'
+    | 'failed'
+    | 'official'
+    | l.UnknownString
+  breakdown: PolicySignalBucket[]
+  computedAt: l.DatetimeString
+}
+
+export type { PolicyTally }
+
+const policyTally = l.typedObject<PolicyTally>(
+  $nsid,
+  'policyTally',
+  l.object({
+    subject: l.string({ format: 'at-uri' }),
+    subjectType: l.string<{ knownValues: ['policy'] }>(),
+    community: l.string({ maxLength: 100 }),
+    voteCount: l.integer({ minimum: 0 }),
+    directVoteCount: l.integer({ minimum: 0 }),
+    delegatedVoteCount: l.integer({ minimum: 0 }),
+    signalSum: l.integer(),
+    signalAverage: l.string({ maxLength: 32 }),
+    eligibleVoterCount: l.integer({ minimum: 0 }),
+    quorumTarget: l.integer({ minimum: 1 }),
+    quorumMet: l.boolean(),
+    official: l.boolean(),
+    certified: l.boolean(),
+    outcome: l.string<{
+      knownValues: [
+        'insufficient_quorum',
+        'contested',
+        'passed',
+        'strong_passed',
+        'failed',
+      ]
+    }>(),
+    state: l.string<{
+      knownValues: [
+        'draft',
+        'deliberation',
+        'voting',
+        'passed',
+        'failed',
+        'official',
+      ]
+    }>(),
+    breakdown: l.array(
+      l.ref<PolicySignalBucket>((() => policySignalBucket) as any),
+      { maxLength: 7 },
+    ),
+    computedAt: l.string({ format: 'datetime' }),
+  }),
+)
+
+export { policyTally }

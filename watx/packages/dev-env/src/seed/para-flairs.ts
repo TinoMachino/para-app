@@ -3,7 +3,7 @@ import { SeedClient } from './client'
 export default async (sc: SeedClient) => {
   const createdAt = () => new Date().toISOString()
   const login = async (identifier: string, password: string) => {
-    const agent = sc.network.pds.getClient()
+    const agent = sc.network.pds.getAgent()
     await agent.login({ identifier, password })
     return agent
   }

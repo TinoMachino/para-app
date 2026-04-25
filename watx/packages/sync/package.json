@@ -30,9 +30,11 @@
     "@atproto/common": "workspace:^",
     "@atproto/identity": "workspace:^",
     "@atproto/lex": "workspace:^",
+    "@atproto/lexicon": "workspace:^",
     "@atproto/repo": "workspace:^",
     "@atproto/syntax": "workspace:^",
     "@atproto/xrpc-server": "workspace:^",
+    "multiformats": "^9.9.0",
     "p-queue": "^6.6.2",
     "ws": "^8.12.0"
   },

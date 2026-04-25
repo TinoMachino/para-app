@@ -91,6 +91,7 @@ export class TestBsky {
       visibilityTagRankPrefix: '',
       debugFieldAllowedDids: new Set(),
       draftsLimit: 500,
+      communityCreatorDids: [],
       ...cfg,
       adminPasswords: [ADMIN_PASSWORD],
       etcdHosts: [],

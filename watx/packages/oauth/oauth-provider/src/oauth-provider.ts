@@ -616,6 +616,7 @@ export class OAuthProvider extends OAuthVerifier {
         await this.accountManager.listDeviceAccounts(deviceId)
       ).map((deviceAccount) => ({
         account: deviceAccount.account,
+        selected: matchesHint.call(parameters, deviceAccount),
 
         // @TODO Return the session expiration date instead of a boolean to
         // avoid having to rely on a leeway when "accepting" the request.
