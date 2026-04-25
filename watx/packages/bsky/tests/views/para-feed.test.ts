@@ -224,7 +224,7 @@ describe('para feed views', () => {
     network = await TestNetwork.create({
       dbPostgresSchema: 'bsky_views_para_feed',
     })
-    agent = network.bsky.getClient()
+    agent = network.bsky.getAgent()
     sc = network.getSeedClient()
     await usersSeed(sc)
     alice = sc.dids.alice
@@ -825,19 +825,29 @@ describe('para feed views', () => {
       cabildeo: string
       present: boolean
       expiresAt?: string
-    }>(network, 'com.para.civic.putLivePresence', {
-      cabildeo: cabildeo.uri,
-      sessionId: 'alice-live-session',
-    }, alice)
+    }>(
+      network,
+      'com.para.civic.putLivePresence',
+      {
+        cabildeo: cabildeo.uri,
+        sessionId: 'alice-live-session',
+      },
+      alice,
+    )
     expect(hostPresence.present).toBe(true)
 
     const participantPresence = await callParaProcedure<{
       cabildeo: string
       present: boolean
-    }>(network, 'com.para.civic.putLivePresence', {
-      cabildeo: cabildeo.uri,
-      sessionId: 'dan-live-session',
-    }, dan)
+    }>(
+      network,
+      'com.para.civic.putLivePresence',
+      {
+        cabildeo: cabildeo.uri,
+        sessionId: 'dan-live-session',
+      },
+      dan,
+    )
     expect(participantPresence.present).toBe(true)
 
     const listed = await callPara<ParaListCabildeosOutput>(
@@ -869,10 +879,7 @@ describe('para feed views', () => {
     const profile = await agent.api.app.bsky.actor.getProfile(
       { actor: dan },
       {
-        headers: await network.serviceHeaders(
-          bob,
-          ids.AppBskyActorGetProfile,
-        ),
+        headers: await network.serviceHeaders(bob, ids.AppBskyActorGetProfile),
       },
     )
     expect(profile.data.cabildeoLive).toEqual(
@@ -886,10 +893,7 @@ describe('para feed views', () => {
     const profiles = await agent.api.app.bsky.actor.getProfiles(
       { actors: [dan] },
       {
-        headers: await network.serviceHeaders(
-          bob,
-          ids.AppBskyActorGetProfiles,
-        ),
+        headers: await network.serviceHeaders(bob, ids.AppBskyActorGetProfiles),
       },
     )
     expect(profiles.data.profiles[0]?.cabildeoLive?.cabildeoUri).toBe(
@@ -917,10 +921,15 @@ describe('para feed views', () => {
     })
     await network.processAll()
 
-    await callParaProcedure(network, 'com.para.civic.putLivePresence', {
-      cabildeo: liveCabildeo.uri,
-      sessionId: 'alice-live-ranking',
-    }, alice)
+    await callParaProcedure(
+      network,
+      'com.para.civic.putLivePresence',
+      {
+        cabildeo: liveCabildeo.uri,
+        sessionId: 'alice-live-ranking',
+      },
+      alice,
+    )
 
     const listed = await callPara<ParaListCabildeosOutput>(
       network,
@@ -933,93 +942,92 @@ describe('para feed views', () => {
   })
 
   it('expires live cabildeo presence without cleanup and respects generic live precedence', async () => {
-    jest.useFakeTimers({
-      doNotFake: [
-        'nextTick',
-        'performance',
-        'setImmediate',
-        'setInterval',
-        'setTimeout',
-      ],
+    const cabildeo = await createCabildeoRecord(sc, alice, {
+      title: 'Expiring live cabildeo',
+      description: 'Presence should expire',
+      community: 'mx-live-expiring',
+      phase: 'open',
+      options: [{ label: 'Yes' }, { label: 'No' }],
     })
-    try {
-      jest.setSystemTime(new Date('2026-04-17T12:00:00.000Z'))
+    await createLiveStatusRecord(sc, alice, {
+      uri: 'https://live.example.com/cabildeo/shared',
+    })
+    await createLiveStatusRecord(sc, bob, {
+      uri: 'https://live.example.com/other-room',
+    })
+    await network.processAll()
 
-      const cabildeo = await createCabildeoRecord(sc, alice, {
-        title: 'Expiring live cabildeo',
-        description: 'Presence should expire',
-        community: 'mx-live-expiring',
-        phase: 'open',
-        options: [{ label: 'Yes' }, { label: 'No' }],
-      })
-      await createLiveStatusRecord(sc, alice, {
-        uri: 'https://live.example.com/cabildeo/shared',
-      })
-      await createLiveStatusRecord(sc, bob, {
-        uri: 'https://live.example.com/other-room',
-      })
-      await network.processAll()
-
-      await callParaProcedure(network, 'com.para.civic.putLivePresence', {
+    await callParaProcedure(
+      network,
+      'com.para.civic.putLivePresence',
+      {
         cabildeo: cabildeo.uri,
         sessionId: 'alice-session-expiring',
-      }, alice)
-      await callParaProcedure(network, 'com.para.civic.putLivePresence', {
+      },
+      alice,
+    )
+    await callParaProcedure(
+      network,
+      'com.para.civic.putLivePresence',
+      {
         cabildeo: cabildeo.uri,
         sessionId: 'bob-session-expiring',
-      }, bob)
+      },
+      bob,
+    )
 
-      const bobGenericLive = await agent.api.app.bsky.actor.getProfile(
-        { actor: bob },
-        {
-          headers: await network.serviceHeaders(
-            alice,
-            ids.AppBskyActorGetProfile,
-          ),
-        },
-      )
-      expect(bobGenericLive.data.status?.isActive).toBe(true)
-      expect(bobGenericLive.data.cabildeoLive).toBeUndefined()
+    const bobGenericLive = await agent.api.app.bsky.actor.getProfile(
+      { actor: bob },
+      {
+        headers: await network.serviceHeaders(
+          alice,
+          ids.AppBskyActorGetProfile,
+        ),
+      },
+    )
+    expect(bobGenericLive.data.status?.isActive).toBe(true)
+    expect(bobGenericLive.data.cabildeoLive).toBeUndefined()
 
-      await createLiveStatusRecord(sc, bob, {
-        uri: 'https://live.example.com/cabildeo/shared',
-      })
-      await network.processAll()
+    await createLiveStatusRecord(sc, bob, {
+      uri: 'https://live.example.com/cabildeo/shared',
+    })
+    await network.processAll()
 
-      const bobMatchedLive = await agent.api.app.bsky.actor.getProfile(
-        { actor: bob },
-        {
-          headers: await network.serviceHeaders(
-            alice,
-            ids.AppBskyActorGetProfile,
-          ),
-        },
-      )
-      expect(bobMatchedLive.data.cabildeoLive?.cabildeoUri).toBe(cabildeo.uri)
+    const bobMatchedLive = await agent.api.app.bsky.actor.getProfile(
+      { actor: bob },
+      {
+        headers: await network.serviceHeaders(
+          alice,
+          ids.AppBskyActorGetProfile,
+        ),
+      },
+    )
+    expect(bobMatchedLive.data.cabildeoLive?.cabildeoUri).toBe(cabildeo.uri)
 
-      jest.setSystemTime(new Date('2026-04-17T12:01:31.000Z'))
+    await network.bsky.db.db
+      .updateTable('cabildeo_live_presence')
+      .set({ expiresAt: new Date(Date.now() - 1000).toISOString() })
+      .where('cabildeo', '=', cabildeo.uri)
+      .execute()
 
-      const listed = await callPara<ParaListCabildeosOutput>(
-        network,
-        'com.para.civic.listCabildeos',
-        { community: 'mx-live-expiring', limit: 10 },
-        alice,
-      )
-      expect(listed.cabildeos[0]?.liveSession).toBeUndefined()
+    const listed = await callPara<ParaListCabildeosOutput>(
+      network,
+      'com.para.civic.listCabildeos',
+      { community: 'mx-live-expiring', limit: 10 },
+      alice,
+    )
+    expect(listed.cabildeos[0]?.liveSession).toBeUndefined()
 
-      const expiredProfile = await agent.api.app.bsky.actor.getProfile(
-        { actor: bob },
-        {
-          headers: await network.serviceHeaders(
-            alice,
-            ids.AppBskyActorGetProfile,
-          ),
-        },
-      )
-      expect(expiredProfile.data.cabildeoLive).toBeUndefined()
-    } finally {
-      jest.useRealTimers()
-    }
+    const expiredProfile = await agent.api.app.bsky.actor.getProfile(
+      { actor: bob },
+      {
+        headers: await network.serviceHeaders(
+          alice,
+          ids.AppBskyActorGetProfile,
+        ),
+      },
+    )
+    expect(expiredProfile.data.cabildeoLive).toBeUndefined()
   })
 
   it('filters blocked participants out of live preview dids', async () => {
@@ -1035,14 +1043,24 @@ describe('para feed views', () => {
     })
     await network.processAll()
 
-    await callParaProcedure(network, 'com.para.civic.putLivePresence', {
-      cabildeo: cabildeo.uri,
-      sessionId: 'alice-blocked-preview',
-    }, alice)
-    await callParaProcedure(network, 'com.para.civic.putLivePresence', {
-      cabildeo: cabildeo.uri,
-      sessionId: 'bob-blocked-preview',
-    }, bob)
+    await callParaProcedure(
+      network,
+      'com.para.civic.putLivePresence',
+      {
+        cabildeo: cabildeo.uri,
+        sessionId: 'alice-blocked-preview',
+      },
+      alice,
+    )
+    await callParaProcedure(
+      network,
+      'com.para.civic.putLivePresence',
+      {
+        cabildeo: cabildeo.uri,
+        sessionId: 'bob-blocked-preview',
+      },
+      bob,
+    )
     await sc.block(dan, bob)
     await network.processAll()
 
@@ -1071,7 +1089,10 @@ describe('para feed views', () => {
     })
     await network.processAll()
 
-    const url = new URL('/xrpc/com.para.civic.putLivePresence', network.bsky.url)
+    const url = new URL(
+      '/xrpc/com.para.civic.putLivePresence',
+      network.bsky.url,
+    )
     const authHeaders = await network.serviceHeaders(
       alice,
       'com.para.civic.putLivePresence',

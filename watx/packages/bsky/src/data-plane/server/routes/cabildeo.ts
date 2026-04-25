@@ -32,17 +32,19 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
           and ${activeHostPresenceExistsSql('live_session', now)}
       )
     )`
+    const sortRankSql = sql<string>`case
+      when ${activeLiveSql}
+        then to_char(
+          "cabildeo_cabildeo"."sortAt"::timestamptz + interval '100 years',
+          'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+        )
+      else "cabildeo_cabildeo"."sortAt"
+    end`
 
     let builder = db.db
       .selectFrom('cabildeo_cabildeo')
       .selectAll()
-      .select(
-        sql<string>`case
-          when ${activeLiveSql}
-            then "cabildeo_cabildeo"."sortAt" + interval '100 years'
-          else "cabildeo_cabildeo"."sortAt"
-        end`.as('sortRank'),
-      )
+      .select(sortRankSql.as('sortRank'))
 
     if (normalizedCommunity) {
       builder = builder.where(
@@ -56,7 +58,7 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
     }
 
     const keyset = new RankedTimeCidKeyset(
-      ref('sortRank'),
+      sortRankSql,
       ref('cabildeo_cabildeo.cid'),
     )
 
