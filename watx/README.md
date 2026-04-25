@@ -1,129 +1,156 @@
-# AT Protocol Reference Implementation (TypeScript)
+# Veintiuno MVP
 
-Welcome friends!
+Veintiuno es una aplicación PARA construida sobre atproto/Bluesky para validar participación cívica digital. Este repositorio contiene la base técnica del backend y las lexicons necesarias para operar el MVP sobre PDS, AppView y clientes compatibles.
 
-This repository contains Bluesky's reference implementation of AT Protocol, and of the `app.bsky` microblogging application service backend.
+El estado actual es **MVP para validación controlada**: hay funcionalidad base lista para pruebas internas y pilotos acotados, pero no debe tratarse como un producto cívico completo ni como una plataforma de participación oficial de extremo a extremo.
 
-## What is in here?
+La regla de producto para este MVP es clara: **no removeremos nada de la interfaz de usuario**. Si una superficie aparece en el cliente pero no pertenece al MVP, se debe limitar la funcionalidad: bloquear acciones incompletas, usar estados deshabilitados, mostrar datos en modo lectura o marcarla como pendiente. La UI puede anticipar el producto futuro, pero el backend y la operación deben prometer solo lo que está listo para validación.
 
-**TypeScript Packages:**
+## Alcance del MVP
 
-| Package                                                                       | Docs                                       | NPM                                                                                                             |
-| ----------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `@atproto/api`: client library                                                | [README](./packages/api/README.md)         | [![NPM](https://img.shields.io/npm/v/@atproto/api)](https://www.npmjs.com/package/@atproto/api)                 |
-| `@atproto/common-web`: shared code and helpers which can run in web browsers  | [README](./packages/common-web/README.md)  | [![NPM](https://img.shields.io/npm/v/@atproto/common-web)](https://www.npmjs.com/package/@atproto/common-web)   |
-| `@atproto/common`: shared code and helpers which doesn't work in web browsers | [README](./packages/common/README.md)      | [![NPM](https://img.shields.io/npm/v/@atproto/common)](https://www.npmjs.com/package/@atproto/common)           |
-| `@atproto/crypto`: cryptographic signing and key serialization                | [README](./packages/crypto/README.md)      | [![NPM](https://img.shields.io/npm/v/@atproto/crypto)](https://www.npmjs.com/package/@atproto/crypto)           |
-| `@atproto/identity`: DID and handle resolution                                | [README](./packages/identity/README.md)    | [![NPM](https://img.shields.io/npm/v/@atproto/identity)](https://www.npmjs.com/package/@atproto/identity)       |
-| `@atproto/lexicon`: schema definition language                                | [README](./packages/lexicon/README.md)     | [![NPM](https://img.shields.io/npm/v/@atproto/lexicon)](https://www.npmjs.com/package/@atproto/lexicon)         |
-| `@atproto/repo`: data storage structure, including MST                        | [README](./packages/repo/README.md)        | [![NPM](https://img.shields.io/npm/v/@atproto/repo)](https://www.npmjs.com/package/@atproto/repo)               |
-| `@atproto/syntax`: string parsers for identifiers                             | [README](./packages/syntax/README.md)      | [![NPM](https://img.shields.io/npm/v/@atproto/syntax)](https://www.npmjs.com/package/@atproto/syntax)           |
-| `@atproto/xrpc`: client-side HTTP API helpers                                 | [README](./packages/xrpc/README.md)        | [![NPM](https://img.shields.io/npm/v/@atproto/xrpc)](https://www.npmjs.com/package/@atproto/xrpc)               |
-| `@atproto/xrpc-server`: server-side HTTP API helpers                          | [README](./packages/xrpc-server/README.md) | [![NPM](https://img.shields.io/npm/v/@atproto/xrpc-server)](https://www.npmjs.com/package/@atproto/xrpc-server) |
+### PARA base social
 
-**TypeScript Services:**
+Incluido en el MVP:
 
-- `pds`: "Personal Data Server", hosting repo content for atproto accounts. Most implementation code in `packages/pds`, with runtime wrapper in `services/pds`. See [bluesky-social/pds](https://github.com/bluesky-social/pds) for directions on self-hosting.
-- `bsky`: AppView implementation of the `app.bsky.*` API endpoints. Running on main network at `api.bsky.app`. Most implementation code in `packages/bsky`, with runtime wrapper in `services/bsky`.
+- Posts PARA y lectura de contenido indexado.
+- Timeline, author feed, thread y consulta por lista de posts.
+- Metadata social de posts PARA.
+- Estadísticas básicas de perfil PARA.
+- Compatibilidad con reglas existentes de visibilidad, bloqueos y mutes donde ya están conectadas.
 
-**Lexicons:** for both the `com.atproto.*` and `app.bsky.*` are canonically versioned in this repo, for now, under `./lexicons/`. These are JSON files in the [Lexicon schema definition language](https://atproto.com/specs/lexicon), similar to JSON Schema or OpenAPI.
+No incluido como promesa de MVP:
 
-**Interoperability Test Data:** the language-neutral test files in `./interop-test-files/` may be useful for other protocol implementations to ensure that they follow the specification correctly
+- Recomendación avanzada.
+- Moderación cívica especializada más allá de las reglas ya conectadas.
+- Métricas públicas definitivas o dashboards de impacto.
 
-The source code for the Bluesky Social client app (for web and mobile) can be found at [bluesky-social/social-app](https://github.com/bluesky-social/social-app).
+### Perfiles y comunidades
 
-Go programming language source code is in [bluesky-social/indigo](https://github.com/bluesky-social/indigo), including the BGS implementation.
+Incluido en el MVP:
 
-## Developer Quickstart
+- Perfiles con agregados PARA disponibles en AppView.
+- Boards/comunidades en modo básico.
+- Governance visible principalmente como estado de lectura y resumen.
+- Modelo actual de figura pública/validación manual donde ya esté soportado.
 
-We recommend [`nvm`](https://github.com/nvm-sh/nvm) for managing Node.js installs. This project requires Node.js version 18. `pnpm` is used to manage the workspace of multiple packages. You can install it with `npm install --global pnpm`.
+Limitado en el MVP:
 
-There is a Makefile which can help with basic development tasks:
+- Administración completa de comunidades.
+- Invitaciones, membresía granular y permisos avanzados.
+- Flujos institucionales completos.
+- Auditoría formal de gobernanza.
+
+### Cabildeo
+
+Incluido en el MVP:
+
+- Crear y leer records de Cabildeo desde PDS cuando las lexicons lo permiten.
+- Listar y ver Cabildeos indexados desde AppView.
+- Listar posiciones de un Cabildeo.
+- Agregados de posiciones, votos, delegaciones y contexto del viewer.
+- Ranking estable con paginación por cursor.
+- Votos y delegación vía records, con lectura agregada en AppView.
+
+Limitado en el MVP:
+
+- El ciclo completo propuesta -> deliberación -> votación -> resolución -> publicación oficial todavía no es una garantía de producto.
+- La operación debe validar manualmente comunidades, roles y datos semilla para pruebas controladas.
+- Las acciones que el cliente muestre pero que no tengan ruta completa deben quedar bloqueadas o claramente pendientes.
+
+### Cabildeo live
+
+Incluido en el MVP:
+
+- Presencia live para Cabildeos elegibles.
+- Host con live status externo activo.
+- Participantes que se unen a una sesión activa.
+- Expiración de presencia por TTL.
+- Ranking boost para Cabildeos live activos.
+- Preview de participantes con filtrado por visibilidad/bloqueos.
+- Hidratación de perfil con `cabildeoLive` cuando aplica.
+
+Limitado en el MVP:
+
+- Live significa presencia y enlace externo, no streaming nativo.
+- No hay grabaciones, chat live dedicado, moderación live en tiempo real ni notificaciones live avanzadas como promesa de MVP.
+- La experiencia debe tolerar que `cabildeoLive` no exista y que `participantPreviewDids.length` no sea igual a `activeParticipantCount`.
+
+## Funcionalidad visible pero limitada en MVP
+
+Estas superficies pueden seguir apareciendo en la interfaz, pero no deben presentarse como listas para producción completa:
+
+- Acciones avanzadas de comunidad, creación/administración completa de boards, invitaciones y membresía granular.
+- Governance avanzado, roles institucionales, auditoría formal y permisos administrativos completos.
+- Discourse intelligence, sentiment y topics como lectura, demo o datos derivados, no como análisis cívico final.
+- Highlights/anotaciones como superficie experimental si el cliente las muestra.
+- Live como presencia/enlace externo, no como plataforma de transmisión.
+- Métricas públicas, dashboards y reportes como exploración futura.
+
+La implementación de cliente debe preferir estados explícitos: disabled, read-only, coming soon, pendiente de validación o requiere rol. No se debe esconder la dirección de producto, pero tampoco permitir acciones sin contrato backend y operativo claro.
+
+## Plan futuro, no MVP
+
+- Verificación INE y pruebas de elegibilidad con zero-knowledge.
+- Gobernanza avanzada con roles institucionales, auditoría formal y flujos administrativos completos.
+- Ciclo completo de Cabildeo: propuesta, deliberación, votación, resolución y publicación oficial.
+- Streaming nativo, grabaciones, notificaciones live avanzadas y moderación live en tiempo real.
+- Analítica/discurso avanzado, resúmenes, sentimiento y recomendaciones como producto confiable.
+- Escalamiento multi-comunidad/regional.
+- Métricas públicas, dashboards y reportes de impacto.
+- Experiencias de cliente más guiadas para usuarios, moderadores, comunidades e instituciones.
+
+## Base técnica
+
+Este repositorio deriva de la implementación TypeScript de AT Protocol y del backend `app.bsky`. Veintiuno usa esa base para agregar lexicons y rutas PARA.
+
+Servicios principales:
+
+- `pds`: Personal Data Server para hospedar repos de cuentas atproto.
+- `bsky`: AppView para servir APIs `app.bsky.*` y vistas PARA indexadas.
+- Lexicons: esquemas `com.para.*` y extensiones relacionadas bajo `lexicons/`.
+- Data-plane: consultas e índices que alimentan feeds, perfiles, Cabildeos, comunidades, highlights y discourse.
+
+Paquetes importantes:
+
+- `packages/pds`: validación, escritura y lectura de records.
+- `packages/bsky`: APIs AppView, hidratación, vistas y data-plane.
+- `packages/api`: cliente TypeScript generado.
+- `packages/dev-infra`: servicios Docker para pruebas locales.
+
+## Desarrollo local
+
+Requisitos:
+
+- Node 22, usando `.nvmrc`.
+- `pnpm`.
+- Docker para pruebas que usan Postgres y Redis.
+- `jq` para algunos comandos del entorno de desarrollo.
+
+Comandos útiles:
 
 ```shell
-# use existing nvm to install node 18 and pnpm
-make nvm-setup
+nvm use
+pnpm install
 
-# pull dependencies and build all local packages
-make deps
-make build
+pnpm --filter @atproto/bsky test -- tests/views/para-feed.test.ts
+pnpm --filter @atproto/bsky test -- tests/data-plane/para-queries.test.ts
+pnpm --filter @atproto/bsky exec tsc --build tsconfig.build.json
 
-# run the tests, using Docker services as needed
-make test
-
-# run a local PDS and AppView with fake test accounts and data
-# (this requires a global installation of `jq` and `docker`)
 make run-dev-env
-
-# show all other commands
-make help
 ```
 
-## About AT Protocol
+Para pruebas de integración PDS/PARA, usar el set enfocado de read-after-write antes de considerar un release candidate.
 
-The Authenticated Transfer Protocol ("ATP" or "atproto") is a decentralized social media protocol, developed by [Bluesky Social PBC](https://bsky.social). Learn more at:
+## Notas operativas
 
-- [Overview and Guides](https://atproto.com/guides/overview) 👈 Best starting point
-- [Github Discussions](https://github.com/bluesky-social/atproto/discussions) 👈 Great place to ask questions
-- [Protocol Specifications](https://atproto.com/specs/atp)
-- [Blogpost on self-authenticating data structures](https://bsky.social/about/blog/3-6-2022-a-self-authenticating-social-protocol)
+- El MVP debe proteger comportamiento PARA ya existente; no hacer cambios amplios en feed, perfiles, governance o PDS sin pruebas enfocadas.
+- Las lexicons y clientes generados solo se deben regenerar cuando el cambio lo requiera explícitamente.
+- Las superficies no MVP deben mantenerse visibles solo si tienen estado limitado claro.
+- Producción requiere validación manual del flujo completo y rollback documentado.
 
-The Bluesky Social application encompasses a set of schemas and APIs built in the overall AT Protocol framework. The namespace for these "Lexicons" is `app.bsky.*`.
+## Licencia
 
-## PARA verification notes
+Este proyecto conserva la licencia dual MIT y Apache 2.0 heredada de la base atproto:
 
-This workspace is also being used for PARA-specific profile and community work.
-
-Current PARA public-figure model:
-
-- PARA stores product approval in `com.para.identity`
-- AppView-visible verification still relies on `app.bsky.graph.verification`
-- clients render `f/` for public figures once backend verification is surfaced in profile views
-
-Current rollout is manual. Future work for Mexico is planned around Instituto Nacional Electoral-backed verification plus zero-knowledge proofs so a user can prove eligibility from their ID without publicly revealing their identity.
-
-## Contributions
-
-> While we do accept contributions, we prioritize high quality issues and pull requests. Adhering to the below guidelines will ensure a more timely review.
-
-**Rules:**
-
-- We may not respond to your issue or PR.
-- We may close an issue or PR without much feedback.
-- We may lock discussions or contributions if our attention is getting DDOSed.
-- We do not provide support for build issues.
-
-**Guidelines:**
-
-- Check for existing issues before filing a new one, please.
-- Open an issue and give some time for discussion before submitting a PR.
-- If submitting a PR that includes a lexicon change, please get sign off on the lexicon change _before_ doing the implementation.
-- Issues are for bugs & feature requests related to the TypeScript implementation of atproto and related services.
-  - For high-level discussions, please use the [Discussion Forum](https://github.com/bluesky-social/atproto/discussions).
-  - For client issues, please use the relevant [social-app](https://github.com/bluesky-social/social-app) repo.
-- Stay away from PRs that:
-  - Refactor large parts of the codebase
-  - Add entirely new features without prior discussion
-  - Change the tooling or frameworks used without prior discussion
-  - Introduce new unnecessary dependencies
-
-Remember, we serve a wide community of users. Our day-to-day involves us constantly asking "which top priority is our top priority." If you submit well-written PRs that solve problems concisely, that's an awesome contribution. Otherwise, as much as we'd love to accept your ideas and contributions, we really don't have the bandwidth.
-
-## Are you a developer interested in building on atproto?
-
-Bluesky is an open social network built on the AT Protocol, a flexible technology that will never lock developers out of the ecosystems that they help build. With atproto, third-party can be as seamless as first-party through custom feeds, federated services, clients, and more.
-
-## Security disclosures
-
-If you discover any security issues, please send an email to security@bsky.app. The email is automatically CCed to the entire team, and we'll respond promptly. See [SECURITY.md](https://github.com/bluesky-social/atproto/blob/main/SECURITY.md) for more info.
-
-## License
-
-This project is dual-licensed under MIT and Apache 2.0 terms:
-
-- MIT license ([LICENSE-MIT.txt](https://github.com/bluesky-social/atproto/blob/main/LICENSE-MIT.txt) or http://opensource.org/licenses/MIT)
-- Apache License, Version 2.0, ([LICENSE-APACHE.txt](https://github.com/bluesky-social/atproto/blob/main/LICENSE-APACHE.txt) or http://www.apache.org/licenses/LICENSE-2.0)
-
-Downstream projects and end users may chose either license individually, or both together, at their discretion. The motivation for this dual-licensing is the additional software patent assurance provided by Apache 2.0.
-
-Bluesky Social PBC has committed to a software patent non-aggression pledge. For details see [the original announcement](https://bsky.social/about/blog/10-01-2025-patent-pledge).
+- MIT License (`LICENSE-MIT.txt`)
+- Apache License, Version 2.0 (`LICENSE-APACHE.txt`)
