@@ -51,6 +51,11 @@ type XrpcErrorResponse = {
   message?: string
 }
 
+type CreateRecordResult = {
+  uri: string
+  cid: string
+}
+
 const MAX_PAGINATION_PAGES = 20
 const GET_POSTS_BATCH_SIZE = 25
 
@@ -235,7 +240,7 @@ export async function toggleSaveHighlight(id: string): Promise<void> {
 export async function publishHighlightAnnotation(
   agent: BskyAgent,
   record: Omit<ParaHighlightRecord, 'createdAt'> & {createdAt?: string},
-) {
+): Promise<CreateRecordResult> {
   if (!agent.session) {
     throw new Error('Not logged in')
   }
@@ -245,11 +250,16 @@ export async function publishHighlightAnnotation(
     createdAt: record.createdAt || new Date().toISOString(),
   }
 
-  return await agent.com.atproto.repo.createRecord({
+  const res = await agent.com.atproto.repo.createRecord({
     repo: agent.session.did,
     collection: PARA_HIGHLIGHT_COLLECTION,
     record: fullRecord as unknown as Record<string, unknown>,
   })
+
+  return {
+    uri: res.data.uri,
+    cid: res.data.cid,
+  }
 }
 
 export async function deleteHighlightAnnotation(
@@ -359,6 +369,8 @@ function mapHighlightViewToHighlight(
     id: view.uri,
     sourcePostUri: view.subjectUri,
     sourcePostCid: view.subjectCid,
+    start: view.start,
+    end: view.end,
     text: view.text,
     postAuthor: post?.author.handle || 'unknown',
     authorName: post?.author.displayName || post?.author.handle || 'Unknown',

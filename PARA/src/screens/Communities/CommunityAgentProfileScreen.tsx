@@ -1,11 +1,7 @@
-import {useMemo, useState} from 'react'
+import {useState} from 'react'
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native'
 import {type RouteProp, useNavigation, useRoute} from '@react-navigation/native'
 
-import {
-  COMMUNITY_AGENT_POSTS,
-  COMMUNITY_AGENT_PROFILE,
-} from '#/lib/mock-data/community-agent'
 import {
   type CommonNavigatorParams,
   type NavigationProp,
@@ -15,6 +11,7 @@ import {useTheme} from '#/alf'
 import {Macintosh_Stroke2_Corner2_Rounded as MacintoshIcon} from '#/components/icons/Macintosh'
 import {Message_Stroke2_Corner0_Rounded as ChatIcon} from '#/components/icons/Message'
 import * as Layout from '#/components/Layout'
+import {ListMaybePlaceholder} from '#/components/Lists'
 import {Text} from '#/components/Typography'
 
 export function CommunityAgentProfileScreen() {
@@ -24,41 +21,70 @@ export function CommunityAgentProfileScreen() {
     useRoute<RouteProp<CommonNavigatorParams, 'CommunityAgentProfile'>>()
   const [isFollowing, setIsFollowing] = useState(false)
   const {agentId} = route.params
-  const {data: seededProfile} = useProfileQuery({did: agentId})
-
-  const profile = seededProfile
-    ? {
-        displayName:
-          seededProfile.displayName || seededProfile.handle || COMMUNITY_AGENT_PROFILE.displayName,
-        handle: seededProfile.handle,
-        role: 'Representative',
-        bio: seededProfile.description || COMMUNITY_AGENT_PROFILE.bio,
-        communityFocus: route.params.communityName || COMMUNITY_AGENT_PROFILE.communityFocus,
-        followersCount: seededProfile.followersCount || 0,
-        postsCount: seededProfile.postsCount || 0,
-        responseTime: 'Active',
-        expertise: ['Governance', 'Community', 'Policy'],
-      }
-    : COMMUNITY_AGENT_PROFILE
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    refetch,
+  } = useProfileQuery({did: agentId})
   const communityName = route.params.communityName || 'this community'
-  const posts = useMemo(
-    () =>
-      COMMUNITY_AGENT_POSTS.map(post => ({
-        ...post,
-        communityName,
-      })),
-    [communityName],
-  )
+
+  if (!profile && (isLoading || isError)) {
+    return (
+      <Layout.Screen testID="communityAgentProfileScreen">
+        <Layout.Header.Outer>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              Representative unavailable
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={isLoading}
+          isError={isError}
+          onRetry={refetch}
+          emptyType="page"
+          emptyMessage="We are loading this representative profile from the network."
+        />
+      </Layout.Screen>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <Layout.Screen testID="communityAgentProfileScreen">
+        <Layout.Header.Outer>
+          <Layout.Header.BackButton />
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              Representative unavailable
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
+        </Layout.Header.Outer>
+        <ListMaybePlaceholder
+          isLoading={false}
+          isError={false}
+          emptyType="page"
+          emptyTitle="Representative unavailable"
+          emptyMessage="This representative could not be resolved from live profile data."
+        />
+      </Layout.Screen>
+    )
+  }
+
+  const displayName = profile.displayName || profile.handle || profile.did
+  const role = 'Representative'
 
   return (
     <Layout.Screen testID="communityAgentProfileScreen">
       <Layout.Header.Outer>
         <Layout.Header.BackButton />
-        <Layout.Header.Content>
-          <Layout.Header.TitleText>
-            {profile.displayName}
-          </Layout.Header.TitleText>
-        </Layout.Header.Content>
+          <Layout.Header.Content>
+            <Layout.Header.TitleText>
+              {displayName}
+            </Layout.Header.TitleText>
+          </Layout.Header.Content>
         <Layout.Header.Slot />
       </Layout.Header.Outer>
 
@@ -83,48 +109,50 @@ export function CommunityAgentProfileScreen() {
               </View>
               <View style={styles.heroText}>
                 <Text style={[styles.displayName, t.atoms.text]}>
-                  {profile.displayName}
+                  {displayName}
                 </Text>
                 <Text style={[styles.handle, t.atoms.text_contrast_medium]}>
                   @{profile.handle}
                 </Text>
                 <Text style={[styles.role, {color: t.palette.primary_600}]}>
-                  {profile.role}
+                  {role}
                 </Text>
               </View>
             </View>
 
-            <Text style={[styles.bio, t.atoms.text]}>{profile.bio}</Text>
+            <Text style={[styles.bio, t.atoms.text]}>
+              {profile.description || 'No profile description has been published.'}
+            </Text>
 
             <View style={styles.metaGrid}>
               <MetaStat
                 label="Focus"
-                value={profile.communityFocus}
+                value={communityName}
                 textColor={t.atoms.text.color}
                 subColor={t.atoms.text_contrast_medium.color}
               />
               <MetaStat
                 label="Followers"
-                value={profile.followersCount.toLocaleString()}
+                value={(profile.followersCount ?? 0).toLocaleString()}
                 textColor={t.atoms.text.color}
                 subColor={t.atoms.text_contrast_medium.color}
               />
               <MetaStat
                 label="Posts"
-                value={profile.postsCount.toLocaleString()}
+                value={(profile.postsCount ?? 0).toLocaleString()}
                 textColor={t.atoms.text.color}
                 subColor={t.atoms.text_contrast_medium.color}
               />
               <MetaStat
                 label="Response time"
-                value={profile.responseTime}
+                value="Network profile"
                 textColor={t.atoms.text.color}
                 subColor={t.atoms.text_contrast_medium.color}
               />
             </View>
 
             <View style={styles.expertiseRow}>
-              {profile.expertise.map(item => (
+              {['Governance', 'Community', 'Policy'].map(item => (
                 <View
                   key={item}
                   style={[
@@ -167,7 +195,7 @@ export function CommunityAgentProfileScreen() {
                 accessibilityRole="button"
                 onPress={() =>
                   navigation.navigate('AgentChat', {
-                    agentId: profile.displayName,
+                    agentId: profile.did,
                   })
                 }
                 style={[
@@ -188,52 +216,13 @@ export function CommunityAgentProfileScreen() {
 
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, t.atoms.text]}>
-              Recent posts
+              Live profile
             </Text>
             <Text
               style={[styles.sectionSubtitle, t.atoms.text_contrast_medium]}>
-              Test feed for {communityName}
+              Representative data is loaded from the actor profile for{' '}
+              {communityName}.
             </Text>
-          </View>
-
-          <View style={styles.postsList}>
-            {posts.map(post => (
-              <View
-                key={post.id}
-                style={[
-                  styles.postCard,
-                  t.atoms.bg,
-                  t.atoms.border_contrast_low,
-                ]}>
-                <View style={styles.postHeader}>
-                  <Text style={[styles.postTitle, t.atoms.text]}>
-                    {post.title}
-                  </Text>
-                  <Text style={[styles.postTime, t.atoms.text_contrast_medium]}>
-                    {new Date(post.publishedAt).toLocaleDateString()}
-                  </Text>
-                </View>
-                <Text style={[styles.postBody, t.atoms.text]}>{post.body}</Text>
-                <View style={styles.postTags}>
-                  {post.tags.map(tag => (
-                    <View
-                      key={tag}
-                      style={[
-                        styles.postTag,
-                        {backgroundColor: t.palette.contrast_25},
-                      ]}>
-                      <Text
-                        style={[
-                          styles.postTagText,
-                          t.atoms.text_contrast_medium,
-                        ]}>
-                        {tag}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ))}
           </View>
         </Layout.Center>
       </ScrollView>

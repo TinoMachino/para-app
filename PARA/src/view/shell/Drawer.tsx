@@ -1,4 +1,4 @@
-import {memo, useCallback} from 'react'
+import {memo, type ReactElement, useCallback} from 'react'
 import {Linking, ScrollView, TouchableOpacity, View} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {msg, plural} from '@lingui/core/macro'
@@ -8,7 +8,6 @@ import {StackActions, useNavigation} from '@react-navigation/native'
 
 import {useActorStatus} from '#/lib/actor-status'
 import {FEEDBACK_FORM_URL, HELP_DESK_URL} from '#/lib/constants'
-import {type PressableScale} from '#/lib/custom-animations/PressableScale'
 import {useNavigationTabState} from '#/lib/hooks/useNavigationTabState'
 import {getTabState, TabState} from '#/lib/routes/helpers'
 import {type NavigationProp} from '#/lib/routes/types'
@@ -442,8 +441,9 @@ let DrawerFooter = ({
 DrawerFooter = memo(DrawerFooter)
 
 interface MenuItemProps {
-  icon: JSX.Element
+  icon: ReactElement
   label: string
+  accessibilityHint?: string
   count?: string
   bold?: boolean
   onPress: () => void

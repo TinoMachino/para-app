@@ -47,7 +47,7 @@ export function Controls({
   hlsLoading,
   hasSubtitleTrack,
   isGif,
-  altText,
+  altText: _altText,
   updateCuePositions,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>
@@ -308,8 +308,7 @@ export function Controls({
       <GifPresentationControls
         isPlaying={playing}
         isLoading={showSpinner}
-        onPress={onPressPlayPause}
-        altText={altText}
+        togglePlayPause={onPressPlayPause}
       />
     )
   }

@@ -690,7 +690,9 @@ function buildMyBaseDebateCards(
       }
     })
     .filter(Boolean)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt)) as MyBaseDebateCard[]
+    .sort((a, b) =>
+      (b?.createdAt ?? '').localeCompare(a?.createdAt ?? ''),
+    ) as MyBaseDebateCard[]
 }
 
 function DebateCardList({

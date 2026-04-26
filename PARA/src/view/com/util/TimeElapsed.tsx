@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {type ReactElement, useState} from 'react'
 import {type I18n} from '@lingui/core'
 import {useLingui} from '@lingui/react'
 
@@ -11,7 +11,7 @@ export function TimeElapsed({
   timeToString,
 }: {
   timestamp: string
-  children: ({timeElapsed}: {timeElapsed: string}) => JSX.Element
+  children: ({timeElapsed}: {timeElapsed: string}) => ReactElement
   timeToString?: (i18n: I18n, timeElapsed: string) => string
 }) {
   const {i18n} = useLingui()

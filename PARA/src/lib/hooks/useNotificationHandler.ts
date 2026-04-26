@@ -45,7 +45,7 @@ export type NotificationReason =
 export type NotificationPayload =
   | undefined
   | {
-      reason: Exclude<NotificationReason, 'chat-message'>
+      reason: Exclude<NotificationReason, 'chat-message' | 'chat-reaction'>
       uri: string
       subject: string
       recipientDid: string

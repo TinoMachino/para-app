@@ -138,7 +138,6 @@ let PostMenuItems = ({
   const {clearTranslation, translate, translationState} = useTranslate({
     key: post.uri,
     forceGoogleTranslate,
-    postLangCodes: getPostLanguageTags(post),
   })
   const navigation = useNavigation<NavigationProp>()
   const {mutedWordsDialogControl} = useGlobalDialogsControlContext()

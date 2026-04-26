@@ -252,10 +252,10 @@ export function ProfileGrid({
   const containerRef = useRef<View>(null)
   const hasTrackedRef = useRef(false)
   const logContext: Metrics['suggestedUser:seen']['logContext'] = isFeedContext
-    ? 'InterstitialDiscover'
+    ? 'DiscoverInterstitial'
     : isProfileHeaderContext
-      ? 'Profile'
-      : 'InterstitialProfile'
+      ? 'ProfileHeader'
+      : 'ProfileInterstitial'
 
   // Callback to fire seen events
   const fireSeen = useCallback(() => {
@@ -364,9 +364,7 @@ export function ProfileGrid({
               profile={profile.actor}
               onPress={() => {
                 ax.metric('suggestedUser:press', {
-                  logContext: isFeedContext
-                    ? 'InterstitialDiscover'
-                    : 'InterstitialProfile',
+                  logContext,
                   recId: profile.recId,
                   position: index,
                   suggestedDid: profile.actor.did,
@@ -387,9 +385,7 @@ export function ProfileGrid({
                           e.preventDefault()
                           onDismiss(profile.actor.did)
                           ax.metric('suggestedUser:dismiss', {
-                            logContext: isFeedContext
-                              ? 'InterstitialDiscover'
-                              : 'InterstitialProfile',
+                            logContext,
                             position: index,
                             suggestedDid: profile.actor.did,
                             recId: profile.recId,
@@ -455,9 +451,7 @@ export function ProfileGrid({
                       style={[a.rounded_sm]}
                       onFollow={() => {
                         ax.metric('suggestedUser:follow', {
-                          logContext: isFeedContext
-                            ? 'InterstitialDiscover'
-                            : 'InterstitialProfile',
+                          logContext,
                           location: 'Card',
                           recId: profile.recId,
                           position: index,
@@ -516,7 +510,7 @@ export function ProfileGrid({
             onPress={() => {
               followDialogControl.open()
               ax.metric('suggestedUser:seeMore', {
-                logContext: isFeedContext ? 'Explore' : 'Profile',
+                logContext: isFeedContext ? 'Explore' : 'ProfileInterstitial',
               })
             }}>
             <ButtonText>

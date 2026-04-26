@@ -1,11 +1,10 @@
 import {
-  type AppStateStatus,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react'
-import {Alert, AppState} from 'react-native'
+import {Alert, AppState, type AppStateStatus} from 'react-native'
 import {nativeBuildVersion} from 'expo-application'
 import {
   checkForUpdateAsync,

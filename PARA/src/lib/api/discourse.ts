@@ -13,7 +13,7 @@ export class DiscourseAPI {
     community?: string
     timeframe: '1h' | '24h' | '7d' | '30d'
   }): Promise<DiscourseSnapshot[]> {
-    const res = await this.agent.api.com.para.discourse.getSnapshot(params)
+    const res = await (this.agent.api.com as any).para.discourse.getSnapshot(params)
     return res.data.snapshots
   }
 
@@ -21,7 +21,7 @@ export class DiscourseAPI {
     community?: string
     timeframe: '1h' | '24h' | '7d' | '30d'
   }): Promise<TopicCluster[]> {
-    const res = await this.agent.api.com.para.discourse.getTopics(params)
+    const res = await (this.agent.api.com as any).para.discourse.getTopics(params)
     return res.data.topics
   }
 
@@ -29,7 +29,7 @@ export class DiscourseAPI {
     community?: string
     timeframe: '1h' | '24h' | '7d' | '30d'
   }): Promise<SentimentDistribution> {
-    const res = await this.agent.api.com.para.discourse.getSentiment(params)
+    const res = await (this.agent.api.com as any).para.discourse.getSentiment(params)
     return res.data.sentiment
   }
 }

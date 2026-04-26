@@ -1,6 +1,8 @@
 import {type ComponentProps, useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {
   Modal,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -9,7 +11,6 @@ import {
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 
-import {COMMUNITY_DATA, type CommunityData} from '#/lib/constants/mockData'
 import {type NavigationProp} from '#/lib/routes/types'
 import {POST_FLAIRS, type PostFlair} from '#/lib/tags'
 import {
@@ -23,7 +24,6 @@ import {FlairSelectionList} from '#/components/FlairSelectionList'
 import {IconCircle} from '#/components/IconCircle'
 import {Filter_Stroke2_Corner0_Rounded as FilterIcon} from '#/components/icons/Filter'
 import {ListMagnifyingGlass_Stroke2_Corner0_Rounded as ListMagnifyingGlass} from '#/components/icons/ListMagnifyingGlass'
-import {TimesLarge_Stroke2_Corner0_Rounded as XIcon} from '#/components/icons/Times'
 import * as Layout from '#/components/Layout'
 import {WebScrollControls} from '#/components/WebScrollControls'
 import {useAnalytics} from '#/analytics'
@@ -72,43 +72,31 @@ export function CommunitiesScreen() {
   const [selectedParticipationFilter, setSelectedParticipationFilter] =
     useState<SelectedParticipationFilter | null>(null)
   const [selectedStateItem, setSelectedStateItem] = useState<string>('')
-  const [recentlyVisited, setRecentlyVisited] = useState<string[]>([
-    'mx-jalisco',
-    'pan',
-    'mx-cdmx',
-  ])
   const {data: liveBoardsData, isLoading: isLiveBoardsLoading} =
     useCommunityBoardsQuery({limit: 12})
+  const {
+    data: participationMatchesData,
+    isLoading: isParticipationMatchesLoading,
+    isError: isParticipationMatchesError,
+  } = useCommunityBoardsQuery({
+    limit: 6,
+    participationKind: selectedParticipationFilter?.kind,
+    flairId: selectedParticipationFilter?.flairId,
+    sort: 'activity',
+  })
+  const {
+    data: stateMatchesData,
+    isLoading: isStateMatchesLoading,
+    isError: isStateMatchesError,
+  } = useCommunityBoardsQuery({
+    limit: 6,
+    state: selectedStateItem || undefined,
+    sort: 'activity',
+  })
 
   const civicScrollRef = useRef<ScrollView>(null)
   const politicalScrollRef = useRef<ScrollView>(null)
 
-  const communityById = useMemo(
-    () =>
-      new Map(
-        COMMUNITY_DATA.map(community => [community.communityId, community]),
-      ),
-    [],
-  )
-  const recentCommunities = useMemo(
-    () =>
-      recentlyVisited
-        .map(id => communityById.get(id))
-        .filter(Boolean) as CommunityData[],
-    [communityById, recentlyVisited],
-  )
-  const civicCommunities = useMemo(
-    () =>
-      COMMUNITY_DATA.filter(community => community.directoryGroup === 'civic'),
-    [],
-  )
-  const politicalCommunities = useMemo(
-    () =>
-      COMMUNITY_DATA.filter(
-        community => community.directoryGroup === 'political',
-      ),
-    [],
-  )
   const matterFlairs = useMemo(
     () =>
       Object.values(POST_FLAIRS)
@@ -125,6 +113,11 @@ export function CommunitiesScreen() {
   )
   const canCreateCommunity = liveBoardsData?.canCreateCommunity ?? true
   const liveBoards = liveBoardsData?.boards ?? []
+  const participationMatches = participationMatchesData?.boards ?? []
+  const stateMatches = stateMatchesData?.boards ?? []
+  const recentLiveBoards = liveBoards.slice(0, 3)
+  const civicBoards = liveBoards.filter(board => board.quadrant !== 'political')
+  const politicalBoards = liveBoards.filter(board => board.quadrant === 'political')
 
   useEffect(() => {
     if (trackedCreatorEntryMetric.current || !liveBoardsData) return
@@ -136,16 +129,6 @@ export function CommunitiesScreen() {
       analytics.metric('community:create:eligibilityDenied', {})
     }
   }, [analytics, liveBoardsData])
-
-  const navigateToCommunityProfile = useCallback(
-    (community: CommunityData) => {
-      navigation.navigate('CommunityProfile', {
-        communityId: community.communityId,
-        communityName: community.communityName,
-      })
-    },
-    [navigation],
-  )
 
   const navigateToLiveCommunityProfile = useCallback(
     (board: CommunityBoardView) => {
@@ -161,10 +144,6 @@ export function CommunitiesScreen() {
     analytics.metric('community:create:ctaClicked', {})
     navigation.navigate('CreateCommunity')
   }, [analytics, navigation])
-
-  const removeRecentlyVisited = useCallback((communityId: string) => {
-    setRecentlyVisited(prev => prev.filter(item => item !== communityId))
-  }, [])
 
   const openParticipationModal = () => {
     setModalType('Participation')
@@ -219,15 +198,22 @@ export function CommunitiesScreen() {
               </Text>
 
               <View style={[styles.resumeGrid, IS_WEB && styles.resumeGridWeb]}>
-                {recentCommunities.map(community => (
-                  <ContinueExploringCard
-                    key={community.communityId}
-                    community={community}
-                    onPress={() => navigateToCommunityProfile(community)}
-                    onRemove={removeRecentlyVisited}
+                {recentLiveBoards.length > 0 ? (
+                  recentLiveBoards.map(board => (
+                    <LiveCommunityCard
+                      key={board.uri}
+                      board={board}
+                      theme={t}
+                      onPress={() => navigateToLiveCommunityProfile(board)}
+                    />
+                  ))
+                ) : (
+                  <EmptyLiveDirectoryCard
                     theme={t}
+                    title="No recent communities yet"
+                    body="Create or join a community and it will appear here from the live directory."
                   />
-                ))}
+                )}
               </View>
             </View>
 
@@ -354,7 +340,7 @@ export function CommunitiesScreen() {
               <View style={styles.directoryStack}>
                 <DirectoryModule
                   title="Civic Territories"
-                  description="State and territorial hubs grounded in the seeded civic network."
+                  description="Live communities with civic or territorial context."
                   theme={t}>
                   <View style={{position: 'relative'}}>
                     <WebScrollControls scrollViewRef={civicScrollRef} />
@@ -364,12 +350,12 @@ export function CommunitiesScreen() {
                       showsHorizontalScrollIndicator={false}
                       style={styles.cardsScroll}
                       contentContainerStyle={styles.directoryRail}>
-                      {civicCommunities.map(community => (
-                        <CivicCommunityCard
-                          key={community.communityId}
-                          community={community}
+                      {(civicBoards.length ? civicBoards : liveBoards).map(board => (
+                        <LiveCommunityCard
+                          key={board.uri}
+                          board={board}
                           theme={t}
-                          onPress={() => navigateToCommunityProfile(community)}
+                          onPress={() => navigateToLiveCommunityProfile(board)}
                         />
                       ))}
                     </ScrollView>
@@ -378,17 +364,22 @@ export function CommunitiesScreen() {
 
                 <DirectoryModule
                   title="Parties"
-                  description="National parties, movement communities, and coalition spaces."
+                  description="Live party, movement, and coalition communities when they are published."
                   theme={t}>
-                  {IS_WEB ? (
+                  {politicalBoards.length === 0 ? (
+                    <EmptyLiveDirectoryCard
+                      theme={t}
+                      title="No party communities yet"
+                      body="Published party communities will appear here once they exist in the live directory."
+                    />
+                  ) : IS_WEB ? (
                     <View style={styles.politicalGrid}>
-                      {politicalCommunities.map(community => (
-                        <PoliticalCommunityCard
-                          key={community.communityId}
-                          community={community}
+                      {politicalBoards.map(board => (
+                        <LiveCommunityCard
+                          key={board.uri}
+                          board={board}
                           theme={t}
-                          style={styles.politicalCardWeb}
-                          onPress={() => navigateToCommunityProfile(community)}
+                          onPress={() => navigateToLiveCommunityProfile(board)}
                         />
                       ))}
                     </View>
@@ -399,12 +390,12 @@ export function CommunitiesScreen() {
                       showsHorizontalScrollIndicator={false}
                       style={styles.cardsScroll}
                       contentContainerStyle={styles.directoryRail}>
-                      {politicalCommunities.map(community => (
-                        <PoliticalCommunityCard
-                          key={community.communityId}
-                          community={community}
+                      {politicalBoards.map(board => (
+                        <LiveCommunityCard
+                          key={board.uri}
+                          board={board}
                           theme={t}
-                          onPress={() => navigateToCommunityProfile(community)}
+                          onPress={() => navigateToLiveCommunityProfile(board)}
                         />
                       ))}
                     </ScrollView>
@@ -478,14 +469,17 @@ export function CommunitiesScreen() {
                   onPress={openParticipationModal}
                   theme={t}>
                   {selectedParticipationFilter ? (
-                    <FilterComingSoonCard
+                    <FilteredBoardsCard
                       theme={t}
-                      compact
                       pillLabel={`${participationType}: ${selectedParticipationFilter.label}`}
-                      title={`Community matches for ${participationType}: ${selectedParticipationFilter.label} are coming soon`}
-                      body="We’re not showing placeholder communities here until participation-based matching is ready."
+                      title={`Community matches for ${selectedParticipationFilter.label}`}
+                      emptyMessage="No matching communities are available yet for this participation filter."
+                      boards={participationMatches}
+                      isLoading={isParticipationMatchesLoading}
+                      isError={isParticipationMatchesError}
                       ctaLabel="Choose another filter"
                       onPress={openParticipationModal}
+                      onPressBoard={navigateToLiveCommunityProfile}
                     />
                   ) : (
                     <View style={styles.discoveryPanelBody}>
@@ -551,14 +545,17 @@ export function CommunitiesScreen() {
                   onPress={openStateModal}
                   theme={t}>
                   {selectedStateItem ? (
-                    <FilterComingSoonCard
+                    <FilteredBoardsCard
                       theme={t}
-                      compact
                       pillLabel={selectedStateItem}
-                      title={`Community matches for ${selectedStateItem} are coming soon`}
-                      body="We’ll show real state-based community matches once public ranking is available."
+                      title={`Community matches for ${selectedStateItem}`}
+                      emptyMessage="No matching communities are available yet for this state."
+                      boards={stateMatches}
+                      isLoading={isStateMatchesLoading}
+                      isError={isStateMatchesError}
                       ctaLabel="Choose another state"
                       onPress={openStateModal}
+                      onPressBoard={navigateToLiveCommunityProfile}
                     />
                   ) : (
                     <View style={styles.discoveryPanelBody}>
@@ -702,84 +699,6 @@ function buildParticipationFilter(
   }
 }
 
-function ContinueExploringCard({
-  community,
-  onPress,
-  onRemove,
-  theme,
-}: {
-  community: CommunityData
-  onPress: () => void
-  onRemove: (communityId: string) => void
-  theme: ThemeShape
-}) {
-  const accent = community.accent || community.color
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      activeOpacity={0.82}
-      style={[
-        styles.resumeCard,
-        {
-          backgroundColor: theme.palette.contrast_25 + '1A',
-          borderColor: theme.palette.contrast_100,
-        },
-        IS_WEB && styles.resumeCardWeb,
-      ]}
-      onPress={onPress}>
-      <View style={styles.resumeHeader}>
-        <View style={[styles.resumeAvatar, {backgroundColor: community.color}]}>
-          <Text style={styles.resumeAvatarText}>
-            {community.name.charAt(0)}
-          </Text>
-        </View>
-
-        <View style={styles.resumeMeta}>
-          <Text
-            style={[styles.resumeTitle, theme.atoms.text]}
-            numberOfLines={1}>
-            {community.communityName}
-          </Text>
-          <Text
-            style={[styles.resumeSubtitle, {color: accent}]}
-            numberOfLines={1}>
-            {community.subtitle || community.eyebrow || community.desc}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          accessibilityRole="button"
-          style={styles.resumeDismiss}
-          onPress={() => onRemove(community.communityId)}>
-          <XIcon
-            width={12}
-            height={12}
-            fill={theme.atoms.text_contrast_medium.color}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <Text
-        style={[styles.resumeDescription, theme.atoms.text_contrast_medium]}
-        numberOfLines={2}>
-        {community.desc}
-      </Text>
-
-      <View style={styles.resumeFooter}>
-        <View style={[styles.metaBadge, {backgroundColor: accent + '1F'}]}>
-          <Text style={[styles.metaBadgeText, {color: accent}]}>
-            {community.region || community.eyebrow || 'Community'}
-          </Text>
-        </View>
-        <Text style={[styles.resumeMembers, theme.atoms.text_contrast_medium]}>
-          {community.members} miembros
-        </Text>
-      </View>
-    </TouchableOpacity>
-  )
-}
-
 function LiveCommunityCard({
   board,
   theme,
@@ -828,6 +747,32 @@ function LiveCommunityCard({
   )
 }
 
+function EmptyLiveDirectoryCard({
+  theme,
+  title,
+  body,
+}: {
+  theme: ThemeShape
+  title: string
+  body: string
+}) {
+  return (
+    <View
+      style={[
+        styles.liveBoardCard,
+        {
+          backgroundColor: theme.palette.contrast_25,
+          borderColor: theme.palette.contrast_100,
+        },
+      ]}>
+      <Text style={[styles.liveBoardTitle, theme.atoms.text]}>{title}</Text>
+      <Text style={[styles.liveBoardBody, theme.atoms.text_contrast_medium]}>
+        {body}
+      </Text>
+    </View>
+  )
+}
+
 function DirectoryModule({
   title,
   description,
@@ -855,126 +800,6 @@ function DirectoryModule({
       </Text>
       {children}
     </View>
-  )
-}
-
-function CivicCommunityCard({
-  community,
-  theme,
-  onPress,
-}: {
-  community: CommunityData
-  theme: ThemeShape
-  onPress: () => void
-}) {
-  const accent = community.accent || community.color
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      activeOpacity={0.82}
-      style={[
-        styles.civicCard,
-        {
-          backgroundColor: accent + '12',
-          borderColor: accent + '35',
-        },
-      ]}
-      onPress={onPress}>
-      <Text style={[styles.cardEyebrow, {color: accent}]}>
-        {community.eyebrow || 'Civic Territory'}
-      </Text>
-      <Text style={[styles.civicTitle, theme.atoms.text]}>
-        {community.name}
-      </Text>
-      <Text style={[styles.civicSubtitle, theme.atoms.text]}>
-        {community.subtitle || community.region}
-      </Text>
-      <Text
-        style={[styles.civicDescription, theme.atoms.text_contrast_medium]}
-        numberOfLines={2}>
-        {community.desc}
-      </Text>
-      <View style={styles.civicFooter}>
-        <View style={[styles.metaBadge, {backgroundColor: accent + '18'}]}>
-          <Text style={[styles.metaBadgeText, {color: accent}]}>
-            {community.region || community.communityName}
-          </Text>
-        </View>
-        <Text style={[styles.civicMembers, theme.atoms.text_contrast_medium]}>
-          {community.members}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  )
-}
-
-function PoliticalCommunityCard({
-  community,
-  theme,
-  style,
-  onPress,
-}: {
-  community: CommunityData
-  theme: ThemeShape
-  style?: any
-  onPress: () => void
-}) {
-  const accent = community.accent || community.color
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      activeOpacity={0.82}
-      style={[
-        styles.politicalCard,
-        {
-          backgroundColor: theme.palette.contrast_25 + '18',
-          borderColor: theme.palette.contrast_100,
-        },
-        style,
-      ]}
-      onPress={onPress}>
-      <View style={styles.politicalHeader}>
-        <View
-          style={[styles.politicalAvatar, {backgroundColor: community.color}]}>
-          <Text style={styles.politicalAvatarText}>
-            {community.name.charAt(0)}
-          </Text>
-        </View>
-        <View style={styles.politicalMeta}>
-          <Text style={[styles.cardEyebrow, {color: accent}]}>
-            {community.eyebrow || 'Party'}
-          </Text>
-          <Text
-            style={[styles.politicalTitle, theme.atoms.text]}
-            numberOfLines={1}>
-            {community.name}
-          </Text>
-        </View>
-      </View>
-
-      <Text
-        style={[styles.politicalSubtitle, theme.atoms.text]}
-        numberOfLines={2}>
-        {community.subtitle || community.communityName}
-      </Text>
-      <Text
-        style={[styles.politicalDescription, theme.atoms.text_contrast_medium]}
-        numberOfLines={2}>
-        {community.desc}
-      </Text>
-
-      <View style={styles.politicalFooter}>
-        <Text style={[styles.politicalHandle, {color: accent}]}>
-          {community.communityName}
-        </Text>
-        <Text
-          style={[styles.politicalMembers, theme.atoms.text_contrast_medium]}>
-          {community.members}
-        </Text>
-      </View>
-    </TouchableOpacity>
   )
 }
 
@@ -1093,28 +918,33 @@ function FeaturedStateCard({
   )
 }
 
-function FilterComingSoonCard({
+function FilteredBoardsCard({
   theme,
   pillLabel,
   title,
-  body,
+  emptyMessage,
+  boards,
+  isLoading,
+  isError,
   ctaLabel,
   onPress,
-  compact = false,
+  onPressBoard,
 }: {
   theme: ThemeShape
   pillLabel: string
   title: string
-  body: string
+  emptyMessage: string
+  boards: CommunityBoardView[]
+  isLoading: boolean
+  isError: boolean
   ctaLabel: string
   onPress: () => void
-  compact?: boolean
+  onPressBoard: (board: CommunityBoardView) => void
 }) {
   return (
     <View
       style={[
         styles.comingSoonCard,
-        compact && styles.comingSoonCardCompact,
         {
           backgroundColor: theme.palette.contrast_25 + '20',
           borderColor: theme.palette.contrast_100,
@@ -1135,8 +965,28 @@ function FilterComingSoonCard({
       </View>
       <Text style={[styles.comingSoonTitle, theme.atoms.text]}>{title}</Text>
       <Text style={[styles.comingSoonBody, theme.atoms.text_contrast_medium]}>
-        {body}
+        {isLoading
+          ? 'Loading live community matches...'
+          : isError
+            ? 'Community matching is temporarily unavailable.'
+            : boards.length === 0
+              ? emptyMessage
+              : `${boards.length} live ${
+                  boards.length === 1 ? 'community' : 'communities'
+                } found.`}
       </Text>
+      {boards.length > 0 ? (
+        <View style={styles.filteredBoardsList}>
+          {boards.map(board => (
+            <LiveCommunityCard
+              key={board.uri || board.communityId}
+              board={board}
+              theme={theme}
+              onPress={() => onPressBoard(board)}
+            />
+          ))}
+        </View>
+      ) : null}
       <TouchableOpacity
         accessibilityRole="button"
         style={[
@@ -1197,7 +1047,7 @@ function WheelPicker({
     })
   }, [getOffsetForIndex, items, selectedValue])
 
-  const handleScroll = (event: any) => {
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const y = event.nativeEvent.contentOffset.y
     const index = getIndexFromOffset(y)
     const clampedIndex = Math.max(0, Math.min(index, items.length - 1))
@@ -1227,13 +1077,17 @@ function WheelPicker({
     [getOffsetForIndex, items, onValueChange, selectedIndex],
   )
 
-  const handleScrollEndDrag = (event: any) => {
+  const handleScrollEndDrag = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
     const y = event.nativeEvent.contentOffset.y
     const index = getIndexFromOffset(y)
     settleToIndex(index)
   }
 
-  const handleMomentumEnd = (event: any) => {
+  const handleMomentumEnd = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
     if (isProgrammaticScroll.current) {
       isProgrammaticScroll.current = false
       return
@@ -1768,6 +1622,10 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
     maxWidth: 420,
+  },
+  filteredBoardsList: {
+    gap: 10,
+    width: '100%',
   },
   comingSoonButton: {
     marginTop: 4,

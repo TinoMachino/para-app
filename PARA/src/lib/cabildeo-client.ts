@@ -20,6 +20,20 @@ export type CabildeoView = CabildeoRecord & {
   voteTotals: CabildeoVoteTotals
 }
 
+const EMPTY_POSITION_COUNTS: CabildeoPositionCounts = {
+  total: 0,
+  for: 0,
+  against: 0,
+  amendment: 0,
+  byOption: [],
+}
+
+const EMPTY_VOTE_TOTALS: CabildeoVoteTotals = {
+  total: 0,
+  direct: 0,
+  delegated: 0,
+}
+
 export function getCabildeoUri(
   cabildeo: CabildeoRecord & {uri?: string},
   index: number,
@@ -41,7 +55,10 @@ export function mapCabildeosToView(
     return {
       ...record,
       uri: getCabildeoUri(record, index),
-    }
+      optionSummary: [],
+      positionCounts: EMPTY_POSITION_COUNTS,
+      voteTotals: EMPTY_VOTE_TOTALS,
+    } as CabildeoView
   })
 }
 

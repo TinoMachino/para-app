@@ -11,8 +11,9 @@ import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
 import {Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
+import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 
-import {type NavigationProp} from '#/lib/routes/types'
+import {type CommonNavigatorParams, type NavigationProp} from '#/lib/routes/types'
 import {
   type RepresentativeItem,
   useRepresentativesQuery,
@@ -38,9 +39,9 @@ const CATEGORIES = [
   'Activist',
 ]
 
-// End of category list
+type Props = NativeStackScreenProps<CommonNavigatorParams, 'Representatives'>
 
-export function RepresentativesScreen({route}: {route: any}) {
+export function RepresentativesScreen({route}: Props) {
   const {_} = useLingui()
   const t = useTheme()
   const navigation = useNavigation<NavigationProp>()
@@ -87,7 +88,10 @@ export function RepresentativesScreen({route}: {route: any}) {
 
   const getRepresentativeBadges = useMemo(
     () => (rep: RepresentativeItem) => {
-      const badges = [{label: 'Verified', tone: 'verified' as const}]
+      const badges: Array<{
+        label: string
+        tone: 'verified' | 'official' | 'state' | 'community'
+      }> = [{label: 'Verified', tone: 'verified'}]
 
       if (rep.type === 'Party') {
         badges.push({label: 'Official', tone: 'official' as const})

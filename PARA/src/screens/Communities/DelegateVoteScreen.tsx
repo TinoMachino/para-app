@@ -6,53 +6,17 @@ import {
   type CommonNavigatorParams,
   type NativeStackScreenProps,
 } from '#/lib/routes/types'
-import {useCabildeoQuery} from '#/state/queries/cabildeo'
+import {
+  useCabildeoQuery,
+  useDelegateCabildeoVoteMutation,
+  useDelegationCandidatesQuery,
+} from '#/state/queries/cabildeo'
 import {useTheme} from '#/alf'
 import * as Layout from '#/components/Layout'
 import {ListMaybePlaceholder} from '#/components/Lists'
 import {Text} from '#/components/Typography'
 
 type Props = NativeStackScreenProps<CommonNavigatorParams, 'DelegateVote'>
-
-// Mock representatives for delegation
-const MOCK_REPRESENTATIVES = [
-  {
-    did: 'did:plc:maria-rep',
-    handle: '@maria.para',
-    displayName: 'María García',
-    delegationCount: 12,
-    compassQuadrant: 'lib-left',
-    bio: 'Activista ambiental · p/Jalisco',
-    trustScore: 94,
-  },
-  {
-    did: 'did:plc:carlos-rep',
-    handle: '@carlos.para',
-    displayName: 'Carlos Hernández',
-    delegationCount: 25,
-    compassQuadrant: 'center',
-    bio: 'Ingeniero civil · Política hidráulica',
-    trustScore: 87,
-  },
-  {
-    did: 'did:plc:lucia-rep',
-    handle: '@lucia.para',
-    displayName: 'Lucía Torres',
-    delegationCount: 6,
-    compassQuadrant: 'auth-left',
-    bio: 'Profesora universitaria · Derechos sociales',
-    trustScore: 91,
-  },
-  {
-    did: 'did:plc:jorge-rep',
-    handle: '@jorge.para',
-    displayName: 'Jorge Mendoza',
-    delegationCount: 42,
-    compassQuadrant: 'lib-right',
-    bio: 'Economista · Libre mercado con responsabilidad',
-    trustScore: 78,
-  },
-]
 
 /**
  * Calculate quadratic voting power: √(N+1)
@@ -72,20 +36,38 @@ export function DelegateVoteScreen({route, navigation}: Props) {
     isError,
     refetch,
   } = useCabildeoQuery(cabildeoUri)
+  const {
+    data: candidates = [],
+    isLoading: isCandidatesLoading,
+    isError: isCandidatesError,
+    refetch: refetchCandidates,
+  } = useDelegationCandidatesQuery({
+    cabildeoUri,
+    communityId: cabildeo?.community,
+  })
+  const delegateMutation = useDelegateCabildeoVoteMutation()
 
   const [selectedRep, setSelectedRep] = useState<string | null>(null)
-  const [hasDelegated, setHasDelegated] = useState(false)
 
-  const handleDelegate = useCallback(() => {
-    if (selectedRep) {
-      setHasDelegated(true)
+  const handleDelegate = useCallback(async () => {
+    if (!selectedRep || !cabildeoUri) return
+    try {
+      await delegateMutation.mutateAsync({
+        cabildeoUri,
+        delegateTo: selectedRep,
+      })
+    } catch {
+      // Error state is rendered from the mutation below.
     }
-  }, [selectedRep])
+  }, [cabildeoUri, delegateMutation, selectedRep])
 
   const selectedRepData = useMemo(
-    () => MOCK_REPRESENTATIVES.find(r => r.did === selectedRep),
-    [selectedRep],
+    () => candidates.find(r => r.did === selectedRep),
+    [candidates, selectedRep],
   )
+  const hasDelegated =
+    Boolean(cabildeo?.userContext?.hasDelegatedTo) ||
+    delegateMutation.isSuccess
 
   if (!cabildeo && (isLoading || !isFetched || isError)) {
     return (
@@ -192,7 +174,7 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                 <Text style={[styles.powerValue, {color: '#FF9500'}]}>
                   {selectedRepData
                     ? calcQuadraticPower(
-                        selectedRepData.delegationCount,
+                        selectedRepData.activeDelegationCount,
                       ).toFixed(1)
                     : '—'}
                 </Text>
@@ -211,7 +193,9 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                   {selectedRepData
                     ? (
                         (1.0 /
-                          calcQuadraticPower(selectedRepData.delegationCount)) *
+                          calcQuadraticPower(
+                            selectedRepData.activeDelegationCount,
+                          )) *
                         100
                       ).toFixed(0) + '%'
                     : '—'}
@@ -229,7 +213,7 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                 const barHeight = (power / 7) * 60
                 const isHighlighted =
                   selectedRepData &&
-                  Math.abs(selectedRepData.delegationCount + 1 - n) < 5
+                  Math.abs(selectedRepData.activeDelegationCount + 1 - n) < 5
 
                 return (
                   <View key={n} style={styles.scaleItem}>
@@ -282,28 +266,48 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                 ✅ Voto delegado exitosamente
               </Text>
               <Text style={[styles.delegatedSub, t.atoms.text_contrast_medium]}>
-                {selectedRepData?.displayName} votará por ti.{'\n'}
-                Puedes revocar en cualquier momento.
+                {(selectedRepData?.displayName ||
+                  selectedRepData?.handle ||
+                  cabildeo.userContext?.hasDelegatedTo) ??
+                  'Tu representante'}{' '}
+                votará por ti.
               </Text>
               <TouchableOpacity
                 accessibilityRole="button"
-                onPress={() => {
-                  setHasDelegated(false)
-                  setSelectedRep(null)
-                }}
+                onPress={() => navigation.goBack()}
                 style={[styles.revokeButton, {borderColor: '#FF3B30' + '40'}]}>
                 <Text style={[styles.revokeText, {color: '#FF3B30'}]}>
-                  Revocar delegación
+                  Volver al cabildeo
                 </Text>
               </TouchableOpacity>
             </View>
           ) : (
             <>
+              {isCandidatesLoading || isCandidatesError ? (
+                <ListMaybePlaceholder
+                  isLoading={isCandidatesLoading}
+                  isError={isCandidatesError}
+                  onRetry={refetchCandidates}
+                  emptyType="results"
+                  emptyMessage="Estamos buscando representantes disponibles para este cabildeo."
+                />
+              ) : candidates.length === 0 ? (
+                <ListMaybePlaceholder
+                  isLoading={false}
+                  isError={false}
+                  emptyType="results"
+                  emptyTitle="No hay representantes disponibles"
+                  emptyMessage="Esta comunidad todavía no tiene representantes o miembros con roles delegables."
+                />
+              ) : (
               <View style={styles.repList}>
-                {MOCK_REPRESENTATIVES.map(rep => {
+                {candidates.map(rep => {
                   const isSelected = selectedRep === rep.did
-                  const power = calcQuadraticPower(rep.delegationCount)
-                  const newPower = calcQuadraticPower(rep.delegationCount + 1)
+                  const power = calcQuadraticPower(rep.activeDelegationCount)
+                  const newPower = calcQuadraticPower(
+                    rep.activeDelegationCount + 1,
+                  )
+                  const displayName = rep.displayName || rep.handle || rep.did
 
                   return (
                     <TouchableOpacity
@@ -326,24 +330,26 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                           {backgroundColor: t.palette.primary_500 + '20'},
                         ]}>
                         <Text style={{fontSize: 20}}>
-                          {rep.displayName.charAt(0)}
+                          {displayName.charAt(0)}
                         </Text>
                       </View>
 
                       <View style={styles.repInfo}>
                         <Text style={[styles.repName, t.atoms.text]}>
-                          {rep.displayName}
+                          {displayName}
                         </Text>
                         <Text
                           style={[
                             styles.repHandle,
                             t.atoms.text_contrast_medium,
                           ]}>
-                          {rep.handle}
+                          {rep.handle ? `@${rep.handle}` : rep.did}
                         </Text>
                         <Text
                           style={[styles.repBio, t.atoms.text_contrast_medium]}>
-                          {rep.bio}
+                          {rep.description ||
+                            rep.roles?.join(' · ') ||
+                            'Representante comunitario'}
                         </Text>
                       </View>
 
@@ -351,7 +357,7 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                         {/* Current delegations */}
                         <View style={styles.repStatItem}>
                           <Text style={[styles.repStatValue, t.atoms.text]}>
-                            {rep.delegationCount}
+                            {rep.activeDelegationCount}
                           </Text>
                           <Text
                             style={[
@@ -403,7 +409,7 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                               styles.compassBadgeText,
                               t.atoms.text_contrast_medium,
                             ]}>
-                            🧭 {rep.compassQuadrant}
+                            {rep.hasVoted ? 'Ya votó' : 'Sin voto registrado'}
                           </Text>
                         </View>
                       </View>
@@ -431,30 +437,44 @@ export function DelegateVoteScreen({route, navigation}: Props) {
                   )
                 })}
               </View>
+              )}
 
               {/* Delegate Button */}
               <TouchableOpacity
                 accessibilityRole="button"
                 onPress={handleDelegate}
-                disabled={!selectedRep}
+                disabled={!selectedRep || delegateMutation.isPending}
                 style={[
                   styles.delegateBtn,
                   {
-                    backgroundColor: selectedRep
+                    backgroundColor: selectedRep && !delegateMutation.isPending
                       ? '#FF9500'
                       : t.palette.contrast_200,
                   },
                 ]}>
-                <Text style={styles.delegateBtnText}>🤝 Delegar mi voto</Text>
+                <Text style={styles.delegateBtnText}>
+                  {delegateMutation.isPending
+                    ? 'Delegando...'
+                    : '🤝 Delegar mi voto'}
+                </Text>
                 {selectedRepData && (
                   <Text style={styles.delegateBtnSub}>
-                    a {selectedRepData.displayName} · nuevo poder: √
+                    a{' '}
+                    {selectedRepData.displayName ||
+                      selectedRepData.handle ||
+                      selectedRepData.did}{' '}
+                    · nuevo poder: √
                     {calcQuadraticPower(
-                      selectedRepData.delegationCount + 1,
+                      selectedRepData.activeDelegationCount + 1,
                     ).toFixed(1)}
                   </Text>
                 )}
               </TouchableOpacity>
+              {delegateMutation.isError ? (
+                <Text style={[styles.errorText, {color: '#FF3B30'}]}>
+                  No se pudo registrar la delegación. Intenta otra vez.
+                </Text>
+              ) : null}
 
               {/* Or vote directly */}
               <TouchableOpacity
@@ -561,6 +581,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   revokeText: {fontSize: 13, fontWeight: '800'},
+  errorText: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 10,
+    textAlign: 'center',
+  },
 
   // Rep List
   repList: {gap: 12, marginBottom: 16},

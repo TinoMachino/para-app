@@ -131,7 +131,9 @@ export function CommunityProfileScreen() {
     featuredRepresentative?.displayName ||
     featuredRepresentative?.handle ||
     featuredRepresentative?.did ||
-    'Rafael Ibarra'
+    'Representative unavailable'
+  const agentActorId =
+    featuredRepresentative?.did || featuredRepresentative?.handle || ''
 
   const {
     data,
@@ -277,15 +279,16 @@ export function CommunityProfileScreen() {
   }
 
   const onPressChat = () => {
-    navigation.navigate('AgentChat', {agentId: agentDisplayName})
+    if (!agentActorId) return
+    navigation.navigate('AgentChat', {agentId: agentActorId})
   }
 
   const onPressAgentProfile = () => {
-    const actorId =
-      featuredRepresentative?.did ||
-      featuredRepresentative?.handle ||
-      'deleg-rep.test'
-    navigation.navigate('Profile', {name: actorId})
+    if (!agentActorId) return
+    navigation.navigate('CommunityAgentProfile', {
+      agentId: agentActorId,
+      communityName: board?.name || communityName,
+    })
   }
 
   const rules = [
@@ -444,6 +447,7 @@ export function CommunityProfileScreen() {
               accessibilityLabel="View AI Delegate Profile"
               accessibilityHint="Navigates to the AI Delegate's profile page"
               onPress={onPressAgentProfile}
+              disabled={!agentActorId}
               style={[
                 pal.border,
                 {
@@ -455,9 +459,23 @@ export function CommunityProfileScreen() {
                   backgroundColor: t.atoms.bg.backgroundColor,
                 },
               ]}>
-              <ProfileHoverCard
-                inline
-                did={featuredRepresentative?.did || 'deleg-rep.test'}>
+              {featuredRepresentative?.did ? (
+                <ProfileHoverCard inline did={featuredRepresentative.did}>
+                  <View
+                    style={[
+                      styles.aiDelegateAvatar,
+                      {
+                        backgroundColor: t.palette.primary_500,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
+                        marginRight: 12,
+                      },
+                    ]}>
+                    <MacintoshIcon style={{color: '#fff'}} size="sm" />
+                  </View>
+                </ProfileHoverCard>
+              ) : (
                 <View
                   style={[
                     styles.aiDelegateAvatar,
@@ -471,12 +489,14 @@ export function CommunityProfileScreen() {
                   ]}>
                   <MacintoshIcon style={{color: '#fff'}} size="sm" />
                 </View>
-              </ProfileHoverCard>
+              )}
               <View style={{flex: 1}}>
                 <Text style={[pal.text, {fontSize: 15, fontWeight: 'bold'}]}>
                   {agentDisplayName}
                 </Text>
-                <Text style={[pal.textLight, {fontSize: 13}]}>AI Delegate</Text>
+                <Text style={[pal.textLight, {fontSize: 13}]}>
+                  Representative
+                </Text>
               </View>
               <TouchableOpacity
                 accessibilityRole="button"

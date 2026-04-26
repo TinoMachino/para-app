@@ -1,4 +1,11 @@
-import {createContext, useCallback, useContext, useId, useMemo} from 'react'
+import {
+  type ComponentType,
+  createContext,
+  useCallback,
+  useContext,
+  useId,
+  useMemo,
+} from 'react'
 import {type GestureResponderEvent, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react'
@@ -10,8 +17,9 @@ import {
   type ViewStyleProp,
   web,
 } from '#/alf'
-import {Button, type ButtonColor, ButtonText} from '#/components/Button'
+import {Button, type ButtonColor, ButtonIcon, ButtonText} from '#/components/Button'
 import * as Dialog from '#/components/Dialog'
+import {type Props as SVGIconProps} from '#/components/icons/common'
 import {Text} from '#/components/Typography'
 import {type BottomSheetViewProps} from '../../modules/bottom-sheet'
 
@@ -160,6 +168,9 @@ export function Action({
   color = 'primary',
   cta,
   testID,
+  disabled,
+  icon,
+  shouldCloseOnPress = true,
 }: {
   /**
    * Callback to run when the action is pressed. The method is called _after_
@@ -175,15 +186,22 @@ export function Action({
    */
   cta?: string
   testID?: string
+  disabled?: boolean
+  icon?: ComponentType<SVGIconProps>
+  shouldCloseOnPress?: boolean
 }) {
   const {_} = useLingui()
   const {gtMobile} = useBreakpoints()
   const {close} = Dialog.useDialogContext()
   const handleOnPress = useCallback(
     (e: GestureResponderEvent) => {
-      close(() => onPress?.(e))
+      if (shouldCloseOnPress) {
+        close(() => onPress?.(e))
+      } else {
+        onPress?.(e)
+      }
     },
-    [close, onPress],
+    [close, onPress, shouldCloseOnPress],
   )
 
   return (
@@ -193,7 +211,9 @@ export function Action({
       size={gtMobile ? 'small' : 'large'}
       label={cta || _(msg`Confirm`)}
       onPress={handleOnPress}
+      disabled={disabled}
       testID={testID}>
+      {icon ? <ButtonIcon icon={icon} /> : null}
       <ButtonText>{cta || _(msg`Confirm`)}</ButtonText>
     </Button>
   )

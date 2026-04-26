@@ -74,6 +74,13 @@ export type Events = {
   'welcomeModal:signinClicked': {}
   'welcomeModal:dismissed': {}
   'welcomeModal:presented': {}
+  'community:create:ctaShown': {}
+  'community:create:eligibilityDenied': {}
+  'community:create:ctaClicked': {}
+  'community:create:submitStarted': {}
+  'community:create:submitSucceeded': {}
+  'community:create:submitFailed': {}
+  'community:create:wizardCompleted': {}
   'signup:nextPressed': {
     activeStep: number
     phoneVerificationRequired?: boolean
@@ -332,6 +339,12 @@ export type Events = {
     logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
     feedDescriptor?: string
   }
+  'post:quote': {
+    uri: string
+    authorDid: string
+    logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
+    feedDescriptor?: string
+  }
   'post:unlike': {
     uri: string
     authorDid: string
@@ -339,6 +352,12 @@ export type Events = {
     feedDescriptor?: string
   }
   'post:unrepost': {
+    uri: string
+    authorDid: string
+    logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
+    feedDescriptor?: string
+  }
+  'post:unquote': {
     uri: string
     authorDid: string
     logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'

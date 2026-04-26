@@ -134,7 +134,7 @@ export default function HashtagScreen({
                 <Layout.Header.TitleText>{headerTitle}</Layout.Header.TitleText>
                 {author && (
                   <Layout.Header.SubtitleText>
-                    {_(msg`From @${sanitizedAuthor}`)}
+                    {_(msg`From @${sanitizedAuthor ?? ''}`)}
                   </Layout.Header.SubtitleText>
                 )}
               </Layout.Header.Content>

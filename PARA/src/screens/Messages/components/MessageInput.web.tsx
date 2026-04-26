@@ -1,7 +1,6 @@
 import {
   type ChangeEvent,
   type KeyboardEvent,
-  type MutableRefObject,
   type ReactNode,
   useCallback,
   useEffect,

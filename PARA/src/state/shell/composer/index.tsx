@@ -122,7 +122,7 @@ export function Provider({children}: React.PropsWithChildren<{}>) {
     let wasOpen = !!state
     if (wasOpen) {
       setState(undefined)
-      purgeTemporaryImageFiles()
+      void purgeTemporaryImageFiles()
       // Purging deletes cached thumbnails on disk, so remove the query
       // caches that may hold references to those now-deleted file paths.
       // Without this, restoring a draft would serve stale ResolvedLink

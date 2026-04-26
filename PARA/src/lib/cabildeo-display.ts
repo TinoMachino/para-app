@@ -42,7 +42,9 @@ export const CABILDEO_PHASE_META = {
 
 export function getCabildeoBadge(cabildeo: Pick<CabildeoView, 'flairs'>) {
   const badge = getPostBadges({flairs: cabildeo.flairs}).find(
-    item => item.kind === 'policy' || item.kind === 'matter',
+    (item): item is ReturnType<typeof getPostBadges>[number] & {
+      kind: DebateKind
+    } => item.kind === 'policy' || item.kind === 'matter',
   )
 
   if (!badge) {

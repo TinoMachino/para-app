@@ -133,7 +133,7 @@ export function publishDeputySelection(
         activeSince: new Date().toISOString(),
         applicants: role.applicants.map(existing =>
           applicantIdentity(existing) === applicantIdentity(applicant)
-            ? {...existing, status: 'approved'}
+            ? {...existing, status: 'approved' as const}
             : existing,
         ),
       }

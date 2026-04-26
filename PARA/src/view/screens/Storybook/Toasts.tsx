@@ -140,7 +140,7 @@ export function Toasts() {
           onPress={() =>
             deprecatedShow(
               `This is a test of the deprecated API`,
-              'exclamation-circle',
+              {type: 'warning'},
             )
           }>
           <DefaultToast

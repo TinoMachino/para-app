@@ -62,11 +62,12 @@ export function PostHighlights({uri}: {uri: string}) {
   }
 
   return (
-    <List<HighlightData>
+    <List
       data={sortedHighlights}
       keyExtractor={(item: HighlightData) => item.id}
       renderItem={({item, index}: {item: HighlightData; index: number}) => (
         <Link
+          label={_(msg`View highlight`)}
           to={{screen: 'SeeHighlightDetails', params: {highlightId: item.id}}}
           style={[
             a.px_lg,

@@ -12,7 +12,7 @@ import {
 import {type Props as SVGIconProps} from '#/components/icons/common'
 import {
   Lock_Stroke2_Corner0_Rounded as LockIcon,
-  Unlock_Stroke2_Corner2_Rounded as UnlockIcon,
+  Lock_Stroke2_Corner2_Rounded as UnlockIcon,
 } from '#/components/icons/Lock'
 import {PencilLine_Stroke2_Corner0_Rounded as PencilIcon} from '#/components/icons/Pencil'
 
@@ -27,22 +27,22 @@ export function getSystemMessageInfo(
   if (ChatBskyConvoDefs.isSystemMessageDataAddMember(data)) {
     return {
       Icon: JoinIcon,
-      message: msg`${createSanitizedDisplayName(data.member)} was added to the group`,
+      message: msg`${createSanitizedDisplayName(data.member as any)} was added to the group`,
     }
   } else if (ChatBskyConvoDefs.isSystemMessageDataRemoveMember(data)) {
     return {
       Icon: LeaveIcon,
-      message: msg`${createSanitizedDisplayName(data.member)} was removed from the group`,
+      message: msg`${createSanitizedDisplayName(data.member as any)} was removed from the group`,
     }
   } else if (ChatBskyConvoDefs.isSystemMessageDataMemberJoin(data)) {
     return {
       Icon: JoinIcon,
-      message: msg`${createSanitizedDisplayName(data.member)} joined the group`,
+      message: msg`${createSanitizedDisplayName(data.member as any)} joined the group`,
     }
   } else if (ChatBskyConvoDefs.isSystemMessageDataMemberLeave(data)) {
     return {
       Icon: LeaveIcon,
-      message: msg`${createSanitizedDisplayName(data.member)} left the group`,
+      message: msg`${createSanitizedDisplayName(data.member as any)} left the group`,
     }
   } else if (ChatBskyConvoDefs.isSystemMessageDataLockConvo(data)) {
     return {Icon: LockIcon, message: msg`Chat locked`}

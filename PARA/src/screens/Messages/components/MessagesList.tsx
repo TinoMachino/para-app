@@ -8,8 +8,8 @@ import {
 } from 'react'
 import {type LayoutChangeEvent, type ScrollViewProps, View} from 'react-native'
 import {
-  KeyboardChatScrollView,
-  type KeyboardChatScrollViewProps,
+  KeyboardAwareScrollView,
+  type KeyboardAwareScrollViewRef,
   KeyboardGestureArea,
 } from 'react-native-keyboard-controller'
 import {
@@ -17,7 +17,6 @@ import {
   type ScrollEvent,
   type SharedValue,
   useAnimatedRef,
-  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -505,7 +504,9 @@ export function MessagesList({
               ) : (
                 <MessageInput
                   textInputId={textInputId}
-                  onSendMessage={onSendMessage}
+                  onSendMessage={(message: string) => {
+                    void onSendMessage(message)
+                  }}
                   hasEmbed={!!embedUri}
                   setEmbed={setEmbed}>
                   <MessageInputEmbed embedUri={embedUri} setEmbed={setEmbed} />
@@ -527,7 +528,7 @@ function ChatScrollComponent({
   inputHeight,
   ...props
 }: ScrollViewProps & {
-  ref?: React.RefObject<KeyboardChatScrollViewProps>
+  ref?: React.RefObject<KeyboardAwareScrollViewRef>
   inputHeight: SharedValue<number>
 }) {
   const scrollEdgeRef = useRef<any>(null)
@@ -539,24 +540,13 @@ function ChatScrollComponent({
     default: 0,
   })
 
-  const inputOffset = platform({
-    ios: bottomInset - tokens.space.lg,
-    android: bottomInset,
-    default: 0,
-  })
-
-  const extraContentPadding = useDerivedValue(
-    () => inputHeight.get() + inputOffset,
-  )
-
   return (
-    <KeyboardChatScrollView
+    <KeyboardAwareScrollView
       ref={mergeRefs([scrollEdgeRef, ref])}
       automaticallyAdjustContentInsets={false}
       keyboardDismissMode="interactive"
-      keyboardLiftBehavior="always"
-      extraContentPadding={extraContentPadding}
-      offset={offset}
+      bottomOffset={offset}
+      extraKeyboardSpace={inputHeight.get()}
       {...props}
     />
   )

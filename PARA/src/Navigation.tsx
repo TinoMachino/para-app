@@ -1218,7 +1218,7 @@ function RoutesContainer({children}: React.PropsWithChildren<{}>) {
    * after an async call - sfn
    */
   const handleChatMessage = useNonReactiveCallback(
-    (payload: Extract<NotificationPayload, {reason: 'chat-message'}>) => {
+    (payload: Extract<NotificationPayload, {reason: 'chat-message' | 'chat-reaction'}>) => {
       notyLogger.debug(`handleChatMessage`, {payload})
 
       if (payload.recipientDid !== currentAccount?.did) {

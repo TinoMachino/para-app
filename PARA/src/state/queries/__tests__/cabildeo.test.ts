@@ -23,6 +23,19 @@ function buildView(overrides: Partial<CabildeoView>, index = 0): CabildeoView {
   return {
     ...baseRecord,
     uri,
+    optionSummary: [],
+    positionCounts: {
+      total: 0,
+      for: 0,
+      against: 0,
+      amendment: 0,
+      byOption: [],
+    },
+    voteTotals: {
+      total: 0,
+      direct: 0,
+      delegated: 0,
+    },
     ...overrides,
   }
 }

@@ -1,4 +1,4 @@
-import {type MutableRefObject, useCallback, useEffect, useState} from 'react'
+import {useCallback, useState} from 'react'
 import {Pressable, View} from 'react-native'
 import {msg} from '@lingui/core/macro'
 import {useLingui} from '@lingui/react/macro'
@@ -12,10 +12,8 @@ import {
   useMessageDraft,
   useSaveMessageDraft,
 } from '#/state/messages/message-drafts'
-import {textInputWebEmitter} from '#/view/com/composer/text-input/textInputWebEmitter'
-import {atoms as a, flatten, useTheme} from '#/alf'
+import {atoms as a, useTheme} from '#/alf'
 import {Composer, useComposerInternalApiRef} from '#/components/Composer'
-import {Button} from '#/components/Button'
 import * as EmojiPicker from '#/components/EmojiPicker'
 import {useInteractionState} from '#/components/hooks/useInteractionState'
 import {EmojiArc_Stroke2_Corner0_Rounded as EmojiSmile} from '#/components/icons/Emoji'
@@ -24,11 +22,13 @@ import * as Toast from '#/components/Toast'
 import {IS_WEB} from '#/env'
 
 export function MessageComposer({
+  textInputId: _textInputId,
   onSendMessage,
   hasEmbed,
   setEmbed,
   children,
 }: {
+  textInputId?: string
   onSendMessage: (message: string) => void | Promise<void>
   hasEmbed: boolean
   setEmbed: (embedUrl: string | undefined) => void
@@ -74,7 +74,7 @@ export function MessageComposer({
   }, [editable, hasEmbed, text, clearDraft, onSendMessage, playHaptic, setEmbed, composerInternalApiRef, l])
 
   const onEmojiInserted = useCallback(
-    (emoji: any) => {
+    (emoji: EmojiPicker.Emoji) => {
       composerInternalApiRef.current?.insert(emoji.native)
     },
     [composerInternalApiRef],
@@ -103,7 +103,7 @@ export function MessageComposer({
               onEmojiSelect={onEmojiInserted}
               nextFocusRef={() => composerInternalApiRef.current?.input?.element}>
               <EmojiPicker.Trigger label={l(msg`Open emoji picker`)}>
-                {({props, state}: {props: any, state: any}) => (
+                {({props, state}) => (
                   <Pressable
                     {...props}
                     style={[

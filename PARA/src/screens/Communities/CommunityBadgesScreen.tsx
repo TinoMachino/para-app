@@ -489,12 +489,12 @@ export function CommunityBadgesScreen() {
                     onPress={() => void refetchGovernance()}
                     style={[
                       styles.inlineAction,
-                      {backgroundColor: t.palette.secondary_25},
+                      {backgroundColor: t.palette.primary_25},
                     ]}>
                     <Text
                       style={[
                         styles.inlineActionText,
-                        {color: t.palette.secondary_700},
+                        {color: t.palette.primary_700},
                       ]}>
                       Retry governance
                     </Text>
@@ -764,7 +764,7 @@ export function CommunityBadgesScreen() {
                   t.atoms.bg_contrast_25,
                   t.atoms.border_contrast_low,
                 ]}>
-                <TreeIcon size="md" style={{color: t.palette.secondary_600}} />
+                <TreeIcon size="md" style={{color: t.palette.primary_600}} />
               </View>
               <View style={[a.flex_1]}>
                 <Text style={[a.text_lg, a.font_bold, t.atoms.text]}>
@@ -803,12 +803,12 @@ export function CommunityBadgesScreen() {
                     <View
                       style={[
                         styles.roleBadge,
-                        {backgroundColor: t.palette.secondary_25},
+                        {backgroundColor: t.palette.primary_25},
                       ]}>
                       <Text
                         style={[
                           styles.roleBadgeText,
-                          {color: t.palette.secondary_700},
+                          {color: t.palette.primary_700},
                         ]}>
                         Active role
                       </Text>
@@ -909,12 +909,12 @@ export function CommunityBadgesScreen() {
                             }
                             style={[
                               styles.inlineAction,
-                              {backgroundColor: t.palette.secondary_25},
+                              {backgroundColor: t.palette.primary_25},
                             ]}>
                             <Text
                               style={[
                                 styles.inlineActionText,
-                                {color: t.palette.secondary_700},
+                                {color: t.palette.primary_700},
                               ]}>
                               Activate
                             </Text>
@@ -932,12 +932,12 @@ export function CommunityBadgesScreen() {
                         onPress={() => onStartEditingRole(role)}
                         style={[
                           styles.primaryActionButton,
-                          {backgroundColor: t.palette.secondary_25},
+                          {backgroundColor: t.palette.primary_25},
                         ]}>
                         <Text
                           style={[
                             styles.primaryActionText,
-                            {color: t.palette.secondary_700},
+                            {color: t.palette.primary_700},
                           ]}>
                           Edit role charter
                         </Text>

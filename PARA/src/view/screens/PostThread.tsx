@@ -1,6 +1,6 @@
 import {useCallback} from 'react'
-import {useFocusEffect} from '@react-navigation/native'
 import {withSpring} from 'react-native-reanimated'
+import {useFocusEffect} from '@react-navigation/native'
 
 import {
   type CommonNavigatorParams,

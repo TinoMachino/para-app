@@ -128,7 +128,7 @@ export function useStarterPackLink({
   return {
     to: `/starter-pack/${handleOrDid}/${rkey}`,
     label: AppBskyGraphStarterpack.isRecord(view.record)
-      ? _(msg`Navigate to ${view.record.name}`)
+      ? _(msg`Navigate to ${view.record.name as string}`)
       : _(msg`Navigate to starter pack`),
     precache,
   }
@@ -158,7 +158,7 @@ export function Link({
   return (
     <BaseLink
       to={`/starter-pack/${handleOrDid}/${rkey}`}
-      label={_(msg`Navigate to ${record.name}`)}
+      label={_(msg`Navigate to ${record.name as string}`)}
       onPress={() => {
         precacheResolvedUri(
           queryClient,

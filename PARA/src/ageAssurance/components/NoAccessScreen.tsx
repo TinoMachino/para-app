@@ -264,7 +264,7 @@ export function NoAccessScreen() {
                   <SimpleInlineLinkText
                     label={_(msg`Click here to delete your account`)}
                     {...createStaticClick(() => {
-                      ax.metric(
+                      logger.metric(
                         'ageAssurance:noAccessScreen:openDeleteAccountDialog',
                         {},
                       )

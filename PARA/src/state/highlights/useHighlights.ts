@@ -1,7 +1,7 @@
 /**
  * Hook for fetching and managing highlights for a specific post
  */
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useEffect, useReducer, useState} from 'react'
 import {useQuery, useQueryClient} from '@tanstack/react-query'
 
 import {
@@ -31,8 +31,7 @@ function notifyListeners() {
 export function useHighlights(postUri: string) {
   const agent = useAgent()
   const queryClient = useQueryClient()
-  // Use useState with a simple refresh trigger
-  const [, forceUpdate] = useState(0)
+  const [, forceUpdate] = useReducer(n => n + 1, 0)
   const [localHighlights, setLocalHighlights] = useState<HighlightData[]>(() =>
     getHighlightsForPost(postUri),
   )
@@ -67,9 +66,13 @@ export function useHighlights(postUri: string) {
 
   // Subscribe to updates
   useEffect(() => {
+    setLocalHighlights(getHighlightsForPost(postUri))
+  }, [postUri])
+
+  useEffect(() => {
     const handleUpdate = () => {
       setLocalHighlights(getHighlightsForPost(postUri))
-      forceUpdate(n => n + 1)
+      forceUpdate()
     }
     listeners.add(handleUpdate)
     return () => {
@@ -86,6 +89,7 @@ export function useHighlights(postUri: string) {
       isPublic: boolean = false,
       text: string,
       tag?: string,
+      localId?: string,
     ) => {
       let newHighlight: HighlightData
 
@@ -115,6 +119,7 @@ export function useHighlights(postUri: string) {
         })
       } else {
         newHighlight = saveHighlight(postUri, {
+          id: localId,
           start,
           end,
           color,

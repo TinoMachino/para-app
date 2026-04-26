@@ -33,11 +33,13 @@ import {useExtractEmbedFromFacets} from './MessageInputEmbed'
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput)
 
 export function MessageInput({
+  textInputId: _textInputId,
   onSendMessage,
   hasEmbed,
   setEmbed,
   children,
 }: {
+  textInputId?: string
   onSendMessage: (message: string) => void
   hasEmbed: boolean
   setEmbed: (embedUrl: string | undefined) => void

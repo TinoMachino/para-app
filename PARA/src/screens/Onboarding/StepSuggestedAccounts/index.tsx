@@ -37,6 +37,16 @@ import {IS_WEB} from '#/env'
 import type * as bsky from '#/types/bsky'
 import {bulkWriteFollows} from '../util'
 
+function hasSuggestedUsersRecId(
+  value: unknown,
+): value is {recId: number | string} {
+  if (!value || typeof value !== 'object' || !('recId' in value)) {
+    return false
+  }
+  const recId = (value as {recId?: unknown}).recId
+  return typeof recId === 'number' || typeof recId === 'string'
+}
+
 export function StepSuggestedAccounts() {
   const {_} = useLingui()
 
@@ -82,6 +92,9 @@ export function StepSuggestedAccounts() {
   const isError = !!error
   const isEmpty =
     !isLoading && suggestedUsers && suggestedUsers.actors.length === 0
+  const suggestedUsersRecId = hasSuggestedUsersRecId(suggestedUsers)
+    ? suggestedUsers.recId
+    : undefined
 
   const followableDids =
     suggestedUsers?.actors
@@ -106,7 +119,7 @@ export function StepSuggestedAccounts() {
         ax.metric('suggestedUser:follow', {
           logContext: 'Onboarding',
           location: 'FollowAll',
-          recId: suggestedUsers?.recId,
+          recId: suggestedUsersRecId,
           position: i,
           suggestedDid: did,
           category: selectedInterest,
@@ -152,7 +165,7 @@ export function StepSuggestedAccounts() {
           'suggestedUser:seen',
           {
             logContext: 'Onboarding',
-            recId: suggestedUsers?.recId,
+            recId: suggestedUsersRecId,
             position,
             suggestedDid: did,
             category: selectedInterest,
@@ -161,7 +174,7 @@ export function StepSuggestedAccounts() {
         )
       }
     },
-    [ax, selectedInterest, suggestedUsers?.recId],
+    [selectedInterest, suggestedUsersRecId],
   )
 
   return (
@@ -246,7 +259,7 @@ export function StepSuggestedAccounts() {
                 position={index}
                 category={selectedInterest}
                 onSeen={onProfileSeen}
-                recId={suggestedUsers?.recId}
+                recId={suggestedUsersRecId}
               />
             ))}
           </View>

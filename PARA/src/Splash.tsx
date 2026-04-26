@@ -26,7 +26,7 @@ const darkSplashImageUri = RNImage.resolveAssetSource(
 
 type Props = {
   isReady: boolean
-  theme: 'light' | 'dim' | 'dark'
+  theme?: 'light' | 'dim' | 'dark'
 }
 
 export function Splash(props: PropsWithChildren<Props>) {
@@ -36,7 +36,7 @@ export function Splash(props: PropsWithChildren<Props>) {
   const [isLayoutReady, setIsLayoutReady] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
   const isReady = props.isReady && isLayoutReady
-  const isDarkMode = props.theme !== 'light'
+  const isDarkMode = props.theme && props.theme !== 'light'
 
   const overlayAnimation = useAnimatedStyle(() => {
     return {

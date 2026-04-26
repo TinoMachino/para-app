@@ -187,6 +187,24 @@ type ListCabildeoPositionsResponse = {
   cursor?: string
 }
 
+export type DelegationCandidateReadView = {
+  did: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+  description?: string
+  roles?: string[]
+  activeDelegationCount: number
+  hasVoted: boolean
+  votedAt?: string
+  selectedOption?: number
+}
+
+type ListDelegationCandidatesResponse = {
+  candidates?: DelegationCandidateReadView[]
+  cursor?: string
+}
+
 const MAX_PAGINATION_PAGES = 20
 
 export async function fetchCabildeosPage(
@@ -323,6 +341,32 @@ export async function fetchCabildeoPositions(
   }
 
   return all
+}
+
+export async function fetchDelegationCandidates(
+  agent: BskyAgent,
+  opts: {
+    cabildeoUri: string
+    communityId?: string
+    limit?: number
+    cursor?: string
+  },
+): Promise<{candidates: DelegationCandidateReadView[]; cursor?: string}> {
+  const res = await requestCivic<ListDelegationCandidatesResponse>(
+    agent,
+    'com.para.civic.listDelegationCandidates',
+    {
+      cabildeo: opts.cabildeoUri,
+      communityId: opts.communityId,
+      limit: opts.limit ? String(opts.limit) : undefined,
+      cursor: opts.cursor,
+    },
+  )
+
+  return {
+    candidates: res.candidates ?? [],
+    cursor: res.cursor,
+  }
 }
 
 async function requestCivic<T>(

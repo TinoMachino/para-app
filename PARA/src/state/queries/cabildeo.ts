@@ -1,9 +1,11 @@
-import {useQuery} from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 
 import {
+  delegateCabildeoVote,
   fetchCabildeo,
   fetchCabildeoPositions,
   fetchCabildeos,
+  fetchDelegationCandidates,
 } from '#/lib/api/cabildeo'
 import {
   type CabildeoView,
@@ -22,6 +24,13 @@ export const cabildeoDetailQueryKey = (cabildeoUri: string) => [
   'detail',
   cabildeoUri,
 ]
+export const delegationCandidatesQueryKey = ({
+  cabildeoUri,
+  communityId,
+}: {
+  cabildeoUri?: string
+  communityId?: string
+}) => [RQKEY_ROOT, 'delegation-candidates', cabildeoUri || '', communityId || '']
 
 export function useCabildeosQuery() {
   const agent = useAgent()
@@ -62,6 +71,64 @@ export function useCabildeoPositionsQuery(cabildeoUri: string | undefined) {
       if (!cabildeoUri) return []
       const positions = await fetchCabildeoPositions(agent, {cabildeoUri})
       return mapCabildeoPositionsFromRead(positions)
+    },
+  })
+}
+
+export function useDelegationCandidatesQuery({
+  cabildeoUri,
+  communityId,
+}: {
+  cabildeoUri?: string
+  communityId?: string
+}) {
+  const agent = useAgent()
+  return useQuery({
+    staleTime: STALE.SECONDS.THIRTY,
+    enabled: Boolean(cabildeoUri),
+    queryKey: delegationCandidatesQueryKey({cabildeoUri, communityId}),
+    queryFn: async () => {
+      if (!cabildeoUri) return []
+      const result = await fetchDelegationCandidates(agent, {
+        cabildeoUri,
+        communityId,
+        limit: 50,
+      })
+      return result.candidates
+    },
+  })
+}
+
+export function useDelegateCabildeoVoteMutation() {
+  const agent = useAgent()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      cabildeoUri,
+      delegateTo,
+      reason,
+      scopeFlairs,
+    }: {
+      cabildeoUri: string
+      delegateTo: string
+      reason?: string
+      scopeFlairs?: string[]
+    }) =>
+      delegateCabildeoVote(agent, {
+        cabildeo: cabildeoUri,
+        delegateTo,
+        reason,
+        scopeFlairs,
+      }),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: cabildeoDetailQueryKey(variables.cabildeoUri),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: [RQKEY_ROOT, 'delegation-candidates', variables.cabildeoUri],
+      })
+      void queryClient.invalidateQueries({queryKey: cabildeosQueryKey})
     },
   })
 }

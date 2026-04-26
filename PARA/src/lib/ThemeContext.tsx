@@ -106,10 +106,10 @@ function getTheme(theme: ThemeName) {
   }
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+export function ThemeProvider({
   theme,
   children,
-}) => {
+}: ThemeProviderProps) {
   const themeValue = getTheme(theme)
 
   return (

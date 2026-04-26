@@ -679,9 +679,21 @@ export function CreatePostScreen() {
                     placeholder={_(msg`What's up?`)}
                     autoFocus
                     isActive={true}
+                    civicAutocompleteEnabled={false}
+                    selectedFlairs={selectedFlair ? [selectedFlair] : []}
+                    postType={null}
                     setRichText={rt => {
                       dispatchPost({type: 'update_richtext', richtext: rt})
                     }}
+                    setSelectedFlairs={flairs => {
+                      const nextFlair = flairs[0]
+                      setSelectedFlair(
+                        Object.values(POST_FLAIRS).find(
+                          flair => flair.id === nextFlair?.id,
+                        ) ?? null,
+                      )
+                    }}
+                    setPostType={() => {}}
                     // Fix: Pass the missing prop
                     onPhotoPasted={onPhotoPasted}
                     // Fix: Ensure the signature matches (RichText) => void

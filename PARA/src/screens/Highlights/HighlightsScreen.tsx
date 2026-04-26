@@ -1,7 +1,7 @@
 /**
  * HighlightsScreen V5 - Grouped Community Feeds
  * Features: Separate feeds per selected community/state, dynamic color headers, upvotes
- * Data Source: Fetches from 'bob.test' (local dev) and parses hashtags. Fallback to mocks.
+ * Data Source: com.para.highlight.listHighlights backed by persisted highlight annotations.
  */
 import {useCallback, useMemo, useRef, useState} from 'react'
 import {
@@ -25,6 +25,7 @@ import {
   getAllHighlights,
   saveHighlight,
 } from '#/state/highlights/highlightStorage'
+import {type HighlightColor} from '#/state/highlights/highlightTypes'
 import {useHighlightVoteMutation} from '#/state/mutations/highlights'
 import {useHighlightsQuery} from '#/state/queries/highlights'
 import {useBaseFilter} from '#/state/shell/base-filter'
@@ -42,6 +43,7 @@ import {WebScrollControls} from '#/components/WebScrollControls'
 
 // Sort options
 type SortOption = 'recent' | 'popular' | 'mostSaved'
+const SAVED_HIGHLIGHT_PREFIX = 'saved:'
 
 const SORT_OPTIONS: {
   key: SortOption
@@ -72,6 +74,12 @@ const getContrastingTextColor = (hexColor: string): string => {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance > 0.5 ? '#333333' : '#FFFFFF'
 }
+
+const getHighlightSubjectUri = (highlight: Highlight) =>
+  highlight.sourcePostUri || highlight.id
+
+const getSavedHighlightId = (highlightId: string) =>
+  `${SAVED_HIGHLIGHT_PREFIX}${highlightId}`
 
 function FeedSection({
   title,
@@ -351,7 +359,11 @@ export function HighlightsScreen() {
   useFocusEffect(
     useCallback(() => {
       const all = getAllHighlights()
-      const savedIds = new Set(all.map(h => h.postUri))
+      const savedIds = new Set(
+        all
+          .filter(h => h.id.startsWith(SAVED_HIGHLIGHT_PREFIX))
+          .map(h => h.id.slice(SAVED_HIGHLIGHT_PREFIX.length)),
+      )
       setSavedHighlights(savedIds)
     }, []),
   )
@@ -443,14 +455,15 @@ export function HighlightsScreen() {
 
   const toggleSave = useCallback(
     (highlightId: string) => {
-      // Check if already saved
       const isSaved = savedHighlights.has(highlightId)
+      const highlight = highlightsWithVotes.find(h => h.id === highlightId)
+      if (!highlight) return
+
+      const subjectUri = getHighlightSubjectUri(highlight)
+      const savedHighlightId = getSavedHighlightId(highlightId)
 
       if (isSaved) {
-        // Delete all highlights for this post ID - mock approach as ID is postUri
-        const all = getAllHighlights()
-        const highlightsForPost = all.filter(h => h.postUri === highlightId)
-        highlightsForPost.forEach(h => deleteHighlight(highlightId, h.id))
+        deleteHighlight(subjectUri, savedHighlightId)
 
         setSavedHighlights(prev => {
           const next = new Set(prev)
@@ -458,17 +471,24 @@ export function HighlightsScreen() {
           return next
         })
       } else {
-        // Find the highlight text
-        const highlight = highlightsWithVotes.find(h => h.id === highlightId)
-        if (!highlight) return
+        const postText = highlight.postPreview || highlight.text
+        const start =
+          typeof highlight.start === 'number'
+            ? highlight.start
+            : Math.max(0, postText.indexOf(highlight.text))
+        const end =
+          typeof highlight.end === 'number'
+            ? highlight.end
+            : start + highlight.text.length
 
-        // Save dummy highlight
-        saveHighlight(highlightId, {
-          start: 0,
-          end: 0,
-          color: '#FEF08A', // default yellow
+        saveHighlight(subjectUri, {
+          id: savedHighlightId,
+          start,
+          end,
+          color: (highlight.color || '#FEF08A') as HighlightColor,
           text: highlight.text,
           isPublic: false,
+          tag: highlight.community,
         })
 
         setSavedHighlights(prev => {

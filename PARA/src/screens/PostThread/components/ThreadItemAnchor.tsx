@@ -1,5 +1,10 @@
 import {memo, useCallback, useMemo} from 'react'
-import {type GestureResponderEvent, Text as RNText, View} from 'react-native'
+import {
+  type GestureResponderEvent,
+  Platform,
+  Text as RNText,
+  View,
+} from 'react-native'
 import {
   AppBskyFeedDefs,
   AppBskyFeedPost,
@@ -597,9 +602,11 @@ function ExpandedPostDetails({
         )
       ) {
         logger.metric('translate', {
-          sourceLanguages: post.record.langs ?? [],
-          targetLanguage: langPrefs.primaryLanguage,
+          os: Platform.OS,
+          possibleSourceLanguages: post.record.langs ?? [],
+          expectedTargetLanguage: langPrefs.primaryLanguage,
           textLength: post.record.text.length,
+          googleTranslate: true,
         })
       }
 

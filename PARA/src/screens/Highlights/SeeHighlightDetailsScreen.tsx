@@ -1,4 +1,4 @@
-import {useCallback, useMemo} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 import {Image, StyleSheet, View} from 'react-native'
 import {
   type AppBskyFeedDefs,
@@ -11,14 +11,21 @@ import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {NINTHS_COMMUNITIES} from '#/lib/communities'
 import {useInitialNumToRender} from '#/lib/hooks/useInitialNumToRender'
 import {useOpenComposer} from '#/lib/hooks/useOpenComposer'
-import {MOCK_HIGHLIGHTS} from '#/lib/mock-highlights'
+import {type Highlight} from '#/lib/mock-data'
 import {type CommonNavigatorParams} from '#/lib/routes/types'
+import {type Shadow} from '#/state/cache/post-shadow'
 import {FeedFeedbackProvider, useFeedFeedback} from '#/state/feed-feedback'
+import {getAllHighlights} from '#/state/highlights/highlightStorage'
+import {
+  type HighlightColor,
+  type HighlightData,
+} from '#/state/highlights/highlightTypes'
 import {useHighlights} from '#/state/highlights/useHighlights'
 import {useHighlightVoteMutation} from '#/state/mutations/highlights'
 import {useHighlightQuery} from '#/state/queries/highlights'
 import {
   PostThreadContextProvider,
+  type ThreadItem,
   usePostThread,
 } from '#/state/queries/usePostThread'
 import {useSession} from '#/state/session'
@@ -48,6 +55,8 @@ type Props = NativeStackScreenProps<
   CommonNavigatorParams,
   'SeeHighlightDetails'
 >
+type ThreadPostItem = Extract<ThreadItem, {type: 'threadPost'}>
+const SAVED_HIGHLIGHT_PREFIX = 'saved:'
 
 // Helper function to extract highlight data from feed
 
@@ -65,7 +74,30 @@ function formatRelativeTime(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString()
 }
 
-// Darken a hex color by a factor (0-1)
+function localHighlightToHighlight(item: HighlightData): Highlight {
+  return {
+    id: item.id,
+    sourcePostUri: item.postUri,
+    start: item.start,
+    end: item.end,
+    text: item.text,
+    postAuthor: 'unknown',
+    authorName: 'Saved highlight',
+    avatarUrl: 'https://i.pravatar.cc/150',
+    postPreview: item.text,
+    color: item.color,
+    community: item.tag || 'Saved',
+    state: 'Unknown',
+    createdAt: item.createdAt,
+    upvotes: 0,
+    downvotes: 0,
+    saves: 1,
+    replyCount: 0,
+    isVerified: false,
+    isTrending: false,
+    viewerHasSaved: true,
+  }
+}
 
 export function SeeHighlightDetailsScreen({route}: Props) {
   const t = useTheme()
@@ -76,18 +108,33 @@ export function SeeHighlightDetailsScreen({route}: Props) {
   const {hasSession, currentAccount} = useSession()
   const feedFeedback = useFeedFeedback(undefined, hasSession)
 
-  // Persistence
-  const {highlights, addHighlight, removeHighlight} = useHighlights(highlightId)
-  const isSaved = highlights.length > 0
   const {data: remoteHighlight} = useHighlightQuery(
     isHighlightRecordUri(highlightId) ? highlightId : undefined,
   )
+  const localHighlight = useMemo(() => {
+    return getAllHighlights().find(
+      item =>
+        item.id === highlightId ||
+        item.id === `${SAVED_HIGHLIGHT_PREFIX}${highlightId}`,
+    )
+  }, [highlightId])
 
   // Fetch full thread for the post behind this highlight.
   const isRealUri = highlightId.startsWith('at://')
   const sourceUri =
     remoteHighlight?.sourcePostUri ||
+    localHighlight?.postUri ||
     (isRealUri && !isHighlightRecordUri(highlightId) ? highlightId : undefined)
+  const {highlights, addHighlight, removeHighlight} = useHighlights(
+    sourceUri || '',
+  )
+  const savedHighlightId = `${SAVED_HIGHLIGHT_PREFIX}${highlightId}`
+  const savedHighlight = highlights.find(
+    item =>
+      item.id === savedHighlightId ||
+      (localHighlight?.id === highlightId && item.id === highlightId),
+  )
+  const isSaved = Boolean(savedHighlight)
   const {data: threadData, context: threadContext} = usePostThread({
     anchor: sourceUri,
   })
@@ -101,10 +148,10 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       anchorItem.type === 'threadPost' &&
       AppBskyFeedPost.isRecord(anchorItem.value.post.record)
     ) {
-      const p = anchorItem.value.post as any
+      const p = anchorItem.value.post
       const r = anchorItem.value.post.record
       return {
-        post: p,
+        post: p as unknown as Shadow<AppBskyFeedDefs.PostView>,
         record: r,
         richText: new RichTextAPI({
           text: r.text,
@@ -121,7 +168,7 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       return remoteHighlight
     }
 
-    // 1. Fallback: derive from fetched post when the route points directly to a post URI.
+    // Derive from fetched post when the route points directly to a post URI.
     if (sourceUri && threadData?.items) {
       const anchorItem = threadData.items.find(
         item => item.type === 'threadPost' && item.uri === sourceUri,
@@ -129,8 +176,8 @@ export function SeeHighlightDetailsScreen({route}: Props) {
 
       if (anchorItem && anchorItem.type === 'threadPost') {
         const post = anchorItem.value.post
-        const record = post.record as any // Cast to access text
-        const text = (record.text as string) || ''
+        const record = post.record
+        const text = record.text || ''
         const tags = text.match(/#\w+/g) || []
 
         let community = 'Unknown'
@@ -152,13 +199,21 @@ export function SeeHighlightDetailsScreen({route}: Props) {
           }
         }
 
+        const fallbackStart = localHighlight?.start ?? 0
+        const fallbackEnd = localHighlight?.end ?? text.length
+        const highlightText =
+          localHighlight?.text || text.slice(fallbackStart, fallbackEnd) || text
+
         return {
-          id: post.uri,
-          text: text, // Full text
+          id: highlightId,
+          sourcePostUri: post.uri,
+          start: fallbackStart,
+          end: fallbackEnd,
+          text: highlightText,
           postAuthor: post.author.handle,
           authorName: post.author.displayName || post.author.handle,
           avatarUrl: post.author.avatar || 'https://i.pravatar.cc/150',
-          postPreview: '', // We use full text now
+          postPreview: text,
           color: color as any,
           community,
           state: state || 'Unknown',
@@ -176,17 +231,18 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       }
     }
 
-    // 2. Fallback to mock data or passed params
-    return MOCK_HIGHLIGHTS.find(h => h.id === highlightId) || null
-  }, [remoteHighlight, sourceUri, threadData, highlightId])
+    if (localHighlight) {
+      return localHighlightToHighlight(localHighlight)
+    }
+
+    return null
+  }, [remoteHighlight, localHighlight, sourceUri, threadData, highlightId])
 
   // Highlight text splitting logic
   const {textParts, highlightPart, fullContent} = useMemo(() => {
     if (!highlight) return {textParts: [], highlightPart: '', fullContent: ''}
 
-    // Determine Full Content vs Snippet
-    // For mocks, text is snippet, postPreview is full text (if present).
-    // For real posts, text is full text.
+    // Determine full content vs. the saved/remote highlighted snippet.
     let fullText = highlight.text
     let snippet = highlight.text
 
@@ -198,9 +254,9 @@ export function SeeHighlightDetailsScreen({route}: Props) {
       snippet = highlight.text
     }
 
-    // If we have saved highlight range (from persistence), prioritize that
-    if (highlights.length > 0) {
-      const h = highlights[0]
+    // If we have saved highlight range (from persistence), prioritize that.
+    if (savedHighlight) {
+      const h = savedHighlight
       if (h.end > h.start && fullText.length >= h.end) {
         const before = fullText.slice(0, h.start)
         const hl = fullText.slice(h.start, h.end)
@@ -210,6 +266,22 @@ export function SeeHighlightDetailsScreen({route}: Props) {
           highlightPart: hl,
           fullContent: fullText,
         }
+      }
+    }
+
+    if (
+      typeof highlight.start === 'number' &&
+      typeof highlight.end === 'number' &&
+      highlight.end > highlight.start &&
+      fullText.length >= highlight.end
+    ) {
+      const before = fullText.slice(0, highlight.start)
+      const hl = fullText.slice(highlight.start, highlight.end)
+      const after = fullText.slice(highlight.end)
+      return {
+        textParts: [before, after],
+        highlightPart: hl,
+        fullContent: fullText,
       }
     }
 
@@ -230,29 +302,37 @@ export function SeeHighlightDetailsScreen({route}: Props) {
 
     // Fallback: Show entire text as highlight or just text
     return {textParts: [fullText], highlightPart: '', fullContent: fullText}
-  }, [highlight, highlights])
+  }, [highlight, savedHighlight])
 
   const toggleSave = useCallback(() => {
     if (isSaved) {
-      if (highlights.length > 0) {
-        removeHighlight(highlights[0].id)
+      if (savedHighlight) {
+        void removeHighlight(savedHighlight.id)
       }
     } else {
-      if (!highlight) return
-      // We save the whole thing as a dummy or...
-      // Ideally we save the "snippet".
-      // Since we might not have the snippet if we just fetched the full post,
-      // let's save the whole post as a highlight for now (start:0, end: length).
-      addHighlight(
-        0,
-        highlight.text.length,
-        highlight.color || '#FEF08A',
+      if (!highlight || !sourceUri) return
+      const start = typeof highlight.start === 'number' ? highlight.start : 0
+      const end =
+        typeof highlight.end === 'number' ? highlight.end : highlight.text.length
+      void addHighlight(
+        start,
+        end,
+        (highlight.color || '#FEF08A') as HighlightColor,
         false,
         highlight.text,
         highlight.community,
+        savedHighlightId,
       )
     }
-  }, [isSaved, highlight, highlights, addHighlight, removeHighlight])
+  }, [
+    isSaved,
+    highlight,
+    sourceUri,
+    savedHighlight,
+    savedHighlightId,
+    addHighlight,
+    removeHighlight,
+  ])
 
   // Optimistic vote state
   const [localVote, setLocalVote] = useState<'up' | 'down' | 'none'>('none')
@@ -284,11 +364,11 @@ export function SeeHighlightDetailsScreen({route}: Props) {
   const slices = useMemo(() => {
     return (threadData?.items || []).filter(
       item => item.type === 'threadPost' && item.depth > 0,
-    ) as Extract<AppBskyFeedDefs.ThreadViewPost, {type: 'threadPost'}>[]
+    ) as ThreadPostItem[]
   }, [threadData])
 
   const renderItem = useCallback(
-    ({item}: {item: any}) => {
+    ({item}: {item: ThreadPostItem}) => {
       return (
         <ThreadItemPost
           item={item}
@@ -426,6 +506,9 @@ export function SeeHighlightDetailsScreen({route}: Props) {
               label="Reply"
               onPress={() => {
                 if (post && record) {
+                  const anchorThreadItem = threadData?.items?.find(
+                    item => item.type === 'threadPost' && item.uri === post.uri,
+                  )
                   openComposer({
                     replyTo: {
                       uri: post.uri,
@@ -434,15 +517,8 @@ export function SeeHighlightDetailsScreen({route}: Props) {
                       author: post.author,
                       embed: post.embed,
                       moderation:
-                        threadData?.items?.find(
-                          i => i.type === 'threadPost' && i.uri === post.uri,
-                        )?.type === 'threadPost'
-                          ? (
-                              threadData?.items?.find(
-                                i =>
-                                  i.type === 'threadPost' && i.uri === post.uri,
-                              ) as any
-                            ).moderation
+                        anchorThreadItem?.type === 'threadPost'
+                          ? anchorThreadItem.moderation
                           : undefined,
                       langs: record.langs,
                     },
@@ -500,6 +576,7 @@ export function SeeHighlightDetailsScreen({route}: Props) {
                 richText={richText}
                 timestamp={post.indexedAt}
                 logContext="Post"
+                forceGoogleTranslate={false}
               />
             ) : (
               <Menu.Root>
@@ -545,7 +622,6 @@ export function SeeHighlightDetailsScreen({route}: Props) {
     highlight,
     t,
     highlightPart,
-    highlightId,
     textParts,
     fullContent,
     voteAdjustedScore,
@@ -604,7 +680,7 @@ export function SeeHighlightDetailsScreen({route}: Props) {
               data={slices}
               renderItem={renderItem}
               ListHeaderComponent={header}
-              keyExtractor={item => item.key}
+              keyExtractor={(item: ThreadPostItem) => item.key}
               initialNumToRender={initialNumToRender}
               contentContainerStyle={{paddingBottom: 40}}
               ListEmptyComponent={

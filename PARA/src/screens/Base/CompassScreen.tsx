@@ -810,7 +810,7 @@ export function CompassScreen({navigation: _}: Props) {
                     onPress={() => handleQuadrantPress(quadrant)}>
                     {quadrant.gradientColors ? (
                       <LinearGradient
-                        colors={quadrant.gradientColors}
+                        colors={quadrant.gradientColors as unknown as readonly [string, string, ...string[]]}
                         start={quadrant.gradientStart}
                         end={quadrant.gradientEnd}
                         style={styles.cellFill}>

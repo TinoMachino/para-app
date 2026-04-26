@@ -41,6 +41,7 @@ export type CommunityBoardView = {
 export type CommunityBoardsResponse = {
   boards: CommunityBoardView[]
   canCreateCommunity: boolean
+  cursor?: string
 }
 
 export type CommunityBoardResponse = {
@@ -71,10 +72,65 @@ type CreateCommunityResponse = {
   subdelegatesChatId: string
 }
 
-export const communityBoardsQueryKey = (limit: number) => [
+export type CommunityMemberView = {
+  did: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+  membershipState: string
+  roles?: string[]
+  joinedAt: string
+  votesCast: number
+  delegationsReceived: number
+  policyPosts: number
+  matterPosts: number
+}
+
+export type CommunityMembersResponse = {
+  members: CommunityMemberView[]
+  cursor?: string
+}
+
+export type CommunityBoardsQueryOptions = {
+  limit?: number
+  query?: string
+  state?: string
+  participationKind?: 'matter' | 'policy'
+  flairId?: string
+  sort?: 'recent' | 'activity' | 'size'
+  cursor?: string
+}
+
+export type CommunityMembersQueryOptions = {
+  communityId?: string
+  membershipState?: string
+  role?: string
+  sort?: 'joined' | 'participation'
+  limit?: number
+  cursor?: string
+}
+
+export const communityBoardsQueryKey = (opts: CommunityBoardsQueryOptions) => [
   RQKEY_ROOT,
   'list',
-  limit,
+  opts.limit ?? 12,
+  opts.query ?? '',
+  opts.state ?? '',
+  opts.participationKind ?? '',
+  opts.flairId ?? '',
+  opts.sort ?? '',
+  opts.cursor ?? '',
+]
+
+export const communityMembersQueryKey = (opts: CommunityMembersQueryOptions) => [
+  RQKEY_ROOT,
+  'members',
+  opts.communityId ?? '',
+  opts.membershipState ?? '',
+  opts.role ?? '',
+  opts.sort ?? '',
+  opts.limit ?? 50,
+  opts.cursor ?? '',
 ]
 
 export const communityBoardQueryKey = ({
@@ -85,13 +141,14 @@ export const communityBoardQueryKey = ({
   uri?: string
 }) => [RQKEY_ROOT, 'detail', communityId || '', uri || '']
 
-export function useCommunityBoardsQuery({limit = 12}: {limit?: number} = {}) {
+export function useCommunityBoardsQuery(opts: CommunityBoardsQueryOptions = {}) {
   const agent = useAgent()
+  const options = {limit: 12, ...opts}
 
   return useQuery<CommunityBoardsResponse>({
     staleTime: STALE.SECONDS.THIRTY,
-    queryKey: communityBoardsQueryKey(limit),
-    queryFn: async () => fetchCommunityBoards({agent, limit}),
+    queryKey: communityBoardsQueryKey(options),
+    queryFn: async () => fetchCommunityBoards({agent, opts: options}),
   })
 }
 
@@ -111,6 +168,20 @@ export function useCommunityBoardQuery({
     enabled: enabled && Boolean(communityId || uri),
     queryKey: communityBoardQueryKey({communityId, uri}),
     queryFn: async () => fetchCommunityBoard({agent, communityId, uri}),
+  })
+}
+
+export function useCommunityMembersQuery(
+  opts: CommunityMembersQueryOptions,
+) {
+  const agent = useAgent()
+  const options = {limit: 50, membershipState: 'active', ...opts}
+
+  return useQuery<CommunityMembersResponse>({
+    staleTime: STALE.SECONDS.THIRTY,
+    enabled: Boolean(options.communityId),
+    queryKey: communityMembersQueryKey(options),
+    queryFn: async () => fetchCommunityMembers({agent, opts: options}),
   })
 }
 
@@ -140,13 +211,19 @@ export function useAcceptDraftInviteMutation() {
 
 async function fetchCommunityBoards({
   agent,
-  limit,
+  opts,
 }: {
   agent: ReturnType<typeof useAgent>
-  limit: number
+  opts: CommunityBoardsQueryOptions
 }): Promise<CommunityBoardsResponse> {
   const params = new URLSearchParams()
-  params.set('limit', String(limit))
+  params.set('limit', String(opts.limit ?? 12))
+  setParam(params, 'query', opts.query)
+  setParam(params, 'state', opts.state)
+  setParam(params, 'participationKind', opts.participationKind)
+  setParam(params, 'flairId', opts.flairId)
+  setParam(params, 'sort', opts.sort)
+  setParam(params, 'cursor', opts.cursor)
 
   const res = await agent.fetchHandler(
     `/xrpc/com.para.community.listBoards?${params.toString()}`,
@@ -163,6 +240,38 @@ async function fetchCommunityBoards({
   }
 
   return normalizeCommunityBoardsResponse(await res.json())
+}
+
+async function fetchCommunityMembers({
+  agent,
+  opts,
+}: {
+  agent: ReturnType<typeof useAgent>
+  opts: CommunityMembersQueryOptions
+}): Promise<CommunityMembersResponse> {
+  const params = new URLSearchParams()
+  params.set('communityId', opts.communityId ?? '')
+  params.set('limit', String(opts.limit ?? 50))
+  setParam(params, 'membershipState', opts.membershipState)
+  setParam(params, 'role', opts.role)
+  setParam(params, 'sort', opts.sort)
+  setParam(params, 'cursor', opts.cursor)
+
+  const res = await agent.fetchHandler(
+    `/xrpc/com.para.community.listMembers?${params.toString()}`,
+    {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+    },
+  )
+
+  if (!res.ok) {
+    throw new Error(await extractErrorMessage(res))
+  }
+
+  return normalizeCommunityMembersResponse(await res.json())
 }
 
 async function fetchCommunityBoard({
@@ -234,6 +343,19 @@ function normalizeCommunityBoardsResponse(
   return {
     boards: boards.map(normalizeBoard),
     canCreateCommunity: Boolean(data.canCreateCommunity),
+    cursor: readString(data.cursor),
+  }
+}
+
+function normalizeCommunityMembersResponse(
+  json: unknown,
+): CommunityMembersResponse {
+  const data = asRecord(json) ?? {}
+  const members = Array.isArray(data.members) ? data.members : []
+
+  return {
+    members: members.map(normalizeMember),
+    cursor: readString(data.cursor),
   }
 }
 
@@ -246,6 +368,25 @@ function normalizeCommunityBoardResponse(json: unknown): CommunityBoardResponse 
           capability => typeof capability === 'string',
         )
       : [],
+  }
+}
+
+function normalizeMember(json: unknown): CommunityMemberView {
+  const data = asRecord(json) ?? {}
+  return {
+    did: readString(data.did) ?? '',
+    handle: readString(data.handle),
+    displayName: readString(data.displayName),
+    avatar: readString(data.avatar),
+    membershipState: readString(data.membershipState) ?? 'active',
+    roles: Array.isArray(data.roles)
+      ? data.roles.filter(role => typeof role === 'string')
+      : undefined,
+    joinedAt: readString(data.joinedAt) ?? '',
+    votesCast: normalizeNumber(data.votesCast),
+    delegationsReceived: normalizeNumber(data.delegationsReceived),
+    policyPosts: normalizeNumber(data.policyPosts),
+    matterPosts: normalizeNumber(data.matterPosts),
   }
 }
 
@@ -352,6 +493,16 @@ function normalizeStatus(
       return value
     default:
       return undefined
+  }
+}
+
+function setParam(
+  params: URLSearchParams,
+  key: string,
+  value: string | undefined,
+) {
+  if (value && value.trim()) {
+    params.set(key, value)
   }
 }
 
