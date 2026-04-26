@@ -133,9 +133,87 @@ export * as external from './external'
 export * as sitemap from './sitemap'
 
 export default function (server: Server, ctx: AppContext) {
+  const notificationLexicons = [
+    {
+      lexicon: 1,
+      id: 'com.para.notification.getPostSubscription',
+      defs: {
+        main: {
+          type: 'query',
+          description:
+            "Get the requesting viewer's notification subscription for a post.",
+          parameters: {
+            type: 'params',
+            required: ['post'],
+            properties: {
+              post: { type: 'string', format: 'at-uri' },
+            },
+          },
+          output: {
+            encoding: 'application/json',
+            schema: {
+              type: 'object',
+              required: ['post', 'reply', 'quote'],
+              properties: {
+                post: { type: 'string', format: 'at-uri' },
+                reply: { type: 'boolean' },
+                quote: { type: 'boolean' },
+                indexedAt: { type: 'string', format: 'datetime' },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      lexicon: 1,
+      id: 'com.para.notification.putPostSubscription',
+      defs: {
+        main: {
+          type: 'procedure',
+          description:
+            'Enable or disable notification subscriptions for a post. Requires auth.',
+          input: {
+            encoding: 'application/json',
+            schema: {
+              type: 'object',
+              required: ['post', 'reply', 'quote'],
+              properties: {
+                post: { type: 'string', format: 'at-uri' },
+                reply: { type: 'boolean' },
+                quote: { type: 'boolean' },
+              },
+            },
+          },
+          output: {
+            encoding: 'application/json',
+            schema: {
+              type: 'object',
+              required: ['post', 'reply', 'quote'],
+              properties: {
+                post: { type: 'string', format: 'at-uri' },
+                reply: { type: 'boolean' },
+                quote: { type: 'boolean' },
+                indexedAt: { type: 'string', format: 'datetime' },
+              },
+            },
+          },
+        },
+      },
+    },
+  ]
   server.addLexicons(paraSchemas)
+  server.addLexicons(notificationLexicons)
+
   const paraServer = { xrpc: server } as ParaLexiconServer
-  ;(paraServer as any).com = { para: new ComParaNS(paraServer) }
+  const para = new ComParaNS(paraServer)
+  ;(para as any).notification = {
+    getPostSubscription: (cfg) =>
+      server.xrpc.method('com.para.notification.getPostSubscription', cfg),
+    putPostSubscription: (cfg) =>
+      server.xrpc.method('com.para.notification.putPostSubscription', cfg),
+  }
+  ;(paraServer as any).com = { para }
 
   // app.bsky
   getTimeline(server, ctx)
