@@ -106,10 +106,12 @@ import getParaCabildeo from './com/para/civic/getCabildeo'
 import getParaPolicyTally from './com/para/civic/getPolicyTally'
 import listParaCabildeoPositions from './com/para/civic/listCabildeoPositions'
 import listParaCabildeos from './com/para/civic/listCabildeos'
+import listParaDelegationCandidates from './com/para/civic/listDelegationCandidates'
 import putParaLivePresence from './com/para/civic/putLivePresence'
 import getParaCommunityBoard from './com/para/community/getBoard'
 import getParaCommunityGovernance from './com/para/community/getGovernance'
 import listParaCommunityBoards from './com/para/community/listBoards'
+import listParaCommunityMembers from './com/para/community/listMembers'
 import getParaDiscourseSentiment from './com/para/discourse/getSentiment'
 import getParaDiscourseSnapshot from './com/para/discourse/getSnapshot'
 import getParaDiscourseTopics from './com/para/discourse/getTopics'
@@ -240,10 +242,12 @@ export default function (server: Server, ctx: AppContext) {
   getParaCabildeo(paraServer, ctx)
   getParaPolicyTally(paraServer, ctx)
   listParaCabildeoPositions(paraServer, ctx)
+  listParaDelegationCandidates(paraServer, ctx)
   putParaLivePresence(paraServer, ctx)
   getParaCommunityBoard(paraServer, ctx)
   getParaCommunityGovernance(paraServer, ctx)
   listParaCommunityBoards(paraServer, ctx)
+  listParaCommunityMembers(paraServer, ctx)
   listParaHighlights(paraServer, ctx)
   getParaHighlight(paraServer, ctx)
   getParaAuthorFeed(paraServer, ctx)

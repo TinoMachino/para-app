@@ -13,14 +13,19 @@ import {
 
 const is$typed = _is$typed,
   validate = _validate
-const id = 'com.para.community.listBoards'
+const id = 'com.para.community.listMembers'
 
 export type QueryParams = {
-  query?: string
-  state?: string
-  participationKind?: 'matter' | 'policy' | (string & {})
-  flairId?: string
-  sort?: 'recent' | 'activity' | 'size' | (string & {})
+  communityId: string
+  membershipState?:
+    | 'pending'
+    | 'active'
+    | 'left'
+    | 'removed'
+    | 'blocked'
+    | (string & {})
+  role?: string
+  sort?: 'joined' | 'participation' | (string & {})
   limit?: number
   cursor?: string
 }
@@ -42,50 +47,41 @@ export function toKnownErr(e: any) {
   return e
 }
 
-export interface BoardView {
-  $type?: 'com.para.community.listBoards#boardView'
-  uri: string
-  cid: string
-  creatorDid: string
-  creatorHandle?: string
-  creatorDisplayName?: string
-  communityId: string
-  slug: string
-  name: string
-  description?: string
-  quadrant: string
-  delegatesChatId: string
-  subdelegatesChatId: string
-  memberCount: number
-  viewerMembershipState:
-    | 'none'
+export interface MemberView {
+  $type?: 'com.para.community.listMembers#memberView'
+  did: string
+  handle?: string
+  displayName?: string
+  avatar?: string
+  membershipState:
     | 'pending'
     | 'active'
     | 'left'
     | 'removed'
     | 'blocked'
     | (string & {})
-  viewerRoles?: string[]
-  status?: 'draft' | 'active' | (string & {})
-  founderStarterPackUri?: string
-  createdAt: string
+  roles: string[]
+  joinedAt: string
+  votesCast: number
+  delegationsReceived: number
+  policyPosts: number
+  matterPosts: number
 }
 
-const hashBoardView = 'boardView'
+const hashMemberView = 'memberView'
 
-export function isBoardView<V>(v: V) {
-  return is$typed(v, id, hashBoardView)
+export function isMemberView<V>(v: V) {
+  return is$typed(v, id, hashMemberView)
 }
 
-export function validateBoardView<V>(v: V) {
-  return validate<BoardView & V>(v, id, hashBoardView)
+export function validateMemberView<V>(v: V) {
+  return validate<MemberView & V>(v, id, hashMemberView)
 }
 
 export interface Output {
-  $type?: 'com.para.community.listBoards#output'
-  boards: BoardView[]
+  $type?: 'com.para.community.listMembers#output'
+  members: MemberView[]
   cursor?: string
-  canCreateCommunity: boolean
 }
 
 const hashOutput = 'output'

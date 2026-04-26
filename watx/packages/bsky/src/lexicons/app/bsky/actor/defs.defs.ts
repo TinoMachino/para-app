@@ -4,13 +4,13 @@
 
 import { l } from '@atproto/lex'
 import * as LabelDefs from '../../../com/atproto/label/defs.defs.js'
+import * as CivicDefs from '../../../com/para/civic/defs.defs.js'
 import * as GraphDefs from '../graph/defs.defs.js'
 import * as RepoStrongRef from '../../../com/atproto/repo/strongRef.defs.js'
 import * as NotificationDefs from '../notification/defs.defs.js'
 import * as FeedThreadgate from '../feed/threadgate.defs.js'
 import * as FeedPostgate from '../feed/postgate.defs.js'
 import * as EmbedExternal from '../embed/external.defs.js'
-import * as ComParaCivicDefs from '../../../com/para/civic/defs.defs.js'
 
 const $nsid = 'app.bsky.actor.defs'
 
@@ -29,7 +29,7 @@ type ProfileViewBasic = {
   createdAt?: l.DatetimeString
   verification?: VerificationState
   status?: StatusView
-  cabildeoLive?: ComParaCivicDefs.CabildeoLive
+  cabildeoLive?: CivicDefs.CabildeoLive
 
   /**
    * Debug information for internal development
@@ -61,9 +61,7 @@ const profileViewBasic = l.typedObject<ProfileViewBasic>(
     ),
     status: l.optional(l.ref<StatusView>((() => statusView) as any)),
     cabildeoLive: l.optional(
-      l.ref<ComParaCivicDefs.CabildeoLive>(
-        (() => ComParaCivicDefs.cabildeoLive) as any,
-      ),
+      l.ref<CivicDefs.CabildeoLive>((() => CivicDefs.cabildeoLive) as any),
     ),
     debug: l.optional(l.lexMap()),
   }),
@@ -86,7 +84,7 @@ type ProfileView = {
   labels?: LabelDefs.Label[]
   verification?: VerificationState
   status?: StatusView
-  cabildeoLive?: ComParaCivicDefs.CabildeoLive
+  cabildeoLive?: CivicDefs.CabildeoLive
 
   /**
    * Debug information for internal development
@@ -120,9 +118,7 @@ const profileView = l.typedObject<ProfileView>(
     ),
     status: l.optional(l.ref<StatusView>((() => statusView) as any)),
     cabildeoLive: l.optional(
-      l.ref<ComParaCivicDefs.CabildeoLive>(
-        (() => ComParaCivicDefs.cabildeoLive) as any,
-      ),
+      l.ref<CivicDefs.CabildeoLive>((() => CivicDefs.cabildeoLive) as any),
     ),
     debug: l.optional(l.lexMap()),
   }),
@@ -152,7 +148,7 @@ type ProfileViewDetailed = {
   pinnedPost?: RepoStrongRef.Main
   verification?: VerificationState
   status?: StatusView
-  cabildeoLive?: ComParaCivicDefs.CabildeoLive
+  cabildeoLive?: CivicDefs.CabildeoLive
 
   /**
    * Debug information for internal development
@@ -199,9 +195,7 @@ const profileViewDetailed = l.typedObject<ProfileViewDetailed>(
     ),
     status: l.optional(l.ref<StatusView>((() => statusView) as any)),
     cabildeoLive: l.optional(
-      l.ref<ComParaCivicDefs.CabildeoLive>(
-        (() => ComParaCivicDefs.cabildeoLive) as any,
-      ),
+      l.ref<CivicDefs.CabildeoLive>((() => CivicDefs.cabildeoLive) as any),
     ),
     debug: l.optional(l.lexMap()),
   }),

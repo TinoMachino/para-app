@@ -15,7 +15,13 @@ const is$typed = _is$typed,
 const id = 'com.para.community.listBoards'
 
 export type QueryParams = {
+  query?: string
+  state?: string
+  participationKind?: 'matter' | 'policy' | (string & {})
+  flairId?: string
+  sort: 'recent' | 'activity' | 'size' | (string & {})
   limit: number
+  cursor?: string
 }
 export type InputSchema = undefined
 export type OutputSchema = Output
@@ -58,6 +64,8 @@ export interface BoardView {
     | 'blocked'
     | (string & {})
   viewerRoles?: string[]
+  status?: 'draft' | 'active' | (string & {})
+  founderStarterPackUri?: string
   createdAt: string
 }
 
@@ -74,6 +82,7 @@ export function validateBoardView<V>(v: V) {
 export interface Output {
   $type?: 'com.para.community.listBoards#output'
   boards: BoardView[]
+  cursor?: string
   canCreateCommunity: boolean
 }
 

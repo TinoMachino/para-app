@@ -39,6 +39,12 @@ const listBoards = async ({
   const res = await ctx.dataplane.getParaCommunityBoards({
     viewerDid: viewer ?? '',
     limit: normalizeLimit(params.limit),
+    cursor: params.cursor ?? '',
+    query: params.query ?? '',
+    state: params.state ?? '',
+    participationKind: params.participationKind ?? '',
+    flairId: params.flairId ?? '',
+    sort: params.sort ?? '',
   })
 
   return {
@@ -73,8 +79,19 @@ const listBoards = async ({
         (board as {founderStarterPackUri?: string}).founderStarterPackUri,
       ),
       createdAt: board.createdAt,
+      governanceSummary: board.governanceSummary
+        ? {
+            moderatorCount: board.governanceSummary.moderatorCount,
+            officialCount: board.governanceSummary.officialCount,
+            deputyRoleCount: board.governanceSummary.deputyRoleCount,
+            lastPublishedAt: parseString(
+              board.governanceSummary.lastPublishedAt,
+            ),
+          }
+        : undefined,
     })),
     canCreateCommunity: true,
+    cursor: parseString(res.cursor),
   }
 }
 

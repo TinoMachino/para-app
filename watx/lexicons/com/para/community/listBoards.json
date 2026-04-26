@@ -8,11 +8,38 @@
       "parameters": {
         "type": "params",
         "properties": {
+          "query": {
+            "type": "string",
+            "maxGraphemes": 128,
+            "maxLength": 256
+          },
+          "state": {
+            "type": "string",
+            "maxGraphemes": 64,
+            "maxLength": 128
+          },
+          "participationKind": {
+            "type": "string",
+            "knownValues": ["matter", "policy"]
+          },
+          "flairId": {
+            "type": "string",
+            "maxGraphemes": 128,
+            "maxLength": 128
+          },
+          "sort": {
+            "type": "string",
+            "knownValues": ["recent", "activity", "size"],
+            "default": "recent"
+          },
           "limit": {
             "type": "integer",
             "minimum": 1,
             "maximum": 100,
             "default": 50
+          },
+          "cursor": {
+            "type": "string"
           }
         }
       },
@@ -112,6 +139,7 @@
             "ref": "#boardView"
           }
         },
+        "cursor": {"type": "string"},
         "canCreateCommunity": {"type": "boolean"}
       }
     }

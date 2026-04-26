@@ -65,6 +65,10 @@ export const schemaDict = {
             type: 'ref',
             ref: 'lex:app.bsky.actor.defs#statusView',
           },
+          cabildeoLive: {
+            type: 'ref',
+            ref: 'lex:com.para.civic.defs#cabildeoLive',
+          },
           debug: {
             type: 'unknown',
             description: 'Debug information for internal development',
@@ -130,6 +134,10 @@ export const schemaDict = {
           status: {
             type: 'ref',
             ref: 'lex:app.bsky.actor.defs#statusView',
+          },
+          cabildeoLive: {
+            type: 'ref',
+            ref: 'lex:com.para.civic.defs#cabildeoLive',
           },
           debug: {
             type: 'unknown',
@@ -221,6 +229,10 @@ export const schemaDict = {
           status: {
             type: 'ref',
             ref: 'lex:app.bsky.actor.defs#statusView',
+          },
+          cabildeoLive: {
+            type: 'ref',
+            ref: 'lex:com.para.civic.defs#cabildeoLive',
           },
           debug: {
             type: 'unknown',
@@ -18766,6 +18778,114 @@ export const schemaDict = {
       },
     },
   },
+  ComParaCivicListDelegationCandidates: {
+    lexicon: 1,
+    id: 'com.para.civic.listDelegationCandidates',
+    defs: {
+      main: {
+        type: 'query',
+        description:
+          'Lists real delegation candidates for a cabildeo/community.',
+        parameters: {
+          type: 'params',
+          required: ['cabildeo'],
+          properties: {
+            cabildeo: {
+              type: 'string',
+              format: 'at-uri',
+            },
+            communityId: {
+              type: 'string',
+              maxLength: 256,
+            },
+            limit: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 50,
+            },
+            cursor: {
+              type: 'string',
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'ref',
+            ref: 'lex:com.para.civic.listDelegationCandidates#output',
+          },
+        },
+      },
+      candidateView: {
+        type: 'object',
+        required: ['did', 'roles', 'activeDelegationCount', 'hasVoted'],
+        properties: {
+          did: {
+            type: 'string',
+            format: 'did',
+          },
+          handle: {
+            type: 'string',
+            format: 'handle',
+          },
+          displayName: {
+            type: 'string',
+            maxGraphemes: 64,
+            maxLength: 640,
+          },
+          avatar: {
+            type: 'string',
+            format: 'uri',
+          },
+          description: {
+            type: 'string',
+            maxGraphemes: 300,
+            maxLength: 3000,
+          },
+          roles: {
+            type: 'array',
+            items: {
+              type: 'string',
+              maxGraphemes: 64,
+              maxLength: 128,
+            },
+          },
+          activeDelegationCount: {
+            type: 'integer',
+            minimum: 0,
+          },
+          hasVoted: {
+            type: 'boolean',
+          },
+          votedAt: {
+            type: 'string',
+            format: 'datetime',
+          },
+          selectedOption: {
+            type: 'integer',
+            minimum: 0,
+          },
+        },
+      },
+      output: {
+        type: 'object',
+        required: ['candidates'],
+        properties: {
+          candidates: {
+            type: 'array',
+            items: {
+              type: 'ref',
+              ref: 'lex:com.para.civic.listDelegationCandidates#candidateView',
+            },
+          },
+          cursor: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  },
   ComParaCivicPosition: {
     lexicon: 1,
     id: 'com.para.civic.position',
@@ -19814,11 +19934,38 @@ export const schemaDict = {
         parameters: {
           type: 'params',
           properties: {
+            query: {
+              type: 'string',
+              maxGraphemes: 128,
+              maxLength: 256,
+            },
+            state: {
+              type: 'string',
+              maxGraphemes: 64,
+              maxLength: 128,
+            },
+            participationKind: {
+              type: 'string',
+              knownValues: ['matter', 'policy'],
+            },
+            flairId: {
+              type: 'string',
+              maxGraphemes: 128,
+              maxLength: 128,
+            },
+            sort: {
+              type: 'string',
+              knownValues: ['recent', 'activity', 'size'],
+              default: 'recent',
+            },
             limit: {
               type: 'integer',
               minimum: 1,
               maximum: 100,
               default: 50,
+            },
+            cursor: {
+              type: 'string',
             },
           },
         },
@@ -19946,8 +20093,141 @@ export const schemaDict = {
               ref: 'lex:com.para.community.listBoards#boardView',
             },
           },
+          cursor: {
+            type: 'string',
+          },
           canCreateCommunity: {
             type: 'boolean',
+          },
+        },
+      },
+    },
+  },
+  ComParaCommunityListMembers: {
+    lexicon: 1,
+    id: 'com.para.community.listMembers',
+    defs: {
+      main: {
+        type: 'query',
+        description: 'Lists real members of a PARA community board.',
+        parameters: {
+          type: 'params',
+          required: ['communityId'],
+          properties: {
+            communityId: {
+              type: 'string',
+              maxLength: 256,
+            },
+            membershipState: {
+              type: 'string',
+              knownValues: ['pending', 'active', 'left', 'removed', 'blocked'],
+            },
+            role: {
+              type: 'string',
+              maxGraphemes: 64,
+              maxLength: 128,
+            },
+            sort: {
+              type: 'string',
+              knownValues: ['joined', 'participation'],
+              default: 'joined',
+            },
+            limit: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 100,
+              default: 50,
+            },
+            cursor: {
+              type: 'string',
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'ref',
+            ref: 'lex:com.para.community.listMembers#output',
+          },
+        },
+      },
+      memberView: {
+        type: 'object',
+        required: [
+          'did',
+          'membershipState',
+          'roles',
+          'joinedAt',
+          'votesCast',
+          'delegationsReceived',
+          'policyPosts',
+          'matterPosts',
+        ],
+        properties: {
+          did: {
+            type: 'string',
+            format: 'did',
+          },
+          handle: {
+            type: 'string',
+            format: 'handle',
+          },
+          displayName: {
+            type: 'string',
+            maxGraphemes: 64,
+            maxLength: 640,
+          },
+          avatar: {
+            type: 'string',
+            format: 'uri',
+          },
+          membershipState: {
+            type: 'string',
+            knownValues: ['pending', 'active', 'left', 'removed', 'blocked'],
+          },
+          roles: {
+            type: 'array',
+            items: {
+              type: 'string',
+              maxGraphemes: 64,
+              maxLength: 128,
+            },
+          },
+          joinedAt: {
+            type: 'string',
+            format: 'datetime',
+          },
+          votesCast: {
+            type: 'integer',
+            minimum: 0,
+          },
+          delegationsReceived: {
+            type: 'integer',
+            minimum: 0,
+          },
+          policyPosts: {
+            type: 'integer',
+            minimum: 0,
+          },
+          matterPosts: {
+            type: 'integer',
+            minimum: 0,
+          },
+        },
+      },
+      output: {
+        type: 'object',
+        required: ['members'],
+        properties: {
+          members: {
+            type: 'array',
+            items: {
+              type: 'ref',
+              ref: 'lex:com.para.community.listMembers#memberView',
+            },
+          },
+          cursor: {
+            type: 'string',
           },
         },
       },
@@ -20738,6 +21018,165 @@ export const schemaDict = {
       },
     },
   },
+  ComParaPost: {
+    lexicon: 1,
+    id: 'com.para.post',
+    defs: {
+      main: {
+        type: 'record',
+        description: 'Record containing a Para post.',
+        key: 'tid',
+        record: {
+          type: 'object',
+          required: ['text', 'createdAt'],
+          properties: {
+            text: {
+              type: 'string',
+              maxLength: 3000,
+              maxGraphemes: 300,
+              description:
+                'The primary post content. May be an empty string, if there are embeds.',
+            },
+            entities: {
+              type: 'array',
+              description: 'DEPRECATED: replaced by app.bsky.richtext.facet.',
+              items: {
+                type: 'ref',
+                ref: 'lex:com.para.post#entity',
+              },
+            },
+            facets: {
+              type: 'array',
+              description:
+                'Annotations of text (mentions, URLs, hashtags, etc)',
+              items: {
+                type: 'ref',
+                ref: 'lex:app.bsky.richtext.facet',
+              },
+            },
+            reply: {
+              type: 'ref',
+              ref: 'lex:com.para.post#replyRef',
+            },
+            embed: {
+              type: 'union',
+              refs: [
+                'lex:app.bsky.embed.images',
+                'lex:app.bsky.embed.video',
+                'lex:app.bsky.embed.external',
+                'lex:app.bsky.embed.record',
+                'lex:app.bsky.embed.recordWithMedia',
+              ],
+            },
+            langs: {
+              type: 'array',
+              description:
+                'Indicates human language of post primary text content.',
+              maxLength: 3,
+              items: {
+                type: 'string',
+                format: 'language',
+              },
+            },
+            labels: {
+              type: 'union',
+              description:
+                'Self-label values for this post. Effectively content warnings.',
+              refs: ['lex:com.atproto.label.defs#selfLabels'],
+            },
+            tags: {
+              type: 'array',
+              description:
+                'Additional hashtags, in addition to any included in post text and facets.',
+              maxLength: 8,
+              items: {
+                type: 'string',
+                maxLength: 640,
+                maxGraphemes: 64,
+              },
+            },
+            flairs: {
+              type: 'array',
+              description:
+                'Optional para-specific flairs associated with the post.',
+              maxLength: 10,
+              items: {
+                type: 'string',
+                maxLength: 128,
+              },
+            },
+            postType: {
+              type: 'string',
+              description:
+                'Optional para-specific post type (policy, matter, meme, etc).',
+              maxLength: 64,
+            },
+            title: {
+              type: 'string',
+              maxLength: 300,
+              maxGraphemes: 300,
+              description:
+                'Optional title for policy or proposal posts, summarizing the content.',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'datetime',
+              description:
+                'Client-declared timestamp when this post was originally created.',
+            },
+          },
+        },
+      },
+      replyRef: {
+        type: 'object',
+        required: ['root', 'parent'],
+        properties: {
+          root: {
+            type: 'ref',
+            ref: 'lex:com.atproto.repo.strongRef',
+          },
+          parent: {
+            type: 'ref',
+            ref: 'lex:com.atproto.repo.strongRef',
+          },
+        },
+      },
+      entity: {
+        type: 'object',
+        description: 'Deprecated: use facets instead.',
+        required: ['index', 'type', 'value'],
+        properties: {
+          index: {
+            type: 'ref',
+            ref: 'lex:com.para.post#textSlice',
+          },
+          type: {
+            type: 'string',
+            description: "Expected values are 'mention' and 'link'.",
+          },
+          value: {
+            type: 'string',
+          },
+        },
+      },
+      textSlice: {
+        type: 'object',
+        description:
+          'Deprecated. Use app.bsky.richtext instead -- A text segment. Start is inclusive, end is exclusive. Indices are for utf16-encoded strings.',
+        required: ['start', 'end'],
+        properties: {
+          start: {
+            type: 'integer',
+            minimum: 0,
+          },
+          end: {
+            type: 'integer',
+            minimum: 0,
+          },
+        },
+      },
+    },
+  },
   ComParaSocialGetPostMeta: {
     lexicon: 1,
     id: 'com.para.social.getPostMeta',
@@ -20874,6 +21313,45 @@ export const schemaDict = {
             },
             voteScore: {
               type: 'integer',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'datetime',
+            },
+          },
+        },
+      },
+    },
+  },
+  ComParaStatus: {
+    lexicon: 1,
+    id: 'com.para.status',
+    defs: {
+      main: {
+        type: 'record',
+        description: 'Current public status for a Para account.',
+        key: 'literal:self',
+        record: {
+          type: 'object',
+          required: ['status', 'createdAt'],
+          properties: {
+            status: {
+              type: 'string',
+              maxLength: 300,
+              maxGraphemes: 300,
+              description: "User's public status message.",
+            },
+            party: {
+              type: 'string',
+              maxLength: 64,
+              maxGraphemes: 64,
+              description: 'Optional political party affiliation.',
+            },
+            community: {
+              type: 'string',
+              maxLength: 64,
+              maxGraphemes: 64,
+              description: 'Optional primary community label.',
             },
             createdAt: {
               type: 'string',
@@ -26424,6 +26902,8 @@ export const ids = {
   ComParaCivicGetPolicyTally: 'com.para.civic.getPolicyTally',
   ComParaCivicListCabildeoPositions: 'com.para.civic.listCabildeoPositions',
   ComParaCivicListCabildeos: 'com.para.civic.listCabildeos',
+  ComParaCivicListDelegationCandidates:
+    'com.para.civic.listDelegationCandidates',
   ComParaCivicPosition: 'com.para.civic.position',
   ComParaCivicPutLivePresence: 'com.para.civic.putLivePresence',
   ComParaCivicVote: 'com.para.civic.vote',
@@ -26435,6 +26915,7 @@ export const ids = {
   ComParaCommunityGetGovernance: 'com.para.community.getGovernance',
   ComParaCommunityGovernance: 'com.para.community.governance',
   ComParaCommunityListBoards: 'com.para.community.listBoards',
+  ComParaCommunityListMembers: 'com.para.community.listMembers',
   ComParaCommunityMembership: 'com.para.community.membership',
   ComParaDiscourseGetSentiment: 'com.para.discourse.getSentiment',
   ComParaDiscourseGetSnapshot: 'com.para.discourse.getSnapshot',
@@ -26447,8 +26928,10 @@ export const ids = {
   ComParaHighlightDefs: 'com.para.highlight.defs',
   ComParaHighlightGetHighlight: 'com.para.highlight.getHighlight',
   ComParaHighlightListHighlights: 'com.para.highlight.listHighlights',
+  ComParaPost: 'com.para.post',
   ComParaSocialGetPostMeta: 'com.para.social.getPostMeta',
   ComParaSocialPostMeta: 'com.para.social.postMeta',
+  ComParaStatus: 'com.para.status',
   ToolsOzoneCommunicationCreateTemplate:
     'tools.ozone.communication.createTemplate',
   ToolsOzoneCommunicationDefs: 'tools.ozone.communication.defs',

@@ -143,6 +143,91 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
     }
   },
 
+  async getParaDelegationCandidates(req) {
+    const cabildeo = await db.db
+      .selectFrom('cabildeo_cabildeo')
+      .where('uri', '=', req.cabildeoUri)
+      .select(['uri', 'community'])
+      .executeTakeFirst()
+
+    if (!cabildeo) {
+      return { candidates: [], cursor: '' }
+    }
+
+    const board = await selectCandidateCommunityBoard(
+      db,
+      req.communityId || cabildeo.community,
+    )
+    const rolesByDid = new Map<string, Set<string>>()
+
+    if (board) {
+      const [governance, members] = await Promise.all([
+        getCandidateGovernanceRecord(db, board.name, board.slug),
+        selectDelegateLikeMembers(db, board.uri),
+      ])
+
+      addGovernanceCandidates(rolesByDid, governance)
+      for (const member of members) {
+        const set = ensureRoleSet(rolesByDid, member.creator)
+        for (const role of member.roles ?? []) {
+          set.add(role)
+        }
+        if (set.size === 0) set.add('member')
+      }
+    }
+
+    const dids = [...rolesByDid.keys()]
+    if (dids.length === 0) {
+      return { candidates: [], cursor: '' }
+    }
+
+    const [profiles, delegationCounts, votes] = await Promise.all([
+      hydrateCandidateProfiles(db, dids),
+      getCandidateDelegationCounts(db, dids),
+      getCandidateVotes(db, req.cabildeoUri, dids),
+    ])
+
+    const candidates = dids
+      .map((did) => {
+        const profile = profiles.get(did)
+        const vote = votes.get(did)
+        return {
+          did,
+          handle: profile?.handle ?? '',
+          displayName: profile?.displayName ?? '',
+          avatar: '',
+          description: profile?.description ?? '',
+          roles: [...(rolesByDid.get(did) ?? new Set<string>())],
+          activeDelegationCount: delegationCounts.get(did) ?? 0,
+          hasVoted: Boolean(vote),
+          votedAt: vote?.createdAt ?? '',
+          selectedOption:
+            typeof vote?.selectedOption === 'number'
+              ? vote.selectedOption
+              : undefined,
+        }
+      })
+      .sort((a, b) => {
+        const delegationDelta =
+          b.activeDelegationCount - a.activeDelegationCount
+        if (delegationDelta !== 0) return delegationDelta
+        return (a.displayName || a.handle || a.did).localeCompare(
+          b.displayName || b.handle || b.did,
+        )
+      })
+
+    const offset = decodeOffsetCursor(req.cursor)
+    const limit = normalizeLimit(req.limit)
+    const page = candidates.slice(offset, offset + limit)
+    const nextOffset = offset + page.length
+
+    return {
+      candidates: page,
+      cursor:
+        nextOffset < candidates.length ? encodeOffsetCursor(nextOffset) : '',
+    }
+  },
+
   async putParaCabildeoLivePresence(req) {
     const now = new Date()
     const nowIso = now.toISOString()
@@ -278,6 +363,201 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
     }
   },
 })
+
+type CandidateGovernancePerson = {
+  did?: string
+  handle?: string
+  displayName?: string
+}
+
+type CandidateGovernanceRecord = {
+  moderators?: Array<CandidateGovernancePerson & { role?: string }>
+  officials?: Array<CandidateGovernancePerson & { office?: string }>
+  deputies?: Array<{
+    role?: string
+    activeHolder?: CandidateGovernancePerson
+  }>
+}
+
+const selectCandidateCommunityBoard = async (
+  db: Database,
+  communityId: string,
+) => {
+  const normalizedSlug = normalizeCommunitySlug(communityId)
+
+  if (communityId.startsWith('at://')) {
+    const byUri = await db.db
+      .selectFrom('para_community_board')
+      .where('uri', '=', communityId)
+      .select(['uri', 'name', 'slug'])
+      .executeTakeFirst()
+    if (byUri) return byUri
+  }
+
+  return db.db
+    .selectFrom('para_community_board')
+    .where(
+      sql<boolean>`(
+        "slug" = ${normalizedSlug}
+        or regexp_replace(lower(coalesce("name", '')), '[^a-z0-9]+', '-', 'g') = ${normalizedSlug}
+      )`,
+    )
+    .select(['uri', 'name', 'slug'])
+    .executeTakeFirst()
+}
+
+const selectDelegateLikeMembers = async (db: Database, communityUri: string) =>
+  db.db
+    .selectFrom('para_community_membership')
+    .where('communityUri', '=', communityUri)
+    .where('membershipState', '=', 'active')
+    .where(
+      sql<boolean>`coalesce("roles", array[]::text[]) && array[
+        'delegate',
+        'delegado',
+        'representative',
+        'representante',
+        'moderator',
+        'official',
+        'deputy',
+        'subdelegate',
+        'agent'
+      ]::text[]`,
+    )
+    .select(['creator', 'roles'])
+    .execute()
+
+const getCandidateGovernanceRecord = async (
+  db: Database,
+  community: string,
+  slug: string,
+): Promise<CandidateGovernanceRecord | null> => {
+  const suffix = `/com.para.community.governance/${slug || 'community'}`
+  const slugMatch = await db.db
+    .selectFrom('record')
+    .select(['json'])
+    .where('uri', 'like', `%${suffix}`)
+    .orderBy('indexedAt', 'desc')
+    .executeTakeFirst()
+
+  if (slugMatch) return parseCandidateGovernance(slugMatch.json)
+
+  const normalizedCommunity = normalizeCommunityKey(community)
+  const recordMatch = await db.db
+    .selectFrom('record')
+    .select(['json'])
+    .where('uri', 'like', '%/com.para.community.governance/%')
+    .where(
+      sql`regexp_replace(lower(translate(regexp_replace(coalesce(("record"."json"::jsonb ->> 'community'), ''), '^p/', '', 'i'), ${COMMUNITY_TRANSLATION_SOURCE}, ${COMMUNITY_TRANSLATION_TARGET})), '[^a-z0-9]+', '', 'g')`,
+      '=',
+      normalizedCommunity,
+    )
+    .orderBy('indexedAt', 'desc')
+    .executeTakeFirst()
+
+  return recordMatch ? parseCandidateGovernance(recordMatch.json) : null
+}
+
+const parseCandidateGovernance = (
+  json: string,
+): CandidateGovernanceRecord | null => {
+  try {
+    const parsed = JSON.parse(json)
+    if (!parsed || typeof parsed !== 'object') return null
+    return parsed as CandidateGovernanceRecord
+  } catch {
+    return null
+  }
+}
+
+const addGovernanceCandidates = (
+  rolesByDid: Map<string, Set<string>>,
+  governance: CandidateGovernanceRecord | null,
+) => {
+  for (const moderator of governance?.moderators ?? []) {
+    if (!moderator.did) continue
+    const roles = ensureRoleSet(rolesByDid, moderator.did)
+    roles.add(moderator.role || 'moderator')
+  }
+
+  for (const official of governance?.officials ?? []) {
+    if (!official.did) continue
+    const roles = ensureRoleSet(rolesByDid, official.did)
+    roles.add(official.office || 'official')
+  }
+
+  for (const deputy of governance?.deputies ?? []) {
+    const holder = deputy.activeHolder
+    if (!holder?.did) continue
+    const roles = ensureRoleSet(rolesByDid, holder.did)
+    roles.add(deputy.role || 'deputy')
+  }
+}
+
+const ensureRoleSet = (map: Map<string, Set<string>>, did: string) => {
+  let set = map.get(did)
+  if (!set) {
+    set = new Set<string>()
+    map.set(did, set)
+  }
+  return set
+}
+
+const hydrateCandidateProfiles = async (db: Database, dids: string[]) => {
+  const rows = await db.db
+    .selectFrom('actor')
+    .leftJoin('profile', 'profile.creator', 'actor.did')
+    .where('actor.did', 'in', dids)
+    .select([
+      'actor.did',
+      'actor.handle',
+      'profile.displayName',
+      'profile.description',
+    ])
+    .execute()
+
+  return new Map(rows.map((row) => [row.did, row]))
+}
+
+const getCandidateDelegationCounts = async (db: Database, dids: string[]) => {
+  const rows = await db.db
+    .selectFrom('cabildeo_delegation')
+    .where('delegateTo', 'in', dids)
+    .select(['delegateTo', sql<number>`count(distinct "creator")`.as('count')])
+    .groupBy('delegateTo')
+    .execute()
+
+  return new Map(rows.map((row) => [row.delegateTo, Number(row.count) || 0]))
+}
+
+const getCandidateVotes = async (
+  db: Database,
+  cabildeoUri: string,
+  dids: string[],
+) => {
+  const rows = await db.db
+    .selectFrom('cabildeo_vote')
+    .where('cabildeo', '=', cabildeoUri)
+    .where('creator', 'in', dids)
+    .select(['creator', 'selectedOption', 'createdAt'])
+    .orderBy('sortAt', 'desc')
+    .execute()
+  const votes = new Map<
+    string,
+    { selectedOption: number | null; createdAt: string }
+  >()
+
+  for (const row of rows) {
+    if (!votes.has(row.creator)) {
+      votes.set(row.creator, {
+        selectedOption: row.selectedOption,
+        createdAt: row.createdAt,
+      })
+    }
+  }
+
+  return votes
+}
 
 class RankedTimeCidKeyset extends TimeCidKeyset<{
   sortRank: string
@@ -507,3 +787,41 @@ const asNumberArray = (value: unknown, length: number): number[] => {
 const normalizeCommunity = (value: string | undefined) => {
   return value?.trim().toLowerCase().replace(/^p\//, '') || ''
 }
+
+const COMMUNITY_TRANSLATION_SOURCE =
+  'ÁÀÄÂÃáàäâãÉÈËÊéèëêÍÌÏÎíìïîÓÒÖÔÕóòöôõÚÙÜÛúùüûÑñÇç'
+const COMMUNITY_TRANSLATION_TARGET =
+  'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuNnCc'
+
+const normalizeCommunityKey = (value: string) =>
+  value
+    .trim()
+    .replace(/^p\//i, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+
+const normalizeCommunitySlug = (value: string) =>
+  value
+    .trim()
+    .replace(/^p\//i, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+const normalizeLimit = (limit: number) => {
+  if (!limit || Number.isNaN(limit)) return 50
+  return Math.max(1, Math.min(limit, 100))
+}
+
+const decodeOffsetCursor = (cursor?: string) => {
+  if (!cursor) return 0
+  const parsed = Number.parseInt(cursor, 10)
+  if (!Number.isFinite(parsed) || parsed < 0) return 0
+  return parsed
+}
+
+const encodeOffsetCursor = (offset: number) => String(Math.max(0, offset))

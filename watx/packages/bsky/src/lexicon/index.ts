@@ -251,12 +251,14 @@ import * as ComParaCivicGetCabildeo from './types/com/para/civic/getCabildeo.js'
 import * as ComParaCivicGetPolicyTally from './types/com/para/civic/getPolicyTally.js'
 import * as ComParaCivicListCabildeoPositions from './types/com/para/civic/listCabildeoPositions.js'
 import * as ComParaCivicListCabildeos from './types/com/para/civic/listCabildeos.js'
+import * as ComParaCivicListDelegationCandidates from './types/com/para/civic/listDelegationCandidates.js'
 import * as ComParaCivicPutLivePresence from './types/com/para/civic/putLivePresence.js'
 import * as ComParaCommunityAcceptDraftInvite from './types/com/para/community/acceptDraftInvite.js'
 import * as ComParaCommunityCreateBoard from './types/com/para/community/createBoard.js'
 import * as ComParaCommunityGetBoard from './types/com/para/community/getBoard.js'
 import * as ComParaCommunityGetGovernance from './types/com/para/community/getGovernance.js'
 import * as ComParaCommunityListBoards from './types/com/para/community/listBoards.js'
+import * as ComParaCommunityListMembers from './types/com/para/community/listMembers.js'
 import * as ComParaDiscourseGetSentiment from './types/com/para/discourse/getSentiment.js'
 import * as ComParaDiscourseGetSnapshot from './types/com/para/discourse/getSnapshot.js'
 import * as ComParaDiscourseGetTopics from './types/com/para/discourse/getTopics.js'
@@ -3693,6 +3695,18 @@ export class ComParaCivicNS {
     return this._server.xrpc.method(nsid, cfg)
   }
 
+  listDelegationCandidates<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaCivicListDelegationCandidates.QueryParams,
+      ComParaCivicListDelegationCandidates.HandlerInput,
+      ComParaCivicListDelegationCandidates.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.civic.listDelegationCandidates' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
   putLivePresence<A extends Auth = void>(
     cfg: MethodConfigOrHandler<
       A,
@@ -3770,6 +3784,18 @@ export class ComParaCommunityNS {
     >,
   ) {
     const nsid = 'com.para.community.listBoards' // @ts-ignore
+    return this._server.xrpc.method(nsid, cfg)
+  }
+
+  listMembers<A extends Auth = void>(
+    cfg: MethodConfigOrHandler<
+      A,
+      ComParaCommunityListMembers.QueryParams,
+      ComParaCommunityListMembers.HandlerInput,
+      ComParaCommunityListMembers.HandlerOutput
+    >,
+  ) {
+    const nsid = 'com.para.community.listMembers' // @ts-ignore
     return this._server.xrpc.method(nsid, cfg)
   }
 }

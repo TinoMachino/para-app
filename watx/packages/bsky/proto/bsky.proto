@@ -1658,10 +1658,45 @@ message GetParaCommunityBoardResponse {
 message GetParaCommunityBoardsRequest {
   string viewer_did = 1;
   int32 limit = 2;
+  string query = 3;
+  string state = 4;
+  string participation_kind = 5;
+  string flair_id = 6;
+  string sort = 7;
+  string cursor = 8;
 }
 
 message GetParaCommunityBoardsResponse {
   repeated ParaCommunityBoardView boards = 1;
+  string cursor = 2;
+}
+
+message GetParaCommunityMembersRequest {
+  string community_id = 1;
+  string membership_state = 2;
+  string role = 3;
+  string sort = 4;
+  int32 limit = 5;
+  string cursor = 6;
+}
+
+message ParaCommunityMemberView {
+  string did = 1;
+  string handle = 2;
+  string display_name = 3;
+  string avatar = 4;
+  string membership_state = 5;
+  repeated string roles = 6;
+  string joined_at = 7;
+  int32 votes_cast = 8;
+  int32 delegations_received = 9;
+  int32 policy_posts = 10;
+  int32 matter_posts = 11;
+}
+
+message GetParaCommunityMembersResponse {
+  repeated ParaCommunityMemberView members = 1;
+  string cursor = 2;
 }
 
 // - Returns indexed Cabildeos and aggregate summaries, paginated
@@ -1801,6 +1836,31 @@ message GetParaCabildeoPositionsRequest {
 
 message GetParaCabildeoPositionsResponse {
   repeated ParaCabildeoPositionView positions = 1;
+  string cursor = 2;
+}
+
+message GetParaDelegationCandidatesRequest {
+  string cabildeo_uri = 1;
+  string community_id = 2;
+  int32 limit = 3;
+  string cursor = 4;
+}
+
+message ParaDelegationCandidateView {
+  string did = 1;
+  string handle = 2;
+  string display_name = 3;
+  string avatar = 4;
+  string description = 5;
+  repeated string roles = 6;
+  int32 active_delegation_count = 7;
+  bool has_voted = 8;
+  string voted_at = 9;
+  optional int32 selected_option = 10;
+}
+
+message GetParaDelegationCandidatesResponse {
+  repeated ParaDelegationCandidateView candidates = 1;
   string cursor = 2;
 }
 
@@ -2050,9 +2110,11 @@ service Service {
   rpc GetParaCommunityGovernance(GetParaCommunityGovernanceRequest) returns (GetParaCommunityGovernanceResponse);
   rpc GetParaCommunityBoard(GetParaCommunityBoardRequest) returns (GetParaCommunityBoardResponse);
   rpc GetParaCommunityBoards(GetParaCommunityBoardsRequest) returns (GetParaCommunityBoardsResponse);
+  rpc GetParaCommunityMembers(GetParaCommunityMembersRequest) returns (GetParaCommunityMembersResponse);
   rpc GetParaCabildeos(GetParaCabildeosRequest) returns (GetParaCabildeosResponse);
   rpc GetParaCabildeo(GetParaCabildeoRequest) returns (GetParaCabildeoResponse);
   rpc GetParaCabildeoPositions(GetParaCabildeoPositionsRequest) returns (GetParaCabildeoPositionsResponse);
+  rpc GetParaDelegationCandidates(GetParaDelegationCandidatesRequest) returns (GetParaDelegationCandidatesResponse);
   rpc PutParaCabildeoLivePresence(PutParaCabildeoLivePresenceRequest) returns (PutParaCabildeoLivePresenceResponse);
   rpc GetParaHighlights(GetParaHighlightsRequest) returns (GetParaHighlightsResponse);
   rpc GetParaHighlight(GetParaHighlightRequest) returns (GetParaHighlightResponse);

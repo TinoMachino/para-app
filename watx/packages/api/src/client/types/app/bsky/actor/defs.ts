@@ -10,6 +10,7 @@ import {
   type OmitKey,
 } from '../../../../util'
 import type * as ComAtprotoLabelDefs from '../../../com/atproto/label/defs.js'
+import type * as ComParaCivicDefs from '../../../com/para/civic/defs.js'
 import type * as AppBskyGraphDefs from '../graph/defs.js'
 import type * as ComAtprotoRepoStrongRef from '../../../com/atproto/repo/strongRef.js'
 import type * as AppBskyNotificationDefs from '../notification/defs.js'
@@ -34,6 +35,7 @@ export interface ProfileViewBasic {
   createdAt?: string
   verification?: VerificationState
   status?: StatusView
+  cabildeoLive?: ComParaCivicDefs.CabildeoLive
   /** Debug information for internal development */
   debug?: { [_ in string]: unknown }
 }
@@ -63,6 +65,7 @@ export interface ProfileView {
   labels?: ComAtprotoLabelDefs.Label[]
   verification?: VerificationState
   status?: StatusView
+  cabildeoLive?: ComParaCivicDefs.CabildeoLive
   /** Debug information for internal development */
   debug?: { [_ in string]: unknown }
 }
@@ -99,6 +102,7 @@ export interface ProfileViewDetailed {
   pinnedPost?: ComAtprotoRepoStrongRef.Main
   verification?: VerificationState
   status?: StatusView
+  cabildeoLive?: ComParaCivicDefs.CabildeoLive
   /** Debug information for internal development */
   debug?: { [_ in string]: unknown }
 }

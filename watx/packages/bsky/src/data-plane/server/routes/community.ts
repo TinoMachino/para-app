@@ -5,10 +5,12 @@ import {
   GetParaCommunityBoardResponse,
   GetParaCommunityBoardsResponse,
   GetParaCommunityGovernanceResponse,
+  GetParaCommunityMembersResponse,
   ParaCommunityDeputyRole,
   ParaCommunityGovernanceHistoryEntry,
   ParaCommunityGovernanceMetadata,
   ParaCommunityMember,
+  ParaCommunityMemberView,
   ParaCommunityModerator,
   ParaCommunityOfficial,
   ParaCommunitySummary,
@@ -36,8 +38,10 @@ type BoardRow = {
 
 type MembershipRow = {
   communityUri: string
+  creator?: string
   membershipState: string
   roles: string[] | null
+  joinedAt?: string
 }
 
 type GovernanceRecord = ComParaCommunityGovernance.Record
@@ -67,12 +71,20 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
   },
 
   async getParaCommunityBoards(req) {
-    const boards = await selectBoards(db, normalizeLimit(req.limit))
-    if (boards.length === 0) {
+    const result = await selectBoards(db, {
+      limit: normalizeLimit(req.limit),
+      cursor: req.cursor,
+      query: req.query,
+      state: req.state,
+      participationKind: req.participationKind,
+      flairId: req.flairId,
+      sort: req.sort,
+    })
+    if (result.boards.length === 0) {
       return new GetParaCommunityBoardsResponse({ boards: [] })
     }
 
-    const uris = boards.map((board) => board.uri)
+    const uris = result.boards.map((board) => board.uri)
     const [memberCounts, viewerMemberships] = await Promise.all([
       getMemberCounts(db, uris),
       req.viewerDid
@@ -81,13 +93,34 @@ export default (db: Database): Partial<ServiceImpl<typeof Service>> => ({
     ])
 
     return new GetParaCommunityBoardsResponse({
-      boards: boards.map((board) =>
+      boards: result.boards.map((board) =>
         toBoardView(
           board,
           memberCounts.get(board.uri) ?? 0,
           viewerMemberships.get(board.uri),
         ),
       ),
+      cursor: result.cursor,
+    })
+  },
+
+  async getParaCommunityMembers(req) {
+    const board = await selectBoard(db, req.communityId, undefined)
+    if (!board) {
+      return new GetParaCommunityMembersResponse({ members: [] })
+    }
+
+    const result = await selectMembers(db, board.uri, {
+      membershipState: req.membershipState,
+      role: req.role,
+      sort: req.sort,
+      limit: normalizeLimit(req.limit),
+      cursor: req.cursor,
+    })
+
+    return new GetParaCommunityMembersResponse({
+      members: result.members.map((member) => new ParaCommunityMemberView(member)),
+      cursor: result.cursor,
     })
   },
 
@@ -187,11 +220,104 @@ const selectBoard = async (
   return (await builder.executeTakeFirst()) as BoardRow | undefined
 }
 
-const selectBoards = async (db: Database, limit: number): Promise<BoardRow[]> => {
-  return (await boardBaseQuery(db)
-    .orderBy('board.createdAt', 'desc')
-    .limit(limit)
+const selectBoards = async (
+  db: Database,
+  opts: {
+    limit: number
+    cursor?: string
+    query?: string
+    state?: string
+    participationKind?: string
+    flairId?: string
+    sort?: string
+  },
+): Promise<{ boards: BoardRow[]; cursor: string }> => {
+  const pageOffset = decodeOffsetCursor(opts.cursor)
+  const needsGovernanceFilter =
+    Boolean(opts.state?.trim()) ||
+    Boolean(opts.flairId?.trim() && opts.participationKind?.trim())
+  const fetchLimit = needsGovernanceFilter ? 500 : opts.limit + 1
+
+  let builder = boardBaseQuery(db)
+
+  const query = opts.query?.trim()
+  if (query) {
+    const like = `%${query.replace(/[%_]/g, '\\$&')}%`
+    builder = builder.where(
+      sql<boolean>`(
+        "board"."name" ilike ${like}
+        or "board"."description" ilike ${like}
+        or "board"."slug" ilike ${like}
+        or "board"."quadrant" ilike ${like}
+      )`,
+    )
+  }
+
+  const ordered =
+    opts.sort === 'size'
+      ? builder.orderBy(
+          (eb) =>
+            eb
+              .selectFrom('para_community_membership')
+              .whereRef('communityUri', '=', 'board.uri')
+              .where('membershipState', '=', 'active')
+              .select(sql<number>`count(*)`.as('memberCount')),
+          'desc',
+        )
+      : opts.sort === 'activity'
+        ? builder.orderBy('board.indexedAt', 'desc')
+        : builder.orderBy('board.createdAt', 'desc')
+
+  const rows = (await ordered
+    .orderBy('board.cid', 'desc')
+    .offset(needsGovernanceFilter ? 0 : pageOffset)
+    .limit(fetchLimit)
     .execute()) as BoardRow[]
+
+  let filtered = rows
+  if (needsGovernanceFilter) {
+    const enriched = await Promise.all(
+      rows.map(async (board) => ({
+        board,
+        governance: await getPublishedGovernanceRecord(db, board.name, board.slug),
+      })),
+    )
+    const state = normalizeCommunityKey(opts.state ?? '')
+    const flairId = opts.flairId?.trim()
+    const participationKind = opts.participationKind?.trim()
+
+    filtered = enriched
+      .filter(({ governance }) => {
+        if (state) {
+          const governanceState = normalizeCommunityKey(
+            governance?.metadata?.state ?? '',
+          )
+          if (governanceState !== state) return false
+        }
+        if (flairId && participationKind) {
+          const flairs =
+            participationKind === 'policy'
+              ? governance?.metadata?.policyFlairIds
+              : governance?.metadata?.matterFlairIds
+          if (!flairs?.includes(flairId)) return false
+        }
+        return true
+      })
+      .map((item) => item.board)
+  }
+
+  const page = needsGovernanceFilter
+    ? filtered.slice(pageOffset, pageOffset + opts.limit)
+    : filtered.slice(0, opts.limit)
+  const nextOffset = pageOffset + page.length
+  const hasMore = needsGovernanceFilter
+    ? nextOffset < filtered.length
+    : rows.length > opts.limit
+
+  return {
+    boards: page,
+    cursor: hasMore ? encodeOffsetCursor(nextOffset) : '',
+  }
 }
 
 const boardBaseQuery = (db: Database) =>
@@ -244,11 +370,11 @@ const getViewerMemberships = async (
   }
 
   const rows = await db.db
-    .selectFrom('para_community_membership')
-    .where('creator', '=', viewerDid)
-    .where('communityUri', 'in', communityUris)
-    .select(['communityUri', 'membershipState', 'roles'])
-    .execute()
+      .selectFrom('para_community_membership')
+      .where('creator', '=', viewerDid)
+      .where('communityUri', 'in', communityUris)
+      .select(['communityUri', 'creator', 'membershipState', 'roles', 'joinedAt'])
+      .execute()
 
   return new Map(rows.map((row) => [row.communityUri, row]))
 }
@@ -276,6 +402,166 @@ const toBoardView = (
     viewerRoles: viewerMembership?.roles ?? [],
     createdAt: board.createdAt,
   })
+
+const selectMembers = async (
+  db: Database,
+  communityUri: string,
+  opts: {
+    membershipState?: string
+    role?: string
+    sort?: string
+    limit: number
+    cursor?: string
+  },
+) => {
+  const offset = decodeOffsetCursor(opts.cursor)
+  const requestedState = opts.membershipState?.trim() || 'active'
+  let builder = db.db
+    .selectFrom('para_community_membership as membership')
+    .leftJoin('actor as actor', 'actor.did', 'membership.creator')
+    .leftJoin('profile as profile', 'profile.creator', 'membership.creator')
+    .where('membership.communityUri', '=', communityUri)
+    .where('membership.membershipState', '=', requestedState)
+    .select([
+      'membership.creator as did',
+      'membership.membershipState',
+      'membership.roles',
+      'membership.joinedAt',
+      'actor.handle as handle',
+      'profile.displayName as displayName',
+    ])
+
+  const role = opts.role?.trim()
+  if (role) {
+    builder = builder.where(
+      sql<boolean>`${role} = any(coalesce("membership"."roles", array[]::text[]))`,
+    )
+  }
+
+  const ordered =
+    opts.sort === 'participation'
+      ? builder.orderBy(
+          (eb) =>
+            eb
+              .selectFrom('cabildeo_vote')
+              .whereRef('creator', '=', 'membership.creator')
+              .select(sql<number>`count(*)`.as('voteCount')),
+          'desc',
+        )
+      : builder.orderBy('membership.joinedAt', 'desc')
+
+  const rows = await ordered
+    .orderBy('membership.cid', 'desc')
+    .offset(offset)
+    .limit(opts.limit + 1)
+    .execute()
+  const page = rows.slice(0, opts.limit)
+  const dids = page.map((row) => row.did)
+  const [voteCounts, delegationCounts, postCounts] = await Promise.all([
+    getVoteCounts(db, dids),
+    getDelegationCounts(db, dids),
+    getCommunityPostCounts(db, dids, communityUri),
+  ])
+
+  return {
+    members: page.map((row) => {
+      const postCount = postCounts.get(row.did)
+      return {
+        did: row.did,
+        handle: row.handle ?? '',
+        displayName: row.displayName ?? '',
+        avatar: '',
+        membershipState: row.membershipState,
+        roles: row.roles ?? [],
+        joinedAt: row.joinedAt,
+        votesCast: voteCounts.get(row.did) ?? 0,
+        delegationsReceived: delegationCounts.get(row.did) ?? 0,
+        policyPosts: postCount?.policyPosts ?? 0,
+        matterPosts: postCount?.matterPosts ?? 0,
+      }
+    }),
+    cursor: rows.length > opts.limit ? encodeOffsetCursor(offset + page.length) : '',
+  }
+}
+
+const getVoteCounts = async (db: Database, dids: string[]) => {
+  if (dids.length === 0) return new Map<string, number>()
+
+  const rows = await db.db
+    .selectFrom('cabildeo_vote')
+    .where('creator', 'in', dids)
+    .select(['creator', sql<number>`count(*)`.as('count')])
+    .groupBy('creator')
+    .execute()
+
+  return new Map(rows.map((row) => [row.creator, Number(row.count) || 0]))
+}
+
+const getDelegationCounts = async (db: Database, dids: string[]) => {
+  if (dids.length === 0) return new Map<string, number>()
+
+  const rows = await db.db
+    .selectFrom('cabildeo_delegation')
+    .where('delegateTo', 'in', dids)
+    .select(['delegateTo', sql<number>`count(distinct "creator")`.as('count')])
+    .groupBy('delegateTo')
+    .execute()
+
+  return new Map(rows.map((row) => [row.delegateTo, Number(row.count) || 0]))
+}
+
+const getCommunityPostCounts = async (
+  db: Database,
+  dids: string[],
+  communityUri: string,
+) => {
+  if (dids.length === 0) {
+    return new Map<string, { policyPosts: number; matterPosts: number }>()
+  }
+
+  const board = await db.db
+    .selectFrom('para_community_board')
+    .where('uri', '=', communityUri)
+    .select(['name', 'slug'])
+    .executeTakeFirst()
+
+  const community = board ? normalizeCommunitySlug(board.slug || board.name) : ''
+  let builder = db.db
+    .selectFrom('para_post_meta')
+    .where('creator', 'in', dids)
+    .select(['creator'])
+    .select(
+      sql<number>`coalesce(sum(case when "postType" = 'policy' then 1 else 0 end), 0)`.as(
+        'policyPosts',
+      ),
+    )
+    .select(
+      sql<number>`coalesce(sum(case when "postType" = 'matter' then 1 else 0 end), 0)`.as(
+        'matterPosts',
+      ),
+    )
+    .groupBy('creator')
+
+  if (community) {
+    builder = builder.where(
+      sql`regexp_replace(lower(coalesce("community", '')), '[^a-z0-9]+', '-', 'g')`,
+      '=',
+      community,
+    )
+  }
+
+  const rows = await builder.execute()
+
+  return new Map(
+    rows.map((row) => [
+      row.creator,
+      {
+        policyPosts: Number(row.policyPosts) || 0,
+        matterPosts: Number(row.matterPosts) || 0,
+      },
+    ]),
+  )
+}
 
 const getGovernanceSummary = async (
   db: Database,
@@ -460,3 +746,12 @@ const normalizeLimit = (limit: number) => {
   if (!limit || Number.isNaN(limit)) return 50
   return Math.max(1, Math.min(limit, 100))
 }
+
+const decodeOffsetCursor = (cursor?: string) => {
+  if (!cursor) return 0
+  const parsed = Number.parseInt(cursor, 10)
+  if (!Number.isFinite(parsed) || parsed < 0) return 0
+  return parsed
+}
+
+const encodeOffsetCursor = (offset: number) => String(Math.max(0, offset))

@@ -77,6 +77,8 @@ export interface BoardView {
     | 'blocked'
     | (string & {})
   viewerRoles?: string[]
+  status?: 'draft' | 'active' | (string & {})
+  founderStarterPackUri?: string
   createdAt: string
   governanceSummary?: GovernanceSummary
 }

@@ -12,9 +12,22 @@ export { $nsid }
 const main = l.query(
   $nsid,
   l.params({
+    query: l.optional(l.string({ maxGraphemes: 128, maxLength: 256 })),
+    state: l.optional(l.string({ maxGraphemes: 64, maxLength: 128 })),
+    participationKind: l.optional(
+      l.string<{ knownValues: ['matter', 'policy'] }>(),
+    ),
+    flairId: l.optional(l.string({ maxGraphemes: 128, maxLength: 128 })),
+    sort: l.optional(
+      l.withDefault(
+        l.string<{ knownValues: ['recent', 'activity', 'size'] }>(),
+        'recent',
+      ),
+    ),
     limit: l.optional(
       l.withDefault(l.integer({ minimum: 1, maximum: 100 }), 50),
     ),
+    cursor: l.optional(l.string()),
   }),
   l.payload('application/json', l.ref<Output>((() => output) as any)),
 )
@@ -98,6 +111,7 @@ export { boardView }
 type Output = {
   $type?: 'com.para.community.listBoards#output'
   boards: BoardView[]
+  cursor?: string
   canCreateCommunity: boolean
 }
 
@@ -108,6 +122,7 @@ const output = l.typedObject<Output>(
   'output',
   l.object({
     boards: l.array(l.ref<BoardView>((() => boardView) as any)),
+    cursor: l.optional(l.string()),
     canCreateCommunity: l.boolean(),
   }),
 )
