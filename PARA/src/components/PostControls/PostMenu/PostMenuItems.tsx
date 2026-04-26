@@ -43,6 +43,10 @@ import {
   usePostDeleteMutation,
   useThreadMuteMutationQueue,
 } from '#/state/queries/post'
+import {
+  usePostSubscriptionMutation,
+  usePostSubscriptionQuery,
+} from '#/state/queries/post-subscriptions'
 import {useToggleQuoteDetachmentMutation} from '#/state/queries/postgate'
 import {getMaybeDetachedQuoteEmbed} from '#/state/queries/postgate/util'
 import {
@@ -84,6 +88,8 @@ import {
   SpeakerVolumeFull_Stroke2_Corner0_Rounded as Unmute,
   SpeakerVolumeFull_Stroke2_Corner0_Rounded as UnmuteIcon,
 } from '#/components/icons/Speaker'
+import {BellPlus_Stroke2_Corner0_Rounded as BellPlus} from '#/components/icons/BellPlus'
+import {BellRinging_Stroke2_Corner0_Rounded as BellRinging} from '#/components/icons/BellRinging'
 import {Trash_Stroke2_Corner0_Rounded as Trash} from '#/components/icons/Trash'
 import {Warning_Stroke2_Corner0_Rounded as Warning} from '#/components/icons/Warning'
 import {Loader} from '#/components/Loader'
@@ -168,6 +174,11 @@ let PostMenuItems = ({
     post,
     rootUri,
   )
+  const {data: postSubscription} = usePostSubscriptionQuery(postUri)
+  const postSubscriptionMutation = usePostSubscriptionMutation()
+  const isPostSubscribed = Boolean(
+    postSubscription?.reply || postSubscription?.quote,
+  )
   const isPostHidden = hiddenPosts && hiddenPosts.includes(postUri)
   const isAuthor = postAuthor.did === currentAccount?.did
   const isRootPostAuthor = new AtUri(rootUri).host === currentAccount?.did
@@ -251,6 +262,38 @@ let PostMenuItems = ({
         Toast.show(l`Failed to toggle thread mute, please try again`, {
           type: 'error',
         })
+      }
+    }
+  }
+
+  const onTogglePostSubscription = async () => {
+    try {
+      const nextIsSubscribed = !isPostSubscribed
+      await postSubscriptionMutation.mutateAsync({
+        post: postUri,
+        reply: nextIsSubscribed,
+        quote: nextIsSubscribed,
+      })
+      ax.metric(
+        nextIsSubscribed
+          ? 'postSubscription:enable'
+          : 'postSubscription:disable',
+        {
+          uri: postUri,
+          authorDid: postAuthor.did,
+          logContext,
+          feedDescriptor: feedFeedback.feedDescriptor,
+        },
+      )
+      Toast.show(
+        nextIsSubscribed
+          ? l`You’ll get notifications for replies and quotes on this post`
+          : l`You’ll no longer get notifications for this post`,
+      )
+    } catch (err) {
+      const e = err as Error
+      if (e?.name !== 'AbortError') {
+        logger.error('Failed to toggle post subscription', {message: e})
       }
     }
   }
@@ -625,6 +668,20 @@ let PostMenuItems = ({
                 </Menu.ItemText>
                 <Menu.ItemIcon
                   icon={isThreadMuted ? Unmute : Mute}
+                  position="right"
+                />
+              </Menu.Item>
+
+              <Menu.Item
+                testID="postDropdownFollowPostBtn"
+                disabled={postSubscriptionMutation.isPending}
+                label={isPostSubscribed ? l`Unfollow post` : l`Follow post`}
+                onPress={() => void onTogglePostSubscription()}>
+                <Menu.ItemText>
+                  {isPostSubscribed ? l`Unfollow post` : l`Follow post`}
+                </Menu.ItemText>
+                <Menu.ItemIcon
+                  icon={isPostSubscribed ? BellRinging : BellPlus}
                   position="right"
                 />
               </Menu.Item>

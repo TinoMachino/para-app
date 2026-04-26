@@ -937,6 +937,34 @@ message GetActivitySubscriptionsByActorAndSubjectsResponse {
   repeated ActivitySubscription subscriptions = 1;
 }
 
+message GetPostSubscriptionRequest {
+  string subscriber_did = 1;
+  string post_uri = 2;
+}
+
+message PostSubscription {
+  string subscriber_did = 1;
+  string post_uri = 2;
+  bool reply = 3;
+  bool quote = 4;
+  google.protobuf.Timestamp indexed_at = 5;
+}
+
+message GetPostSubscriptionResponse {
+  optional PostSubscription subscription = 1;
+}
+
+message PutPostSubscriptionRequest {
+  string subscriber_did = 1;
+  string post_uri = 2;
+  bool reply = 3;
+  bool quote = 4;
+}
+
+message PutPostSubscriptionResponse {
+  optional PostSubscription subscription = 1;
+}
+
 //
 // FeedGenerators
 //
@@ -2084,6 +2112,8 @@ service Service {
   rpc GetUnreadNotificationCount(GetUnreadNotificationCountRequest) returns (GetUnreadNotificationCountResponse);
   rpc GetActivitySubscriptionDids(GetActivitySubscriptionDidsRequest) returns (GetActivitySubscriptionDidsResponse);
   rpc GetActivitySubscriptionsByActorAndSubjects(GetActivitySubscriptionsByActorAndSubjectsRequest) returns (GetActivitySubscriptionsByActorAndSubjectsResponse);
+  rpc GetPostSubscription(GetPostSubscriptionRequest) returns (GetPostSubscriptionResponse);
+  rpc PutPostSubscription(PutPostSubscriptionRequest) returns (PutPostSubscriptionResponse);
   rpc UpdateNotificationSeen(UpdateNotificationSeenRequest) returns (UpdateNotificationSeenResponse);
 
   // FeedGenerators

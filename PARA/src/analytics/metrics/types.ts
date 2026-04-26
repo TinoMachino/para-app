@@ -377,6 +377,18 @@ export type Events = {
     feedDescriptor?: string
     position?: number
   }
+  'postSubscription:enable': {
+    uri: string
+    authorDid: string
+    logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
+    feedDescriptor?: string
+  }
+  'postSubscription:disable': {
+    uri: string
+    authorDid: string
+    logContext: 'FeedItem' | 'PostThreadItem' | 'Post' | 'ImmersiveVideo'
+    feedDescriptor?: string
+  }
   'post:pin': {}
   'post:unpin': {}
   'post:bookmark': {

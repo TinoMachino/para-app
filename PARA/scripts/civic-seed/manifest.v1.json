@@ -196,6 +196,171 @@
       "displayName": "Hector Salgado",
       "description": "Spreadsheet-heavy policy nerd focused on land use and metro growth.",
       "roles": ["researcher"]
+    },
+    {
+      "alias": "party_pan_president",
+      "handle": "j-romero-pan.test",
+      "email": "j-romero-pan@test.com",
+      "password": "hunter2",
+      "displayName": "Jorge Romero Herrera",
+      "description": "Presidente nacional del Partido Accion Nacional, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:00:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:00:00.000Z",
+        "proofBlob": "ine-direction://pan/jorge-romero-herrera"
+      }
+    },
+    {
+      "alias": "party_pan_secretary",
+      "handle": "k-gonz-pan.test",
+      "email": "k-gonz-pan@test.com",
+      "password": "hunter2",
+      "displayName": "Karen Michel Gonzalez Marquez",
+      "description": "Secretaria nacional del Partido Accion Nacional, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:05:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:05:00.000Z",
+        "proofBlob": "ine-direction://pan/karen-michel-gonzalez-marquez"
+      }
+    },
+    {
+      "alias": "party_pri_president",
+      "handle": "alito-pri.test",
+      "email": "alito-pri@test.com",
+      "password": "hunter2",
+      "displayName": "Rafael Alejandro Moreno Cardenas",
+      "description": "Presidente nacional del Partido Revolucionario Institucional, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:10:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:10:00.000Z",
+        "proofBlob": "ine-direction://pri/rafael-alejandro-moreno-cardenas"
+      }
+    },
+    {
+      "alias": "party_pri_secretary",
+      "handle": "c-viggiano-pri.test",
+      "email": "c-viggiano-pri@test.com",
+      "password": "hunter2",
+      "displayName": "Alma Carolina Viggiano Austria",
+      "description": "Secretaria general del Partido Revolucionario Institucional, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:15:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:15:00.000Z",
+        "proofBlob": "ine-direction://pri/alma-carolina-viggiano-austria"
+      }
+    },
+    {
+      "alias": "party_pvem_executive_secretary",
+      "handle": "p-guerrero-pvem.test",
+      "email": "p-guerrero-pvem@test.com",
+      "password": "hunter2",
+      "displayName": "Pilar Guerrero Rubio",
+      "description": "Secretaria ejecutiva del Partido Verde Ecologista de Mexico, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:20:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:20:00.000Z",
+        "proofBlob": "ine-direction://pvem/pilar-guerrero-rubio"
+      }
+    },
+    {
+      "alias": "party_pvem_technical_secretary",
+      "handle": "g-aguilar-pvem.test",
+      "email": "g-aguilar-pvem@test.com",
+      "password": "hunter2",
+      "displayName": "Gabriela Aguilar Garcia",
+      "description": "Secretaria tecnica del Partido Verde Ecologista de Mexico, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:25:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:25:00.000Z",
+        "proofBlob": "ine-direction://pvem/gabriela-aguilar-garcia"
+      }
+    },
+    {
+      "alias": "party_pt_coordinator",
+      "handle": "a-anaya-pt.test",
+      "email": "a-anaya-pt@test.com",
+      "password": "hunter2",
+      "displayName": "Alberto Anaya Gutierrez",
+      "description": "Integrante de la Comision Coordinadora Nacional del Partido del Trabajo, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:30:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:30:00.000Z",
+        "proofBlob": "ine-direction://pt/alberto-anaya-gutierrez"
+      }
+    },
+    {
+      "alias": "party_pt_technical_secretary",
+      "handle": "s-garay-pt.test",
+      "email": "s-garay-pt@test.com",
+      "password": "hunter2",
+      "displayName": "Silvano Garay Ulloa",
+      "description": "Secretario tecnico del Partido del Trabajo, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:35:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:35:00.000Z",
+        "proofBlob": "ine-direction://pt/silvano-garay-ulloa"
+      }
+    },
+    {
+      "alias": "party_mc_coordinator",
+      "handle": "j-alvarez-mc.test",
+      "email": "j-alvarez-mc@test.com",
+      "password": "hunter2",
+      "displayName": "Jorge Alvarez Maynez",
+      "description": "Coordinador nacional de Movimiento Ciudadano, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:40:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:40:00.000Z",
+        "proofBlob": "ine-direction://mc/jorge-alvarez-maynez"
+      }
+    },
+    {
+      "alias": "party_morena_president",
+      "handle": "l-alcalde-morena.test",
+      "email": "l-alcalde-morena@test.com",
+      "password": "hunter2",
+      "displayName": "Luisa Maria Alcalde Lujan",
+      "description": "Presidenta nacional de Morena registrada por el INE, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:45:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:45:00.000Z",
+        "proofBlob": "ine-direction://morena/luisa-maria-alcalde-lujan"
+      }
+    },
+    {
+      "alias": "party_morena_secretary",
+      "handle": "c-rangel-morena.test",
+      "email": "c-rangel-morena@test.com",
+      "password": "hunter2",
+      "displayName": "Carolina Rangel Gracida",
+      "description": "Secretaria general de Morena registrada por el INE, seeded from INE party direction data.",
+      "roles": ["party_official", "official"],
+      "identity": {
+        "createdAt": "2026-04-17T10:50:00.000Z",
+        "isVerifiedPublicFigure": true,
+        "verifiedAt": "2026-04-17T12:50:00.000Z",
+        "proofBlob": "ine-direction://morena/carolina-rangel-gracida"
+      }
     }
   ],
   "follows": [
@@ -362,15 +527,376 @@
       "subject": "deputy_applicant",
       "rkey": "seed-verify-deputy-applicant",
       "createdAt": "2026-03-12T14:00:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pan_president",
+      "rkey": "seed-verify-party-pan-president",
+      "createdAt": "2026-04-17T12:00:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pan_secretary",
+      "rkey": "seed-verify-party-pan-secretary",
+      "createdAt": "2026-04-17T12:05:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pri_president",
+      "rkey": "seed-verify-party-pri-president",
+      "createdAt": "2026-04-17T12:10:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pri_secretary",
+      "rkey": "seed-verify-party-pri-secretary",
+      "createdAt": "2026-04-17T12:15:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pvem_executive_secretary",
+      "rkey": "seed-verify-party-pvem-executive-secretary",
+      "createdAt": "2026-04-17T12:20:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pvem_technical_secretary",
+      "rkey": "seed-verify-party-pvem-technical-secretary",
+      "createdAt": "2026-04-17T12:25:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pt_coordinator",
+      "rkey": "seed-verify-party-pt-coordinator",
+      "createdAt": "2026-04-17T12:30:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_pt_technical_secretary",
+      "rkey": "seed-verify-party-pt-technical-secretary",
+      "createdAt": "2026-04-17T12:35:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_mc_coordinator",
+      "rkey": "seed-verify-party-mc-coordinator",
+      "createdAt": "2026-04-17T12:40:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_morena_president",
+      "rkey": "seed-verify-party-morena-president",
+      "createdAt": "2026-04-17T12:45:00.000Z"
+    },
+    {
+      "issuer": "para_verifier_mx",
+      "subject": "party_morena_secretary",
+      "rkey": "seed-verify-party-morena-secretary",
+      "createdAt": "2026-04-17T12:50:00.000Z"
     }
   ],
   "communities": [
     {"id": "mx-jalisco", "name": "p/Jalisco", "slug": "jalisco"},
     {"id": "mx-cdmx", "name": "p/CDMX", "slug": "cdmx"},
     {"id": "mx-oaxaca", "name": "p/Oaxaca", "slug": "oaxaca"},
-    {"id": "mx-nuevoleon", "name": "p/NuevoLeon", "slug": "nuevoleon"}
+    {"id": "mx-nuevoleon", "name": "p/NuevoLeon", "slug": "nuevoleon"},
+    {"id": "party-pan", "name": "p/PAN", "slug": "pan"},
+    {"id": "party-pri", "name": "p/PRI", "slug": "pri"},
+    {"id": "party-pvem", "name": "p/PVEM", "slug": "pvem"},
+    {"id": "party-pt", "name": "p/PT", "slug": "pt"},
+    {"id": "party-mc", "name": "p/MC", "slug": "mc"},
+    {"id": "party-morena", "name": "p/Morena", "slug": "morena"}
   ],
   "governanceRecords": [
+    {
+      "actor": "party_pan_president",
+      "rkey": "pan",
+      "community": "p/PAN",
+      "communityId": "party-pan",
+      "slug": "pan",
+      "createdAt": "2026-04-17T10:00:00.000Z",
+      "updatedAt": "2026-04-17T12:00:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_pan_president",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_pan_president",
+          "office": "Presidente nacional",
+          "mandate": "Registered national president of Partido Accion Nacional according to INE party data."
+        },
+        {
+          "actor": "party_pan_secretary",
+          "office": "Secretaria nacional",
+          "mandate": "Registered national secretary of Partido Accion Nacional according to INE party data."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "www.pan.org.mx",
+        "lastPublishedAt": "2026-04-17T12:00:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-pan-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_pan_president",
+          "createdAt": "2026-04-17T12:00:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
+    {
+      "actor": "party_pri_president",
+      "rkey": "pri",
+      "community": "p/PRI",
+      "communityId": "party-pri",
+      "slug": "pri",
+      "createdAt": "2026-04-17T10:10:00.000Z",
+      "updatedAt": "2026-04-17T12:10:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_pri_president",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_pri_president",
+          "office": "Presidente nacional",
+          "mandate": "Registered national president of Partido Revolucionario Institucional according to INE party data."
+        },
+        {
+          "actor": "party_pri_secretary",
+          "office": "Secretaria general",
+          "mandate": "Registered secretary general of Partido Revolucionario Institucional according to INE party data."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "www.pri.org.mx",
+        "lastPublishedAt": "2026-04-17T12:10:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-pri-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_pri_president",
+          "createdAt": "2026-04-17T12:10:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
+    {
+      "actor": "party_pvem_executive_secretary",
+      "rkey": "pvem",
+      "community": "p/PVEM",
+      "communityId": "party-pvem",
+      "slug": "pvem",
+      "createdAt": "2026-04-17T10:20:00.000Z",
+      "updatedAt": "2026-04-17T12:20:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_pvem_executive_secretary",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_pvem_executive_secretary",
+          "office": "Secretaria ejecutiva",
+          "mandate": "Registered executive secretary of Partido Verde Ecologista de Mexico according to INE party data."
+        },
+        {
+          "actor": "party_pvem_technical_secretary",
+          "office": "Secretaria tecnica",
+          "mandate": "Registered technical secretary of Partido Verde Ecologista de Mexico according to INE party data."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "www.partidoverde.org.mx",
+        "lastPublishedAt": "2026-04-17T12:20:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-pvem-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_pvem_executive_secretary",
+          "createdAt": "2026-04-17T12:20:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
+    {
+      "actor": "party_pt_coordinator",
+      "rkey": "pt",
+      "community": "p/PT",
+      "communityId": "party-pt",
+      "slug": "pt",
+      "createdAt": "2026-04-17T10:30:00.000Z",
+      "updatedAt": "2026-04-17T12:30:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_pt_coordinator",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_pt_coordinator",
+          "office": "Comision Coordinadora Nacional",
+          "mandate": "Registered member of the national coordinating commission of Partido del Trabajo according to INE party data."
+        },
+        {
+          "actor": "party_pt_technical_secretary",
+          "office": "Secretario tecnico",
+          "mandate": "Registered technical secretary of Partido del Trabajo according to INE party data."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "partidodeltrabajo.com.mx",
+        "lastPublishedAt": "2026-04-17T12:30:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-pt-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_pt_coordinator",
+          "createdAt": "2026-04-17T12:30:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
+    {
+      "actor": "party_mc_coordinator",
+      "rkey": "mc",
+      "community": "p/MC",
+      "communityId": "party-mc",
+      "slug": "mc",
+      "createdAt": "2026-04-17T10:40:00.000Z",
+      "updatedAt": "2026-04-17T12:40:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_mc_coordinator",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_mc_coordinator",
+          "office": "Coordinador nacional",
+          "mandate": "Registered national coordinator of Movimiento Ciudadano according to INE party data."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "www.movimientociudadano.mx",
+        "lastPublishedAt": "2026-04-17T12:40:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-mc-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_mc_coordinator",
+          "createdAt": "2026-04-17T12:40:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
+    {
+      "actor": "party_morena_president",
+      "rkey": "morena",
+      "community": "p/Morena",
+      "communityId": "party-morena",
+      "slug": "morena",
+      "createdAt": "2026-04-17T10:45:00.000Z",
+      "updatedAt": "2026-04-17T12:45:00.000Z",
+      "moderators": [
+        {
+          "actor": "party_morena_president",
+          "role": "Party governance publisher",
+          "badge": "INE Direction",
+          "capabilities": [
+            "publish_governance_updates",
+            "set_official_representatives"
+          ]
+        }
+      ],
+      "officials": [
+        {
+          "actor": "party_morena_president",
+          "office": "Presidenta nacional",
+          "mandate": "Registered national president of Morena according to INE party data. Watch for post-April 2026 leadership updates."
+        },
+        {
+          "actor": "party_morena_secretary",
+          "office": "Secretaria general",
+          "mandate": "Registered secretary general of Morena according to INE party data. Watch for post-April 2026 leadership updates."
+        }
+      ],
+      "metadata": {
+        "termLengthDays": 365,
+        "reviewCadence": "Refresh from INE direction organs after official updates",
+        "escalationPath": "INE direction record > PARA trust desk > party governance update",
+        "publicContact": "www.morena.org",
+        "lastPublishedAt": "2026-04-17T12:45:00.000Z",
+        "state": "National"
+      },
+      "editHistory": [
+        {
+          "id": "seed-party-morena-ine-2026",
+          "action": "set_official_representatives",
+          "actor": "party_morena_president",
+          "createdAt": "2026-04-17T12:45:00.000Z",
+          "summary": "Seeded national party representatives from INE party direction data."
+        }
+      ]
+    },
     {
       "actor": "mod_jalisco",
       "rkey": "seed-governance-jalisco",

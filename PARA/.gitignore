@@ -89,6 +89,9 @@ dist/
 *.key
 *.mobileprovision
 *.orig.*
+*.orig
+*.rej
+*.upstream
 web-build/
 stats.json
 
@@ -143,7 +146,9 @@ bskyweb/static/media/*.svg
 *_errors.txt
 *_output.txt
 typecheck_errors.txt
+typecheck_out.txt
 typecheck_output*.txt
+out.txt
 tsc_errors.log
 ios_build.log
 eslint_errors.txt

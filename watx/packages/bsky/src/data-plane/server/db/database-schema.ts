@@ -36,6 +36,7 @@ import * as paraStatus from './tables/para-status'
 import * as post from './tables/post'
 import * as postAgg from './tables/post-agg'
 import * as postEmbed from './tables/post-embed'
+import * as postSubscription from './tables/post-subscription'
 import * as postgate from './tables/post-gate'
 import * as privateData from './tables/private-data'
 import * as profile from './tables/profile'
@@ -57,6 +58,7 @@ export type DatabaseSchemaType = duplicateRecord.PartialDB &
   profile.PartialDB &
   profileAgg.PartialDB &
   post.PartialDB &
+  postSubscription.PartialDB &
   postEmbed.PartialDB &
   postAgg.PartialDB &
   repost.PartialDB &

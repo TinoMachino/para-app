@@ -28,6 +28,7 @@ type PostEmbedImage = DatabaseSchemaType['post_embed_image']
 type PostEmbedExternal = DatabaseSchemaType['post_embed_external']
 type PostEmbedRecord = DatabaseSchemaType['post_embed_record']
 type PostEmbedVideo = DatabaseSchemaType['post_embed_video']
+type PostSubscription = Selectable<DatabaseSchemaType['post_subscription']>
 type PostAncestor = {
   uri: string
   height: number
@@ -51,6 +52,7 @@ type IndexedPost = {
   ancestors?: PostAncestor[]
   descendents?: PostDescendent[]
   threadgate?: app.bsky.feed.threadgate.Main
+  postSubscriptions?: PostSubscription[]
 }
 
 const REPLY_NOTIF_DEPTH = 5
@@ -258,6 +260,22 @@ const insertFn = async (
     .selectAll('descendent')
     .select(['cid', 'creator', 'sortAt'])
     .execute()
+  const quotedPostUris = (embeds ?? [])
+    .flatMap((embed) => ('embedUri' in embed ? [embed.embedUri] : []))
+    .filter((uri) => new AtUri(uri).collection === app.bsky.feed.post.$type)
+  const subscriptionPostUris = [
+    ...new Set([
+      ...ancestors.map((ancestor) => ancestor.uri),
+      ...quotedPostUris,
+    ]),
+  ]
+  const postSubscriptions = subscriptionPostUris.length
+    ? await db
+        .selectFrom('post_subscription')
+        .selectAll()
+        .where('postUri', 'in', subscriptionPostUris)
+        .execute()
+    : []
   return {
     post: insertedPost,
     facets,
@@ -265,6 +283,7 @@ const insertFn = async (
     ancestors,
     descendents,
     threadgate,
+    postSubscriptions,
   }
 }
 
@@ -308,6 +327,23 @@ const notifsForInsert = (obj: IndexedPost) => {
             recordCid: obj.post.cid,
             sortAt: obj.post.sortAt,
           })
+          for (const subscription of obj.postSubscriptions ?? []) {
+            if (
+              subscription.postUri !== embedUri.toString() ||
+              !subscription.quote
+            ) {
+              continue
+            }
+            maybeNotify({
+              did: subscription.subscriberDid,
+              reason: 'subscribed-post',
+              reasonSubject: subscription.postUri,
+              author: obj.post.creator,
+              recordUri: obj.post.uri,
+              recordCid: obj.post.cid,
+              sortAt: obj.post.sortAt,
+            })
+          }
         }
       }
     }
@@ -335,6 +371,23 @@ const notifsForInsert = (obj: IndexedPost) => {
         recordCid: obj.post.cid,
         sortAt: obj.post.sortAt,
       })
+      for (const subscription of obj.postSubscriptions ?? []) {
+        if (
+          subscription.postUri !== ancestorUri.toString() ||
+          !subscription.reply
+        ) {
+          continue
+        }
+        maybeNotify({
+          did: subscription.subscriberDid,
+          reason: 'subscribed-post',
+          reasonSubject: subscription.postUri,
+          author: obj.post.creator,
+          recordUri: obj.post.uri,
+          recordCid: obj.post.cid,
+          sortAt: obj.post.sortAt,
+        })
+      }
       // found hidden reply, don't notify any higher ancestors
       if (threadgateHiddenReplies.includes(ancestorUri.toString())) break
     }

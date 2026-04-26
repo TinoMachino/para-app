@@ -6953,6 +6953,239 @@ export class GetActivitySubscriptionsByActorAndSubjectsResponse extends Message<
 }
 
 /**
+ * @generated from message bsky.GetPostSubscriptionRequest
+ */
+export class GetPostSubscriptionRequest extends Message<GetPostSubscriptionRequest> {
+  /**
+   * @generated from field: string subscriber_did = 1;
+   */
+  subscriberDid = "";
+
+  /**
+   * @generated from field: string post_uri = 2;
+   */
+  postUri = "";
+
+  constructor(data?: PartialMessage<GetPostSubscriptionRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "bsky.GetPostSubscriptionRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "subscriber_did", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "post_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPostSubscriptionRequest {
+    return new GetPostSubscriptionRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPostSubscriptionRequest {
+    return new GetPostSubscriptionRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPostSubscriptionRequest {
+    return new GetPostSubscriptionRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetPostSubscriptionRequest | PlainMessage<GetPostSubscriptionRequest> | undefined, b: GetPostSubscriptionRequest | PlainMessage<GetPostSubscriptionRequest> | undefined): boolean {
+    return proto3.util.equals(GetPostSubscriptionRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message bsky.PostSubscription
+ */
+export class PostSubscription extends Message<PostSubscription> {
+  /**
+   * @generated from field: string subscriber_did = 1;
+   */
+  subscriberDid = "";
+
+  /**
+   * @generated from field: string post_uri = 2;
+   */
+  postUri = "";
+
+  /**
+   * @generated from field: bool reply = 3;
+   */
+  reply = false;
+
+  /**
+   * @generated from field: bool quote = 4;
+   */
+  quote = false;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp indexed_at = 5;
+   */
+  indexedAt?: Timestamp;
+
+  constructor(data?: PartialMessage<PostSubscription>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "bsky.PostSubscription";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "subscriber_did", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "post_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "reply", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "quote", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "indexed_at", kind: "message", T: Timestamp },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PostSubscription {
+    return new PostSubscription().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PostSubscription {
+    return new PostSubscription().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PostSubscription {
+    return new PostSubscription().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PostSubscription | PlainMessage<PostSubscription> | undefined, b: PostSubscription | PlainMessage<PostSubscription> | undefined): boolean {
+    return proto3.util.equals(PostSubscription, a, b);
+  }
+}
+
+/**
+ * @generated from message bsky.GetPostSubscriptionResponse
+ */
+export class GetPostSubscriptionResponse extends Message<GetPostSubscriptionResponse> {
+  /**
+   * @generated from field: optional bsky.PostSubscription subscription = 1;
+   */
+  subscription?: PostSubscription;
+
+  constructor(data?: PartialMessage<GetPostSubscriptionResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "bsky.GetPostSubscriptionResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "subscription", kind: "message", T: PostSubscription, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPostSubscriptionResponse {
+    return new GetPostSubscriptionResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPostSubscriptionResponse {
+    return new GetPostSubscriptionResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPostSubscriptionResponse {
+    return new GetPostSubscriptionResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetPostSubscriptionResponse | PlainMessage<GetPostSubscriptionResponse> | undefined, b: GetPostSubscriptionResponse | PlainMessage<GetPostSubscriptionResponse> | undefined): boolean {
+    return proto3.util.equals(GetPostSubscriptionResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message bsky.PutPostSubscriptionRequest
+ */
+export class PutPostSubscriptionRequest extends Message<PutPostSubscriptionRequest> {
+  /**
+   * @generated from field: string subscriber_did = 1;
+   */
+  subscriberDid = "";
+
+  /**
+   * @generated from field: string post_uri = 2;
+   */
+  postUri = "";
+
+  /**
+   * @generated from field: bool reply = 3;
+   */
+  reply = false;
+
+  /**
+   * @generated from field: bool quote = 4;
+   */
+  quote = false;
+
+  constructor(data?: PartialMessage<PutPostSubscriptionRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "bsky.PutPostSubscriptionRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "subscriber_did", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "post_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "reply", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "quote", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PutPostSubscriptionRequest {
+    return new PutPostSubscriptionRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PutPostSubscriptionRequest {
+    return new PutPostSubscriptionRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PutPostSubscriptionRequest {
+    return new PutPostSubscriptionRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PutPostSubscriptionRequest | PlainMessage<PutPostSubscriptionRequest> | undefined, b: PutPostSubscriptionRequest | PlainMessage<PutPostSubscriptionRequest> | undefined): boolean {
+    return proto3.util.equals(PutPostSubscriptionRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message bsky.PutPostSubscriptionResponse
+ */
+export class PutPostSubscriptionResponse extends Message<PutPostSubscriptionResponse> {
+  /**
+   * @generated from field: optional bsky.PostSubscription subscription = 1;
+   */
+  subscription?: PostSubscription;
+
+  constructor(data?: PartialMessage<PutPostSubscriptionResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "bsky.PutPostSubscriptionResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "subscription", kind: "message", T: PostSubscription, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PutPostSubscriptionResponse {
+    return new PutPostSubscriptionResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PutPostSubscriptionResponse {
+    return new PutPostSubscriptionResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PutPostSubscriptionResponse {
+    return new PutPostSubscriptionResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PutPostSubscriptionResponse | PlainMessage<PutPostSubscriptionResponse> | undefined, b: PutPostSubscriptionResponse | PlainMessage<PutPostSubscriptionResponse> | undefined): boolean {
+    return proto3.util.equals(PutPostSubscriptionResponse, a, b);
+  }
+}
+
+/**
  * - Return uris of feed generator records created by user A
  *     - `getActorFeeds`
  *

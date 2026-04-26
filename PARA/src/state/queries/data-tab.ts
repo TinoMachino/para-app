@@ -1,6 +1,6 @@
 import {useInfiniteQuery} from '@tanstack/react-query'
 
-import {type RepresentativeItem} from '#/lib/mock-data'
+import {type PolicyItem, type RepresentativeItem} from '#/lib/mock-data'
 import {fetchPolicies} from '#/lib/services/policies'
 import {fetchRepresentatives} from '#/lib/services/representatives'
 import {useAgent} from '#/state/session'
@@ -19,7 +19,7 @@ interface PolicyQueryParams {
 }
 
 // Shared filtering logic
-function applyFilters(data: any[], params: PolicyQueryParams): any[] {
+function applyFilters(data: PolicyItem[], params: PolicyQueryParams) {
   let filtered = data
 
   if (params.category && params.category !== 'All') {
@@ -35,8 +35,8 @@ function applyFilters(data: any[], params: PolicyQueryParams): any[] {
   if (params.filters && params.filters.length > 0) {
     filtered = filtered.filter(
       p =>
-        params.filters!.includes(p.party) ||
-        params.filters!.includes(p.community),
+        (p.party ? params.filters!.includes(p.party) : false) ||
+        (p.community ? params.filters!.includes(p.community) : false),
     )
   }
 
@@ -208,6 +208,8 @@ export function useRepresentativesQuery(params: {
   municipality?: string
   query?: string
 }) {
+  const agent = useAgent()
+
   return useInfiniteQuery({
     queryKey: [
       'representatives',
@@ -217,7 +219,7 @@ export function useRepresentativesQuery(params: {
       params.query,
     ],
     queryFn: async ({pageParam}) => {
-      const response = await fetchRepresentatives({
+      const response = await fetchRepresentatives(agent, {
         category: params.category,
         state: params.state,
         cursor: pageParam,

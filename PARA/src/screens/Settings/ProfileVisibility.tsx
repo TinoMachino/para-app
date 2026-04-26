@@ -6,10 +6,12 @@ import {Trans} from '@lingui/react/macro'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useFocusEffect} from '@react-navigation/native'
 
+import {fetchParaIdentity, putParaIdentity} from '#/lib/api/para-identity'
 import {
   type CommonNavigatorParams,
   type NativeStackScreenProps,
 } from '#/lib/routes/types'
+import {useAgent, useSession} from '#/state/session'
 import * as SettingsList from '#/screens/Settings/components/SettingsList'
 import {atoms as a, useTheme} from '#/alf'
 import * as Toggle from '#/components/forms/Toggle'
@@ -24,6 +26,8 @@ type Props = NativeStackScreenProps<CommonNavigatorParams, 'ProfileVisibility'>
 export function ProfileVisibilityScreen({}: Props) {
   const t = useTheme()
   const {_} = useLingui()
+  const agent = useAgent()
+  const {currentAccount} = useSession()
   const [loading, setLoading] = useState(true)
 
   // Visibility States
@@ -37,31 +41,37 @@ export function ProfileVisibilityScreen({}: Props) {
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true)
-      const [votes, raq, highlights, publicFigure] = await Promise.all([
-        AsyncStorage.getItem('para_public_votes'),
-        AsyncStorage.getItem('para_public_raq'),
-        AsyncStorage.getItem('para_public_highlights'),
-        AsyncStorage.getItem('para_is_public_figure'),
-      ])
+      const [votes, raq, highlights, publicFigure, identity] =
+        await Promise.all([
+          AsyncStorage.getItem('para_public_votes'),
+          AsyncStorage.getItem('para_public_raq'),
+          AsyncStorage.getItem('para_public_highlights'),
+          AsyncStorage.getItem('para_is_public_figure'),
+          currentAccount
+            ? fetchParaIdentity(agent, currentAccount.did)
+            : Promise.resolve(null),
+        ])
 
       setVotesPublic(votes === 'true')
       setRaqPublic(raq === 'true')
       setHighlightsPublic(highlights === 'true')
-      setIsPublicFigure(publicFigure === 'true')
+      setIsPublicFigure(
+        identity?.isVerifiedPublicFigure ?? publicFigure === 'true',
+      )
     } catch (e) {
       console.error('Failed to load visibility settings', e)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [agent, currentAccount])
 
   useFocusEffect(
     useCallback(() => {
-      loadSettings()
+      void loadSettings()
     }, [loadSettings]),
   )
 
-  const togglePublicFigure = async (value: boolean) => {
+  const togglePublicFigure = (value: boolean) => {
     if (value) {
       // Confirmation Dialog
       Alert.alert(
@@ -77,19 +87,27 @@ export function ProfileVisibilityScreen({}: Props) {
           {
             text: _(msg`Confirm`),
             style: 'destructive',
-            onPress: async () => {
-              await applyPublicFigureChanges(true)
+            onPress: () => {
+              void applyPublicFigureChanges(true)
             },
           },
         ],
       )
     } else {
-      await applyPublicFigureChanges(false)
+      void applyPublicFigureChanges(false)
     }
   }
 
   const applyPublicFigureChanges = async (value: boolean) => {
     try {
+      if (!currentAccount) {
+        throw new Error('No active account')
+      }
+
+      await putParaIdentity(agent, currentAccount.did, {
+        isVerifiedPublicFigure: value,
+      })
+
       setIsPublicFigure(value)
       await AsyncStorage.setItem('para_is_public_figure', value.toString())
 
@@ -108,6 +126,7 @@ export function ProfileVisibilityScreen({}: Props) {
       }
     } catch (e) {
       console.error('Failed to update public figure status', e)
+      Toast.show(_(msg`Could not update public figure status`))
     }
   }
 
@@ -172,7 +191,7 @@ export function ProfileVisibilityScreen({}: Props) {
               name="public_figure"
               label={_(msg`Public Figure Mode`)}
               value={isPublicFigure}
-              onChange={value => togglePublicFigure(value)}
+              onChange={togglePublicFigure}
               style={[a.w_full, a.py_xs]}>
               <Toggle.LabelText style={[a.flex_1]}>
                 <Trans>Enable Public Figure Status</Trans>
@@ -209,7 +228,7 @@ export function ProfileVisibilityScreen({}: Props) {
               value={votesPublic}
               disabled={isPublicFigure}
               onChange={() =>
-                toggleSetting(
+                void toggleSetting(
                   'para_public_votes',
                   votesPublic,
                   setVotesPublic,
@@ -229,7 +248,12 @@ export function ProfileVisibilityScreen({}: Props) {
               value={raqPublic}
               disabled={isPublicFigure}
               onChange={() =>
-                toggleSetting('para_public_raq', raqPublic, setRaqPublic, 'RAQ')
+                void toggleSetting(
+                  'para_public_raq',
+                  raqPublic,
+                  setRaqPublic,
+                  'RAQ',
+                )
               }
               style={[a.w_full, a.py_xs]}>
               <Toggle.LabelText style={[a.flex_1]}>
@@ -244,7 +268,7 @@ export function ProfileVisibilityScreen({}: Props) {
               value={highlightsPublic}
               disabled={isPublicFigure}
               onChange={() =>
-                toggleSetting(
+                void toggleSetting(
                   'para_public_highlights',
                   highlightsPublic,
                   setHighlightsPublic,

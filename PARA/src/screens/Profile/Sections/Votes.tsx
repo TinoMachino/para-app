@@ -1,9 +1,13 @@
 import {forwardRef, useEffect, useImperativeHandle} from 'react'
 import {findNodeHandle, View} from 'react-native'
+import {msg} from '@lingui/core/macro'
+import {useLingui} from '@lingui/react'
 
+import {EmptyState} from '#/view/com/util/EmptyState'
 import {List} from '#/view/com/util/List'
 import {type ListRef} from '#/view/com/util/List'
 import {atoms as a, useTheme} from '#/alf'
+import {EditBig_Stroke1_Corner0_Rounded as EditIcon} from '#/components/icons/EditBig'
 import {Text} from '#/components/Typography'
 import {IS_IOS} from '#/env'
 import {type SectionRef} from './types'
@@ -15,8 +19,14 @@ interface Props {
   isFocused: boolean
 }
 
-// Mock Data
-import {PROFILE_VOTES as MOCK_VOTES} from '#/lib/mock-data'
+type ProfileVoteItem = {
+  id: string
+  title: string
+  vote: string
+  date: string
+}
+
+const PROFILE_VOTES: ProfileVoteItem[] = []
 
 export const ProfileVotesSection = forwardRef<SectionRef, Props>(
   function ProfileVotesSection(
@@ -24,6 +34,7 @@ export const ProfileVotesSection = forwardRef<SectionRef, Props>(
     ref,
   ) {
     const t = useTheme()
+    const {_} = useLingui()
 
     useImperativeHandle(ref, () => ({
       scrollToTop: () => {
@@ -42,7 +53,7 @@ export const ProfileVotesSection = forwardRef<SectionRef, Props>(
       }
     }, [isFocused, scrollElRef, setScrollViewTag])
 
-    const renderItem = ({item}: {item: (typeof MOCK_VOTES)[0]}) => (
+    const renderItem = ({item}: {item: ProfileVoteItem}) => (
       <View style={[a.p_md, a.border_b, t.atoms.border_contrast_low]}>
         <Text style={[a.text_md, a.font_bold]}>{item.title}</Text>
         <View style={[a.flex_row, a.justify_between, a.mt_xs]}>
@@ -69,10 +80,17 @@ export const ProfileVotesSection = forwardRef<SectionRef, Props>(
     return (
       <List
         ref={scrollElRef}
-        data={MOCK_VOTES}
+        data={PROFILE_VOTES}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item: ProfileVoteItem) => item.id}
         headerOffset={headerHeight}
+        ListEmptyComponent={
+          <EmptyState
+            icon={EditIcon}
+            message={_(msg`No public votes yet`)}
+            style={{width: '100%'}}
+          />
+        }
         contentContainerStyle={{
           minHeight: '100%',
           paddingBottom: 100,

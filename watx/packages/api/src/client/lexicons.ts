@@ -21018,6 +21018,103 @@ export const schemaDict = {
       },
     },
   },
+  ComParaNotificationGetPostSubscription: {
+    lexicon: 1,
+    id: 'com.para.notification.getPostSubscription',
+    defs: {
+      main: {
+        type: 'query',
+        description:
+          "Get the requesting viewer's notification subscription for a post.",
+        parameters: {
+          type: 'params',
+          required: ['post'],
+          properties: {
+            post: {
+              type: 'string',
+              format: 'at-uri',
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['post', 'reply', 'quote'],
+            properties: {
+              post: {
+                type: 'string',
+                format: 'at-uri',
+              },
+              reply: {
+                type: 'boolean',
+              },
+              quote: {
+                type: 'boolean',
+              },
+              indexedAt: {
+                type: 'string',
+                format: 'datetime',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  ComParaNotificationPutPostSubscription: {
+    lexicon: 1,
+    id: 'com.para.notification.putPostSubscription',
+    defs: {
+      main: {
+        type: 'procedure',
+        description:
+          'Enable or disable notification subscriptions for a post. Requires auth.',
+        input: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['post', 'reply', 'quote'],
+            properties: {
+              post: {
+                type: 'string',
+                format: 'at-uri',
+              },
+              reply: {
+                type: 'boolean',
+              },
+              quote: {
+                type: 'boolean',
+              },
+            },
+          },
+        },
+        output: {
+          encoding: 'application/json',
+          schema: {
+            type: 'object',
+            required: ['post', 'reply', 'quote'],
+            properties: {
+              post: {
+                type: 'string',
+                format: 'at-uri',
+              },
+              reply: {
+                type: 'boolean',
+              },
+              quote: {
+                type: 'boolean',
+              },
+              indexedAt: {
+                type: 'string',
+                format: 'datetime',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   ComParaPost: {
     lexicon: 1,
     id: 'com.para.post',
@@ -26928,6 +27025,10 @@ export const ids = {
   ComParaHighlightDefs: 'com.para.highlight.defs',
   ComParaHighlightGetHighlight: 'com.para.highlight.getHighlight',
   ComParaHighlightListHighlights: 'com.para.highlight.listHighlights',
+  ComParaNotificationGetPostSubscription:
+    'com.para.notification.getPostSubscription',
+  ComParaNotificationPutPostSubscription:
+    'com.para.notification.putPostSubscription',
   ComParaPost: 'com.para.post',
   ComParaSocialGetPostMeta: 'com.para.social.getPostMeta',
   ComParaSocialPostMeta: 'com.para.social.postMeta',

@@ -1,9 +1,6 @@
 import { Server } from '@atproto/xrpc-server'
 import { AppContext } from '../context'
-import {
-  ComParaNS,
-  Server as ParaLexiconServer,
-} from '../lexicon'
+import { ComParaNS, Server as ParaLexiconServer } from '../lexicon'
 import { schemas as paraSchemas } from '../lexicon/lexicons'
 import getProfile from './app/bsky/actor/getProfile'
 import getProfiles from './app/bsky/actor/getProfiles'
@@ -121,6 +118,8 @@ import getParaPosts from './com/para/feed/getPosts'
 import getParaTimeline from './com/para/feed/getTimeline'
 import getParaHighlight from './com/para/highlight/getHighlight'
 import listParaHighlights from './com/para/highlight/listHighlights'
+import getParaPostSubscription from './com/para/notification/getPostSubscription'
+import putParaPostSubscription from './com/para/notification/putPostSubscription'
 import getParaPostMeta from './com/para/social/getPostMeta'
 
 export * as health from './health'
@@ -250,6 +249,8 @@ export default function (server: Server, ctx: AppContext) {
   listParaCommunityMembers(paraServer, ctx)
   listParaHighlights(paraServer, ctx)
   getParaHighlight(paraServer, ctx)
+  getParaPostSubscription(paraServer, ctx)
+  putParaPostSubscription(paraServer, ctx)
   getParaAuthorFeed(paraServer, ctx)
   getParaPostThread(paraServer, ctx)
   getParaPosts(paraServer, ctx)

@@ -24,10 +24,7 @@ import {Plural, Trans} from '@lingui/react/macro'
 import {useNavigation} from '@react-navigation/native'
 import {useQueryClient} from '@tanstack/react-query'
 
-import {
-  getDmServiceHeadersForServiceUrl,
-  MAX_POST_LINES,
-} from '#/lib/constants'
+import {getDmServiceHeadersForServiceUrl, MAX_POST_LINES} from '#/lib/constants'
 import {useAnimatedValue} from '#/lib/hooks/useAnimatedValue'
 import {usePalette} from '#/lib/hooks/usePalette'
 import {makeProfileLink} from '#/lib/routes/links'
@@ -77,6 +74,10 @@ import * as bsky from '#/types/bsky'
 const MAX_AUTHORS = 5
 
 const EXPANDED_AUTHOR_EL_HEIGHT = 35
+
+function isPostUri(uri?: string) {
+  return uri?.includes('app.bsky.feed.post') || uri?.includes('com.para.post')
+}
 
 interface Author {
   profile: AppBskyActorDefs.ProfileView
@@ -536,39 +537,66 @@ let NotificationFeedItem = ({
     icon = <RepostIcon size="xl" style={{color: t.palette.positive_500}} />
   } else if (item.type === 'subscribed-post') {
     const postsCount = 1 + (item.additional?.length || 0)
-    a11yLabel = hasMultipleAuthors
-      ? _(
-          msg`New posts from ${firstAuthorName} and ${plural(
-            additionalAuthorsCount,
-            {
+    const isFollowedPostActivity = isPostUri(item.notification.reasonSubject)
+    if (isFollowedPostActivity) {
+      a11yLabel = hasMultipleAuthors
+        ? _(
+            msg`${firstAuthorName} and ${plural(additionalAuthorsCount, {
               one: `${formattedAuthorsCount} other`,
               other: `${formattedAuthorsCount} others`,
-            },
-          )}`,
-        )
-      : _(
-          msg`New ${plural(postsCount, {
-            one: 'post',
-            other: 'posts',
-          })} from ${firstAuthorName}`,
-        )
-    notificationContent = hasMultipleAuthors ? (
-      <Trans>
-        New posts from {firstAuthorLink} and{' '}
-        <Text style={[a.text_md, a.font_semi_bold, a.leading_snug]}>
-          <Plural
-            value={additionalAuthorsCount}
-            one={`${formattedAuthorsCount} other`}
-            other={`${formattedAuthorsCount} others`}
-          />
-        </Text>{' '}
-      </Trans>
-    ) : (
-      <Trans>
-        New <Plural value={postsCount} one="post" other="posts" /> from{' '}
-        {firstAuthorLink}
-      </Trans>
-    )
+            })} replied or quoted a post you follow`,
+          )
+        : _(msg`${firstAuthorName} replied or quoted a post you follow`)
+      notificationContent = hasMultipleAuthors ? (
+        <Trans>
+          {firstAuthorLink} and{' '}
+          <Text style={[a.text_md, a.font_semi_bold, a.leading_snug]}>
+            <Plural
+              value={additionalAuthorsCount}
+              one={`${formattedAuthorsCount} other`}
+              other={`${formattedAuthorsCount} others`}
+            />
+          </Text>{' '}
+          replied or quoted a post you follow
+        </Trans>
+      ) : (
+        <Trans>{firstAuthorLink} replied or quoted a post you follow</Trans>
+      )
+    } else {
+      a11yLabel = hasMultipleAuthors
+        ? _(
+            msg`New posts from ${firstAuthorName} and ${plural(
+              additionalAuthorsCount,
+              {
+                one: `${formattedAuthorsCount} other`,
+                other: `${formattedAuthorsCount} others`,
+              },
+            )}`,
+          )
+        : _(
+            msg`New ${plural(postsCount, {
+              one: 'post',
+              other: 'posts',
+            })} from ${firstAuthorName}`,
+          )
+      notificationContent = hasMultipleAuthors ? (
+        <Trans>
+          New posts from {firstAuthorLink} and{' '}
+          <Text style={[a.text_md, a.font_semi_bold, a.leading_snug]}>
+            <Plural
+              value={additionalAuthorsCount}
+              one={`${formattedAuthorsCount} other`}
+              other={`${formattedAuthorsCount} others`}
+            />
+          </Text>{' '}
+        </Trans>
+      ) : (
+        <Trans>
+          New <Plural value={postsCount} one="post" other="posts" /> from{' '}
+          {firstAuthorLink}
+        </Trans>
+      )
+    }
     icon = <BellRingingIcon size="xl" style={{color: t.palette.primary_500}} />
   } else {
     return null

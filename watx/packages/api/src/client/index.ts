@@ -328,6 +328,8 @@ import * as ComParaHighlightAnnotation from './types/com/para/highlight/annotati
 import * as ComParaHighlightDefs from './types/com/para/highlight/defs.js'
 import * as ComParaHighlightGetHighlight from './types/com/para/highlight/getHighlight.js'
 import * as ComParaHighlightListHighlights from './types/com/para/highlight/listHighlights.js'
+import * as ComParaNotificationGetPostSubscription from './types/com/para/notification/getPostSubscription.js'
+import * as ComParaNotificationPutPostSubscription from './types/com/para/notification/putPostSubscription.js'
 import * as ComParaPost from './types/com/para/post.js'
 import * as ComParaSocialGetPostMeta from './types/com/para/social/getPostMeta.js'
 import * as ComParaSocialPostMeta from './types/com/para/social/postMeta.js'
@@ -706,6 +708,8 @@ export * as ComParaHighlightAnnotation from './types/com/para/highlight/annotati
 export * as ComParaHighlightDefs from './types/com/para/highlight/defs.js'
 export * as ComParaHighlightGetHighlight from './types/com/para/highlight/getHighlight.js'
 export * as ComParaHighlightListHighlights from './types/com/para/highlight/listHighlights.js'
+export * as ComParaNotificationGetPostSubscription from './types/com/para/notification/getPostSubscription.js'
+export * as ComParaNotificationPutPostSubscription from './types/com/para/notification/putPostSubscription.js'
 export * as ComParaPost from './types/com/para/post.js'
 export * as ComParaSocialGetPostMeta from './types/com/para/social/getPostMeta.js'
 export * as ComParaSocialPostMeta from './types/com/para/social/postMeta.js'
@@ -5565,6 +5569,7 @@ export class ComParaNS {
   discourse: ComParaDiscourseNS
   feed: ComParaFeedNS
   highlight: ComParaHighlightNS
+  notification: ComParaNotificationNS
   social: ComParaSocialNS
 
   constructor(client: XrpcClient) {
@@ -5575,6 +5580,7 @@ export class ComParaNS {
     this.discourse = new ComParaDiscourseNS(client)
     this.feed = new ComParaFeedNS(client)
     this.highlight = new ComParaHighlightNS(client)
+    this.notification = new ComParaNotificationNS(client)
     this.social = new ComParaSocialNS(client)
     this.post = new ComParaPostRecord(client)
     this.status = new ComParaStatusRecord(client)
@@ -6547,6 +6553,38 @@ export class ComParaHighlightAnnotationRecord {
       undefined,
       { collection: 'com.para.highlight.annotation', ...params },
       { headers },
+    )
+  }
+}
+
+export class ComParaNotificationNS {
+  _client: XrpcClient
+
+  constructor(client: XrpcClient) {
+    this._client = client
+  }
+
+  getPostSubscription(
+    params?: ComParaNotificationGetPostSubscription.QueryParams,
+    opts?: ComParaNotificationGetPostSubscription.CallOptions,
+  ): Promise<ComParaNotificationGetPostSubscription.Response> {
+    return this._client.call(
+      'com.para.notification.getPostSubscription',
+      params,
+      undefined,
+      opts,
+    )
+  }
+
+  putPostSubscription(
+    data?: ComParaNotificationPutPostSubscription.InputSchema,
+    opts?: ComParaNotificationPutPostSubscription.CallOptions,
+  ): Promise<ComParaNotificationPutPostSubscription.Response> {
+    return this._client.call(
+      'com.para.notification.putPostSubscription',
+      opts?.qp,
+      data,
+      opts,
     )
   }
 }
